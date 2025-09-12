@@ -1,0 +1,17 @@
+{
+  "nazev": "Palačinky",
+  "porce": 4,
+  "cas_pripravy": "20 min",
+  "ingredience": [
+    "250 g hladké mouky",
+    "500 ml mléka",
+    "2 vejce",
+    "špetka soli"
+  ],
+  "postup": [
+    "Smíchej všechny ingredience.",
+    "Rozehřej pánev a smaž palačinky dozlatova.",
+    "Podávej s marmeládou nebo ovocem."
+  ],
+  "tagy": ["dezert", "snídaně", "pečení"]
+}
