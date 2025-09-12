@@ -1,7 +1,7 @@
 const recipeList = document.getElementById("recipeList");
 
 // seznam JSON receptů
-const recipes = ["recepty/gulash.json", "recepty/palacinky.json"];
+const recipes = ["recepty/gulas.json", "recepty/palacinky.json"];
 const loadedRecipes = [];
 
 // načtení všech receptů
