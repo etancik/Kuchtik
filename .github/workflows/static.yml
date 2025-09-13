@@ -69,6 +69,7 @@ jobs:
           mkdir -p deploy
           cp index.html deploy/
           cp style.css deploy/
+          cp favicon.svg deploy/
           cp -r src deploy/
           cp -r recipes deploy/
       
