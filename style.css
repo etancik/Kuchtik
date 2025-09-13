@@ -86,6 +86,7 @@ button {
 #exportBtn {
   max-width: none;
   width: auto;
+  display: none; /* Hidden by default */
 }
 
 /* Sticky export button when recipes are selected */
@@ -115,4 +116,24 @@ button {
     transform: translateX(-50%) translateY(0);
     opacity: 1;
   }
+}
+
+/* Recipe card improvements */
+.selectRecipe {
+  transform: scale(1.5);
+  margin-right: 15px !important;
+}
+
+.edit-recipe-btn, .delete-recipe-btn {
+  padding: 10px 12px !important;
+  font-size: 18px !important;
+  min-width: 44px !important;
+  height: 44px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.edit-recipe-btn:hover, .delete-recipe-btn:hover {
+  transform: scale(1.05);
 }
