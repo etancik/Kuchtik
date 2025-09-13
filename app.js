@@ -50,6 +50,6 @@ document.getElementById("exportBtn").addEventListener("click", () => {
 
   const text = encodeURIComponent(items.join("\n"));
   const shortcutName = encodeURIComponent("Import receptů"); // musí odpovídat Shortcut na iOS
-  const url = `shortcuts://run-shortcut?name=${shortcutName}&input=${text}`;
+  const url = `shortcuts://run-shortcut?name=${shortcutName}&input=text&text=${text}`;
   window.location.href = url;
 });
