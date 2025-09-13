@@ -38,17 +38,17 @@ describe('recipeAPI', () => {
   });
 
   describe('loadRecipe', () => {
-    test('should load recipe from URL', async () => {
-      const mockRecipe = { nazev: 'Test Recipe', ingredience: ['test'] };
+    test('should load recipe from GitHub', async () => {
+      const mockRecipe = { name: 'Test Recipe', ingredients: ['test'] };
       
       fetch.mockResolvedValueOnce({
         ok: true,
         json: async () => mockRecipe
       });
 
-      const result = await loadRecipe('recipes/test.json');
+      const result = await loadRecipe('test.json');
       
-      expect(fetch).toHaveBeenCalledWith('recipes/test.json');
+      expect(fetch).toHaveBeenCalledWith('https://raw.githubusercontent.com/etancik/Kuchtik/main/recipes/test.json');
       expect(result).toEqual(mockRecipe);
     });
 
@@ -58,8 +58,8 @@ describe('recipeAPI', () => {
         status: 404
       });
 
-      await expect(loadRecipe('recipes/missing.json')).rejects.toThrow(
-        'Failed to load recipe: recipes/missing.json (404)'
+      await expect(loadRecipe('missing.json')).rejects.toThrow(
+        'Failed to load recipe: missing.json (404)'
       );
     });
   });

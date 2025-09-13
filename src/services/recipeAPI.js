@@ -26,18 +26,25 @@ export async function getRecipeFileList() {
 }
 
 /**
- * Load a single recipe from URL
- * @param {string} url - Recipe file URL
+ * Load a single recipe from GitHub
+ * @param {string} filename - Recipe filename (e.g., 'gulas.json')
  * @returns {Promise<Object>} Recipe data
  */
-export async function loadRecipe(url) {
+export async function loadRecipe(filename) {
+  // Use full GitHub raw URL for consistent loading
+  const url = `https://raw.githubusercontent.com/etancik/Kuchtik/main/recipes/${filename}`;
+  console.log(`🌐 Loading recipe from: ${url}`);
+  
   const response = await fetch(url);
   
   if (!response.ok) {
-    throw new Error(`Failed to load recipe: ${url} (${response.status})`);
+    console.error(`❌ Failed to fetch ${url}: ${response.status}`);
+    throw new Error(`Failed to load recipe: ${filename} (${response.status})`);
   }
   
-  return response.json();
+  const data = await response.json();
+  console.log(`✅ Recipe loaded successfully: ${filename}`);
+  return data;
 }
 
 /**
@@ -45,20 +52,28 @@ export async function loadRecipe(url) {
  * @returns {Promise<Object[]>} Array of recipe objects
  */
 export async function loadAllRecipes() {
+  console.log('🔄 Starting to load all recipes...');
   const recipes = [];
   
-  const recipeFiles = await getRecipeFileList();
-  console.log(`Found ${recipeFiles.length} recipes:`, recipeFiles);
-  
-  // Load all recipes
-  for (const recipeFile of recipeFiles) {
-    try {
-      const url = `recipes/${recipeFile}`;
-      const data = await loadRecipe(url);
-      recipes.push(data);
-    } catch (error) {
-      console.error(`Error loading recipe ${recipeFile}:`, error);
+  try {
+    const recipeFiles = await getRecipeFileList();
+    console.log(`📋 Found ${recipeFiles.length} recipe files:`, recipeFiles);
+    
+    // Load all recipes
+    for (const recipeFile of recipeFiles) {
+      try {
+        console.log(`📖 Loading recipe: ${recipeFile}`);
+        const data = await loadRecipe(recipeFile);
+        console.log(`✅ Successfully loaded: ${recipeFile}`);
+        recipes.push(data);
+      } catch (error) {
+        console.error(`❌ Error loading recipe ${recipeFile}:`, error);
+        // Continue loading other recipes even if one fails
+      }
     }
+  } catch (error) {
+    console.error('❌ Failed to get recipe file list:', error);
+    throw error;
   }
   
   return recipes;
