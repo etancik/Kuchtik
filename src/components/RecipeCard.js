@@ -82,6 +82,7 @@ export function createRecipeCard(recipe) {
               <i class="fas fa-edit"></i>
             </button>
             <button class="btn btn-outline-danger delete-recipe-btn" 
+                    data-recipe-id='${recipe.id || recipeName}' 
                     data-recipe-name='${recipeName}' 
                     title="Delete Recipe"
                     style="padding: 4px 6px; font-size: 14px; border-width: 1px; flex: none; width: auto; display: inline-block;">

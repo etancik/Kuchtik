@@ -1,26 +1,40 @@
 /**
- * Unified Recipe UI component for creating and editing recipes
+ * Refactored Unified Recipe UI component using RecipeRepository
  */
 
 import { templateLoader } from '../utils/templateLoader.js';
-import { recipeCreation } from '../services/recipeCreation.js';
-import { loadAllRecipes, clearRecipeCache, getCacheStatus, loadRecipe, getRecipeFileList } from '../services/recipeAPI.js';
-import { githubAuth } from '../services/githubAuth.js';
+import RecipeRepository from '../repositories/RecipeRepository.js';
+import gitHubAPIAdapter from '../adapters/GitHubAPIAdapter.js';
 
 class RecipeUI {
   constructor() {
     this.isEditing = false;
     this.editingRecipe = null;
     this.modal = null;
-    this.refreshWorkers = new Map(); // Track active refresh workers
+    this.repository = null;
   }
 
   /**
    * Initialize the recipe UI
    */
   async initialize() {
-    console.log('🚀 Initializing RecipeUI...');
+    console.log('🚀 Initializing RecipeUI with RecipeRepository...');
     try {
+      // Initialize repository with GitHub adapter
+      this.repository = new RecipeRepository({
+        syncStrategy: 'immediate',
+        cacheExpiry: 5 * 60 * 1000, // 5 minutes
+        enableOptimisticUpdates: true,
+        maxRetries: 3,
+        retryDelay: 1000
+      });
+
+      // Set the GitHub API adapter
+      this.repository.setGitHubAPI(gitHubAPIAdapter);
+
+      // Set up event listeners for repository events
+      this.setupRepositoryEventHandlers();
+
       // Load and inject the modal template
       const modalHtml = await templateLoader.loadTemplate('src/templates/recipe-modal.html');
       document.body.insertAdjacentHTML('beforeend', modalHtml);
@@ -37,11 +51,154 @@ class RecipeUI {
       // Setup edit button handlers
       this.setupEditHandlers();
       
-      console.log('✅ RecipeUI initialized successfully');
+      console.log('✅ RecipeUI initialized successfully with RecipeRepository');
     } catch (error) {
       console.error('❌ Failed to initialize RecipeUI:', error);
       throw error;
     }
+  }
+
+  /**
+   * Set up event listeners for repository events
+   */
+  setupRepositoryEventHandlers() {
+    // Listen for optimistic updates
+    this.repository.on('optimisticUpdate', (event) => {
+      console.log('⚡ Optimistic update:', event);
+      this.handleOptimisticUpdate(event);
+    });
+
+    // Listen for successful operations
+    this.repository.on('operationSuccess', (event) => {
+      console.log('✅ Operation success:', event);
+      this.handleOperationSuccess(event);
+    });
+
+    // Listen for operation failures
+    this.repository.on('operationFailure', (event) => {
+      console.log('❌ Operation failure:', event);
+      this.handleOperationFailure(event);
+    });
+
+    // Listen for rollbacks
+    this.repository.on('rollback', (event) => {
+      console.log('↩️ Rollback occurred:', event);
+      this.handleRollback(event);
+    });
+
+    // Listen for cache updates
+    this.repository.on('cacheUpdated', (event) => {
+      console.log('🔄 Cache updated:', event);
+      this.handleCacheUpdate(event);
+    });
+
+    // Listen for recipes updates (when the full recipe list changes)
+    this.repository.on('recipesUpdated', (recipes) => {
+      console.log('📝 Recipes updated, refreshing display with', recipes.length, 'recipes');
+      this.refreshRecipesDisplay();
+    });
+
+    // Listen for sync status changes
+    this.repository.on('syncStatusChange', (event) => {
+      console.log('🔄 Sync status change:', event);
+      this.handleSyncStatusChange(event);
+    });
+  }
+
+  /**
+   * Handle optimistic updates
+   * @param {Object} event - Event data
+   */
+  handleOptimisticUpdate(event) {
+    const { operation, recipeId, recipe } = event;
+    
+    switch (operation) {
+      case 'create':
+        this.showSuccessMessage(`Recipe "${recipe.name}" is being created...`);
+        break;
+      case 'update':
+        this.showSuccessMessage(`Recipe "${recipe.name}" is being updated...`);
+        break;
+      case 'delete':
+        this.showSuccessMessage(`Recipe "${recipeId}" is being deleted...`);
+        break;
+    }
+
+    // Trigger UI refresh
+    this.refreshRecipesDisplay();
+  }
+
+  /**
+   * Handle successful operations
+   * @param {Object} event - Event data
+   */
+  handleOperationSuccess(event) {
+    const { operation, recipeId, recipe } = event;
+    
+    switch (operation) {
+      case 'create':
+        this.showSuccessMessage(`Recipe "${recipe.name}" created successfully!`);
+        break;
+      case 'update':
+        this.showSuccessMessage(`Recipe "${recipe.name}" updated successfully!`);
+        break;
+      case 'delete':
+        this.showSuccessMessage(`Recipe "${recipeId}" deleted successfully!`);
+        break;
+    }
+  }
+
+  /**
+   * Handle operation failures
+   * @param {Object} event - Event data
+   */
+  handleOperationFailure(event) {
+    const { operation, recipeId, error } = event;
+    
+    let message;
+    switch (operation) {
+      case 'create':
+        message = `Failed to create recipe: ${error.message}`;
+        break;
+      case 'update':
+        message = `Failed to update recipe: ${error.message}`;
+        break;
+      case 'delete':
+        message = `Failed to delete recipe "${recipeId}": ${error.message}`;
+        break;
+      default:
+        message = `Operation failed: ${error.message}`;
+    }
+    
+    this.showErrorMessage(message);
+  }
+
+  /**
+   * Handle rollbacks
+   * @param {Object} event - Event data
+   */
+  handleRollback(event) {
+    const { operation, recipeId, error } = event;
+    this.showWarningMessage(`${operation} operation for "${recipeId}" was rolled back due to: ${error.message}`);
+    this.refreshRecipesDisplay();
+  }
+
+  /**
+   * Handle cache updates
+   */
+  handleCacheUpdate() {
+    // Refresh the display when cache is updated
+    this.refreshRecipesDisplay();
+  }
+
+  /**
+   * Handle sync status changes
+   * @param {Object} event - Event data
+   */
+  handleSyncStatusChange(event) {
+    const { status } = event;
+    // Could show sync status in UI (e.g., spinning indicator)
+    console.log('Sync status:', status);
   }
 
   /**
@@ -55,8 +212,9 @@ class RecipeUI {
         this.showEditForm(recipeData);
       } else if (e.target.closest('.delete-recipe-btn')) {
         const button = e.target.closest('.delete-recipe-btn');
+        const recipeId = button.getAttribute('data-recipe-id');
         const recipeName = button.getAttribute('data-recipe-name');
-        this.showDeleteConfirmation(recipeName);
+        this.showDeleteConfirmation(recipeId, recipeName);
       }
     });
   }
@@ -106,199 +264,37 @@ class RecipeUI {
 
   /**
    * Show delete confirmation dialog
+   * @param {string} recipeId - ID of the recipe to delete
    * @param {string} recipeName - Name of the recipe to delete
    */
-  async showDeleteConfirmation(recipeName) {
+  async showDeleteConfirmation(recipeId, recipeName) {
     console.log('🗑️ Showing delete confirmation for:', recipeName);
     
     const confirmed = confirm(
-      `Are you sure you want to delete the recipe "${recipeName}"?\n\n` +
+      `Are you sure you want to delete the recipe "${recipeName}"?\\n\\n` +
       `This action cannot be undone and will permanently remove the recipe from your collection.`
     );
     
     if (confirmed) {
-      await this.handleDeleteRecipe(recipeName);
+      await this.handleDeleteRecipe(recipeId);
     }
   }
 
   /**
    * Handle recipe deletion
-   * @param {string} recipeName - Name of the recipe to delete
+   * @param {string} recipeId - ID of the recipe to delete
    */
-  async handleDeleteRecipe(recipeName) {
+  async handleDeleteRecipe(recipeId) {
     try {
-      console.log('🗑️ Deleting recipe:', recipeName);
+      console.log('🗑️ Deleting recipe:', recipeId);
       
-      // Check authentication
-      if (!githubAuth.isAuthenticated()) {
-        alert('Authentication required. Please authenticate first.');
-        return;
-      }
-      
-      // Delete the recipe
-      const result = await recipeCreation.deleteRecipe(recipeName);
-      console.log('✅ Recipe deleted successfully:', result);
-      
-      // OPTIMISTIC UPDATE: Immediately reflect the deletion in UI
-      await this.optimisticDeleteUpdate(recipeName);
-      
-      // Show success message
-      this.showSuccessMessage(`Recipe "${recipeName}" deleted successfully!`);
-      
-      // Start delayed worker to verify the deletion was processed by GitHub
-      this.startDelayedRefreshWorker('delete', recipeName);
+      // Delete the recipe using repository (optimistic updates handled automatically)
+      await this.repository.delete(recipeId);
       
     } catch (error) {
       console.error('❌ Failed to delete recipe:', error);
-      alert(`Failed to delete recipe: ${error.message}`);
+      this.showErrorMessage(`Failed to delete recipe: ${error.message}`);
     }
-  }
-
-  /**
-   * Clear the form
-   */
-  clearForm() {
-    // Clear basic fields
-    document.getElementById('recipe-name').value = '';
-    document.getElementById('recipe-servings').value = '4';
-    document.getElementById('recipe-time').value = '';
-    document.getElementById('recipe-tags').value = '';
-    
-    // Clear dynamic lists
-    this.resetContainer('ingredients-container', 'ingredient-input', 'Enter ingredient', 'input');
-    this.resetContainer('instructions-container', 'instruction-input', 'Enter instruction step', 'textarea');
-    this.resetContainer('notes-container', 'note-input', 'Enter note', 'input');
-  }
-
-  /**
-   * Populate form with recipe data
-   * @param {Object} recipe - Recipe data
-   */
-  populateForm(recipe) {
-    // Populate basic fields
-    document.getElementById('recipe-name').value = recipe.name || '';
-    document.getElementById('recipe-servings').value = recipe.servings || '4';
-    document.getElementById('recipe-time').value = recipe.cookingTime || '';
-    document.getElementById('recipe-tags').value = (recipe.tags || []).join(', ');
-    
-    // Populate ingredients
-    this.populateContainer('ingredients-container', recipe.ingredients || [], 'ingredient-input', 'Enter ingredient', 'input');
-    
-    // Populate instructions
-    this.populateContainer('instructions-container', recipe.instructions || [], 'instruction-input', 'Enter instruction step', 'textarea');
-    
-    // Populate notes
-    this.populateContainer('notes-container', recipe.notes || [], 'note-input', 'Enter note', 'input');
-  }
-
-  /**
-   * Reset a container to have one empty input
-   * @param {string} containerId - Container element ID
-   * @param {string} inputClass - Input class name
-   * @param {string} placeholder - Input placeholder
-   * @param {string} inputType - 'input' or 'textarea'
-   */
-  resetContainer(containerId, inputClass, placeholder, inputType) {
-    const container = document.getElementById(containerId);
-    container.innerHTML = '';
-    
-    const div = document.createElement('div');
-    div.className = 'input-group mb-2';
-    
-    if (containerId === 'instructions-container') {
-      div.innerHTML = `
-        <span class="input-group-text">1.</span>
-        <${inputType} class="form-control ${inputClass}" ${inputType === 'textarea' ? 'rows="2"' : ''} placeholder="${placeholder}" required></${inputType}>
-        <button class="btn btn-outline-secondary" type="button" onclick="recipeUI.remove${this.getMethodSuffix(containerId)}(this)">
-          <i class="fas fa-minus"></i>
-        </button>
-      `;
-    } else {
-      div.innerHTML = `
-        <${inputType} class="form-control ${inputClass}" placeholder="${placeholder}" ${containerId === 'ingredients-container' ? 'required' : ''}></${inputType}>
-        <button class="btn btn-outline-secondary" type="button" onclick="recipeUI.remove${this.getMethodSuffix(containerId)}(this)">
-          <i class="fas fa-minus"></i>
-        </button>
-      `;
-    }
-    
-    container.appendChild(div);
-  }
-
-  /**
-   * Populate a container with data
-   * @param {string} containerId - Container element ID
-   * @param {Array} data - Data array
-   * @param {string} inputClass - Input class name
-   * @param {string} placeholder - Input placeholder
-   * @param {string} inputType - 'input' or 'textarea'
-   */
-  populateContainer(containerId, data, inputClass, placeholder, inputType) {
-    const container = document.getElementById(containerId);
-    container.innerHTML = '';
-    
-    if (data.length === 0) {
-      this.resetContainer(containerId, inputClass, placeholder, inputType);
-      return;
-    }
-    
-    data.forEach((item, index) => {
-      const div = document.createElement('div');
-      div.className = 'input-group mb-2';
-      
-      if (containerId === 'instructions-container') {
-        div.innerHTML = `
-          <span class="input-group-text">${index + 1}.</span>
-          <${inputType} class="form-control ${inputClass}" ${inputType === 'textarea' ? 'rows="2"' : ''} placeholder="${placeholder}" required>${this.escapeHtml(item)}</${inputType}>
-          <button class="btn btn-outline-secondary" type="button" onclick="recipeUI.remove${this.getMethodSuffix(containerId)}(this)">
-            <i class="fas fa-minus"></i>
-          </button>
-        `;
-      } else {
-        // Handle input vs textarea differently for value setting
-        if (inputType === 'input') {
-          div.innerHTML = `
-            <${inputType} class="form-control ${inputClass}" placeholder="${placeholder}" value="${this.escapeHtml(item)}" ${containerId === 'ingredients-container' ? 'required' : ''}></${inputType}>
-            <button class="btn btn-outline-secondary" type="button" onclick="recipeUI.remove${this.getMethodSuffix(containerId)}(this)">
-              <i class="fas fa-minus"></i>
-            </button>
-          `;
-        } else {
-          div.innerHTML = `
-            <${inputType} class="form-control ${inputClass}" placeholder="${placeholder}" ${containerId === 'ingredients-container' ? 'required' : ''}>${this.escapeHtml(item)}</${inputType}>
-            <button class="btn btn-outline-secondary" type="button" onclick="recipeUI.remove${this.getMethodSuffix(containerId)}(this)">
-              <i class="fas fa-minus"></i>
-            </button>
-          `;
-        }
-      }
-      
-      container.appendChild(div);
-    });
-  }
-
-  /**
-   * Get method suffix for container type
-   * @param {string} containerId - Container ID
-   * @returns {string} Method suffix
-   */
-  getMethodSuffix(containerId) {
-    if (containerId.includes('ingredient')) return 'Ingredient';
-    if (containerId.includes('instruction')) return 'Instruction';
-    if (containerId.includes('note')) return 'Note';
-    return '';
-  }
-
-  /**
-   * Escape HTML characters to prevent XSS
-   * @param {string} text - Text to escape
-   * @returns {string} Escaped text
-   */
-  escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
   }
 
   /**
@@ -319,33 +315,29 @@ class RecipeUI {
       
       if (this.isEditing) {
         console.log('🔄 Updating existing recipe...');
-        console.log('📝 Original recipe:', this.editingRecipe.name);
-        console.log('� Updated data:', formData);
+        console.log('📝 Original recipe ID:', this.editingRecipe.id);
+        console.log('📄 Updated data:', formData);
         
-        const result = await recipeCreation.updateRecipe(formData, this.editingRecipe.name);
-        console.log('✅ Recipe updated successfully:', result);
+        // Update the recipe using repository (optimistic updates handled automatically)
+        await this.repository.update(this.editingRecipe.name, formData);
         
-        // Close modal and refresh recipes
+        // Close modal
         this.modal.hide();
-        await this.refreshRecipes('update', formData.name);
         
-        // Show success message
-        this.showSuccessMessage();
       } else {
-        const result = await recipeCreation.createRecipe(formData);
-        console.log('✅ Recipe created successfully:', result);
+        console.log('🔄 Creating new recipe...');
+        console.log('📄 Recipe data:', formData);
         
-        // Close modal and refresh recipes
+        // Create the recipe using repository (optimistic updates handled automatically)
+        await this.repository.create(formData);
+        
+        // Close modal
         this.modal.hide();
-        await this.refreshRecipes('create', formData.name);
-        
-        // Show success message
-        this.showSuccessMessage();
       }
       
     } catch (error) {
       console.error('❌ Failed to process recipe:', error);
-      alert(`Failed to ${this.isEditing ? 'update' : 'create'} recipe:\n${error.message}`);
+      this.showErrorMessage(`Failed to ${this.isEditing ? 'update' : 'create'} recipe: ${error.message}`);
     } finally {
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalBtnText;
@@ -389,8 +381,8 @@ class RecipeUI {
       tags
     };
 
-    if (!this.isEditing) {
-      const userInfo = githubAuth.getUserInfo();
+    if (!this.isEditing && this.repository.githubAPI.isAuthenticated()) {
+      const userInfo = this.repository.githubAPI.getCurrentUser();
       recipeData.author = userInfo?.login || 'Anonymous';
       recipeData.created = new Date().toISOString();
     }
@@ -399,8 +391,201 @@ class RecipeUI {
   }
 
   /**
-   * Add ingredient input
+   * Load and display all recipes using repository
+   * @returns {Promise<Array>} Array of recipes
    */
+  async loadAllRecipes() {
+    try {
+      console.log('🔄 Loading all recipes from repository...');
+      const recipes = await this.repository.getAll();
+      console.log(`✅ Loaded ${recipes.length} recipes from repository`);
+      return recipes;
+    } catch (error) {
+      console.error('❌ Failed to load recipes:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Refresh the recipes display
+   */
+  async refreshRecipesDisplay() {
+    try {
+      const recipes = await this.loadAllRecipes();
+      
+      // Assuming there's a global function to render recipes
+      if (window.renderRecipes) {
+        window.renderRecipes(recipes);
+      }
+    } catch (error) {
+      console.error('❌ Failed to refresh recipes display:', error);
+    }
+  }
+
+  /**
+   * Get repository cache status
+   * @returns {Object} Cache status information
+   */
+  getCacheStatus() {
+    return this.repository.getCacheMetadata();
+  }
+
+  /**
+   * Clear repository cache
+   */
+  clearCache() {
+    this.repository.clearCache();
+    console.log('🗑️ Repository cache cleared');
+  }
+
+  /**
+   * Show success message
+   * @param {string} message - Success message
+   */
+  showSuccessMessage(message = 'Operation completed successfully!') {
+    // Implementation depends on your UI framework
+    // This could be a toast, alert, or custom notification
+    console.log('✅', message);
+    
+    // Simple alert for now - replace with better UI component
+    if (window.showToast) {
+      window.showToast(message, 'success');
+    } else {
+      // Fallback to browser alert
+      setTimeout(() => alert(message), 100);
+    }
+  }
+
+  /**
+   * Show error message
+   * @param {string} message - Error message
+   */
+  showErrorMessage(message) {
+    console.error('❌', message);
+    
+    if (window.showToast) {
+      window.showToast(message, 'error');
+    } else {
+      alert(message);
+    }
+  }
+
+  /**
+   * Show warning message
+   * @param {string} message - Warning message
+   */
+  showWarningMessage(message) {
+    console.warn('⚠️', message);
+    
+    if (window.showToast) {
+      window.showToast(message, 'warning');
+    } else {
+      alert(message);
+    }
+  }
+
+  // Form manipulation methods (keeping existing functionality)
+  clearForm() {
+    // Clear basic fields
+    document.getElementById('recipe-name').value = '';
+    document.getElementById('recipe-servings').value = '4';
+    document.getElementById('recipe-time').value = '';
+    document.getElementById('recipe-tags').value = '';
+    
+    // Clear dynamic lists
+    this.resetContainer('ingredients-container', 'ingredient-input', 'Enter ingredient', 'input');
+    this.resetContainer('instructions-container', 'instruction-input', 'Enter instruction step', 'textarea');
+    this.resetContainer('notes-container', 'note-input', 'Enter note', 'input');
+  }
+
+  populateForm(recipe) {
+    // Populate basic fields
+    document.getElementById('recipe-name').value = recipe.name || '';
+    document.getElementById('recipe-servings').value = recipe.servings || '4';
+    document.getElementById('recipe-time').value = recipe.cookingTime || '';
+    document.getElementById('recipe-tags').value = (recipe.tags || []).join(', ');
+    
+    // Populate ingredients
+    this.populateContainer('ingredients-container', recipe.ingredients || [], 'ingredient-input', 'Enter ingredient', 'input');
+    
+    // Populate instructions
+    this.populateContainer('instructions-container', recipe.instructions || [], 'instruction-input', 'Enter instruction step', 'textarea');
+    
+    // Populate notes
+    this.populateContainer('notes-container', recipe.notes || [], 'note-input', 'Enter note', 'input');
+  }
+
+  resetContainer(containerId, inputClass, placeholder, inputType) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+    
+    const div = document.createElement('div');
+    div.className = 'input-group mb-2';
+    
+    if (containerId === 'instructions-container') {
+      div.innerHTML = `
+        <span class="input-group-text">1.</span>
+        <${inputType} class="form-control ${inputClass}" ${inputType === 'textarea' ? 'rows="2"' : ''} placeholder="${placeholder}" required></${inputType}>
+        <button class="btn btn-outline-secondary" type="button" onclick="recipeUI.remove${this.getMethodSuffix(containerId)}(this)">
+          <i class="fas fa-minus"></i>
+        </button>
+      `;
+    } else {
+      div.innerHTML = `
+        <${inputType} class="form-control ${inputClass}" placeholder="${placeholder}" ${containerId === 'ingredients-container' ? 'required' : ''}></${inputType}>
+        <button class="btn btn-outline-secondary" type="button" onclick="recipeUI.remove${this.getMethodSuffix(containerId)}(this)">
+          <i class="fas fa-minus"></i>
+        </button>
+      `;
+    }
+    
+    container.appendChild(div);
+  }
+
+  populateContainer(containerId, data, inputClass, placeholder, inputType) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+    
+    if (data.length === 0) {
+      this.resetContainer(containerId, inputClass, placeholder, inputType);
+      return;
+    }
+    
+    data.forEach((item, index) => {
+      const div = document.createElement('div');
+      div.className = 'input-group mb-2';
+      
+      if (containerId === 'instructions-container') {
+        div.innerHTML = `
+          <span class="input-group-text">${index + 1}.</span>
+          <${inputType} class="form-control ${inputClass}" ${inputType === 'textarea' ? 'rows="2"' : ''} required>${item}</${inputType}>
+          <button class="btn btn-outline-secondary" type="button" onclick="recipeUI.remove${this.getMethodSuffix(containerId)}(this)">
+            <i class="fas fa-minus"></i>
+          </button>
+        `;
+      } else {
+        div.innerHTML = `
+          <${inputType} class="form-control ${inputClass}" value="${item}" ${containerId === 'ingredients-container' ? 'required' : ''}></${inputType}>
+          <button class="btn btn-outline-secondary" type="button" onclick="recipeUI.remove${this.getMethodSuffix(containerId)}(this)">
+            <i class="fas fa-minus"></i>
+          </button>
+        `;
+      }
+      
+      container.appendChild(div);
+    });
+  }
+
+  getMethodSuffix(containerId) {
+    const map = {
+      'ingredients-container': 'Ingredient',
+      'instructions-container': 'Instruction',
+      'notes-container': 'Note'
+    };
+    return map[containerId] || '';
+  }
+
+  // Dynamic input management methods (keeping existing functionality)
   addIngredient() {
     const container = document.getElementById('ingredients-container');
     const ingredientDiv = document.createElement('div');
@@ -415,10 +600,6 @@ class RecipeUI {
     ingredientDiv.querySelector('input').focus();
   }
 
-  /**
-   * Remove ingredient input
-   * @param {HTMLElement} button - Remove button element
-   */
   removeIngredient(button) {
     const container = document.getElementById('ingredients-container');
     if (container.children.length > 1) {
@@ -426,9 +607,6 @@ class RecipeUI {
     }
   }
 
-  /**
-   * Add instruction input
-   */
   addInstruction() {
     const container = document.getElementById('instructions-container');
     const stepNumber = container.children.length + 1;
@@ -445,10 +623,6 @@ class RecipeUI {
     instructionDiv.querySelector('textarea').focus();
   }
 
-  /**
-   * Remove instruction input
-   * @param {HTMLElement} button - Remove button element
-   */
   removeInstruction(button) {
     const container = document.getElementById('instructions-container');
     if (container.children.length > 1) {
@@ -463,9 +637,6 @@ class RecipeUI {
     }
   }
 
-  /**
-   * Add note input
-   */
   addNote() {
     const container = document.getElementById('notes-container');
     const noteDiv = document.createElement('div');
@@ -480,349 +651,14 @@ class RecipeUI {
     noteDiv.querySelector('input').focus();
   }
 
-  /**
-   * Remove note input
-   * @param {HTMLElement} button - Remove button element
-   */
   removeNote(button) {
     const container = document.getElementById('notes-container');
     if (container.children.length > 0) {
       button.parentElement.remove();
     }
   }
-
-  /**
-   * Perform optimistic update for delete operations
-   * @param {string} recipeName - Name of the deleted recipe
-   */
-  async optimisticDeleteUpdate(recipeName) {
-    console.log('⚡ Performing optimistic delete update for:', recipeName);
-    
-    try {
-      // 1. Remove from cache if it exists
-      clearRecipeCache(recipeName);
-      
-      // 2. Get current recipes from cache/memory and filter out deleted one
-      let currentRecipes = [];
-      try {
-        // Try to get recipes without forcing a GitHub call
-        currentRecipes = await this.getCurrentRecipesFromMemory();
-      } catch (error) {
-        console.warn('Could not get current recipes from memory, loading fresh:', error);
-        currentRecipes = await loadAllRecipes(true);
-      }
-      
-      // 3. Filter out the deleted recipe
-      const updatedRecipes = currentRecipes.filter(recipe => recipe.name !== recipeName);
-      console.log(`⚡ Filtered out deleted recipe. Recipes: ${currentRecipes.length} → ${updatedRecipes.length}`);
-      
-      // 4. Update UI immediately
-      if (window.renderRecipes) {
-        window.renderRecipes(updatedRecipes);
-        console.log('⚡ UI updated optimistically - deleted recipe removed from display');
-      }
-      
-    } catch (error) {
-      console.error('❌ Optimistic delete update failed:', error);
-      // Fallback to normal refresh if optimistic update fails
-      await this.refreshRecipes('delete', recipeName);
-    }
-  }
-
-  /**
-   * Get current recipes from memory/cache without forcing GitHub requests
-   * @returns {Promise<Array>} Current recipes
-   */
-  async getCurrentRecipesFromMemory() {
-    // This is a lightweight way to get recipes, preferring cache hits
-    const recipeFiles = await getRecipeFileList();
-    const recipes = [];
-    
-    for (const filename of recipeFiles) {
-      try {
-        // Try to load from cache first (don't force refresh)
-        const recipe = await loadRecipe(filename, false);
-        recipes.push(recipe);
-      } catch (error) {
-        console.warn(`Could not load ${filename} from cache:`, error);
-        // Continue with other recipes, don't fail completely
-      }
-    }
-    
-    return recipes;
-  }
-  async refreshRecipes(operationType = null, recipeName = null) {
-    try {
-      console.log('🔄 Refreshing recipes display...');
-      
-      // For delete operations, we've already done optimistic updates,
-      // so this is mainly for create/update operations
-      if (operationType === 'delete') {
-        console.log('⚡ Delete operation: optimistic update already performed, skipping immediate refresh');
-        return; // Skip immediate refresh for deletes, rely on delayed worker
-      }
-      
-      // Clear cache for better reliability after operations
-      if (operationType && recipeName) {
-        clearRecipeCache(); // Clear all cache after operations
-        console.log('🗑️ Cleared recipe cache due to operation:', operationType);
-      }
-      
-      // Immediate refresh attempt with force refresh for operations
-      const forceRefresh = Boolean(operationType);
-      const recipes = await loadAllRecipes(forceRefresh);
-      
-      // Assuming there's a global function to render recipes
-      if (window.renderRecipes) {
-        window.renderRecipes(recipes);
-      }
-
-      // If this is after a create/update/delete operation, start a delayed worker
-      if (operationType && recipeName) {
-        this.startDelayedRefreshWorker(operationType, recipeName);
-      }
-      
-    } catch (error) {
-      console.error('❌ Failed to refresh recipes:', error);
-    }
-  }
-
-  /**
-   * Start a delayed refresh worker to handle GitHub API delays
-   * @param {string} operationType - 'create', 'update', or 'delete'
-   * @param {string} recipeName - Name of the affected recipe
-   */
-  startDelayedRefreshWorker(operationType, recipeName) {
-    const workerId = `${operationType}-${recipeName}-${Date.now()}`;
-    console.log(`🔄 Starting delayed refresh worker for ${operationType} of "${recipeName}"...`);
-    
-    // Cancel any existing worker for the same recipe
-    const existingWorkerId = Array.from(this.refreshWorkers.keys())
-      .find(id => id.includes(recipeName));
-    if (existingWorkerId) {
-      globalThis.clearTimeout(this.refreshWorkers.get(existingWorkerId));
-      this.refreshWorkers.delete(existingWorkerId);
-      console.log(`🔄 Cancelled existing worker for "${recipeName}"`);
-    }
-
-    // Create new worker with exponential backoff
-    this.scheduleDelayedRefresh(workerId, operationType, recipeName, 0);
-  }
-
-  /**
-   * Schedule delayed refresh with exponential backoff
-   * @param {string} workerId - Unique worker identifier
-   * @param {string} operationType - 'create', 'update', or 'delete'
-   * @param {string} recipeName - Name of the affected recipe
-   * @param {number} attempt - Current attempt number (0-based)
-   */
-  scheduleDelayedRefresh(workerId, operationType, recipeName, attempt) {
-    const delays = [3000, 8000, 20000, 45000, 60000]; // 3s, 8s, 20s, 45s, 60s
-    
-    if (attempt >= delays.length) {
-      console.log(`⏰ Max refresh attempts reached for "${recipeName}"`);
-      this.refreshWorkers.delete(workerId);
-      return;
-    }
-
-    const delay = delays[attempt];
-    const delaySeconds = Math.round(delay / 1000);
-    console.log(`⏰ Scheduling refresh attempt ${attempt + 1} for "${recipeName}" in ${delaySeconds}s (${delay}ms)`);
-    
-    const timeoutId = globalThis.setTimeout(async () => {
-      try {
-        console.log(`🔄 Executing delayed refresh attempt ${attempt + 1} for "${recipeName}"`);
-        
-        // Check if the operation was successful by verifying recipe state
-        const success = await this.verifyRecipeOperation(operationType, recipeName);
-        
-        if (success) {
-          console.log(`✅ Recipe "${recipeName}" ${operationType} confirmed, refreshing display`);
-          
-          // Refresh the display with forced refresh
-          const recipes = await loadAllRecipes(true);
-          if (window.renderRecipes) {
-            window.renderRecipes(recipes);
-          }
-          
-          // Show status update
-          this.showDelayedRefreshStatus(operationType, recipeName, true);
-          
-          // Clean up worker
-          this.refreshWorkers.delete(workerId);
-        } else {
-          console.log(`⏰ Recipe "${recipeName}" ${operationType} not yet confirmed, scheduling retry`);
-          
-          // Schedule next attempt
-          this.scheduleDelayedRefresh(workerId, operationType, recipeName, attempt + 1);
-        }
-        
-      } catch (error) {
-        console.error(`❌ Error in delayed refresh worker for "${recipeName}":`, error);
-        
-        // Schedule retry on error (unless max attempts reached)
-        if (attempt + 1 < delays.length) {
-          this.scheduleDelayedRefresh(workerId, operationType, recipeName, attempt + 1);
-        } else {
-          console.log(`❌ Max retry attempts reached for "${recipeName}"`);
-          this.showDelayedRefreshStatus(operationType, recipeName, false);
-          this.refreshWorkers.delete(workerId);
-        }
-      }
-    }, delay);
-    
-    this.refreshWorkers.set(workerId, timeoutId);
-  }
-
-  /**
-   * Verify if a recipe operation was successful
-   * @param {string} operationType - 'create', 'update', or 'delete'
-   * @param {string} recipeName - Name of the affected recipe
-   * @returns {boolean} True if operation is confirmed
-   */
-  async verifyRecipeOperation(operationType, recipeName) {
-    try {
-      const recipes = await loadAllRecipes();
-      const recipeExists = recipes.some(recipe => recipe.name === recipeName);
-      
-      switch (operationType) {
-        case 'create':
-        case 'update':
-          return recipeExists; // Recipe should exist after create/update
-        case 'delete':
-          return !recipeExists; // Recipe should not exist after delete
-        default:
-          return false;
-      }
-    } catch (error) {
-      console.error(`❌ Error verifying ${operationType} operation for "${recipeName}":`, error);
-      return false;
-    }
-  }
-
-  /**
-   * Show status update for delayed refresh operations
-   * @param {string} operationType - 'create', 'update', or 'delete'
-   * @param {string} recipeName - Name of the affected recipe
-   * @param {boolean} success - Whether the operation was confirmed
-   */
-  showDelayedRefreshStatus(operationType, recipeName, success) {
-    const alert = document.createElement('div');
-    alert.className = `alert ${success ? 'alert-info' : 'alert-warning'} alert-dismissible fade show position-fixed`;
-    alert.style.cssText = 'top: 80px; right: 20px; z-index: 1060; min-width: 300px;';
-    
-    const icon = success ? 'fa-sync-alt' : 'fa-exclamation-triangle';
-    const message = success 
-      ? `Recipe list updated - "${recipeName}" ${operationType} confirmed`
-      : `Recipe "${recipeName}" ${operationType} may still be processing`;
-    
-    alert.innerHTML = `
-      <i class="fas ${icon} me-2"></i>
-      ${message}
-      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    
-    document.body.appendChild(alert);
-    
-    // Auto-remove after 4 seconds
-    globalThis.setTimeout(() => {
-      if (alert.parentNode) {
-        alert.remove();
-      }
-    }, 4000);
-  }
-
-  /**
-   * Cancel all active refresh workers
-   */
-  cancelAllRefreshWorkers() {
-    console.log(`🛑 Cancelling ${this.refreshWorkers.size} active refresh workers`);
-    for (const [workerId, timeoutId] of this.refreshWorkers.entries()) {
-      globalThis.clearTimeout(timeoutId);
-      console.log(`🛑 Cancelled worker: ${workerId}`);
-    }
-    this.refreshWorkers.clear();
-  }
-
-  /**
-   * Get status of active refresh workers
-   * @returns {Array} Array of active worker information
-   */
-  getActiveRefreshWorkers() {
-    return Array.from(this.refreshWorkers.keys()).map(workerId => {
-      const [operationType, recipeName, timestamp] = workerId.split('-');
-      return {
-        id: workerId,
-        operationType,
-        recipeName,
-        startedAt: new Date(parseInt(timestamp)),
-        duration: Date.now() - parseInt(timestamp)
-      };
-    });
-  }
-
-  /**
-   * Manually trigger a recipe list refresh (useful for debugging or user-initiated refresh)
-   */
-  async forceRefresh() {
-    console.log('🔄 Manual refresh triggered');
-    try {
-      clearRecipeCache(); // Clear cache for manual refresh
-      const recipes = await loadAllRecipes(true);
-      if (window.renderRecipes) {
-        window.renderRecipes(recipes);
-      }
-      
-      this.showSuccessMessage('Recipe list refreshed successfully');
-    } catch (error) {
-      console.error('❌ Manual refresh failed:', error);
-      alert(`Failed to refresh recipe list: ${error.message}`);
-    }
-  }
-
-  /**
-   * Show current cache status (useful for debugging)
-   * @returns {Object} Cache status information
-   */
-  showCacheStatus() {
-    const status = getCacheStatus();
-    console.log('📊 Recipe Cache Status:', {
-      'Total entries': status.totalEntries,
-      'Valid entries': status.validEntries,
-      'Expired entries': status.expiredEntries,
-      'Cache duration': `${status.cacheDurationMinutes} minutes`,
-      'Entries': status.entries
-    });
-    return status;
-  }
-
-  /**
-   * Show success message
-   * @param {string} [customMessage] - Optional custom message to display
-   */
-  showSuccessMessage(customMessage) {
-    const alert = document.createElement('div');
-    alert.className = 'alert alert-success alert-dismissible fade show position-fixed';
-    alert.style.cssText = 'top: 20px; right: 20px; z-index: 1060; min-width: 300px;';
-    
-    const message = customMessage || `Recipe ${this.isEditing ? 'updated' : 'created'} successfully!`;
-    
-    alert.innerHTML = `
-      <i class="fas fa-check-circle me-2"></i>
-      ${message}
-      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    
-    document.body.appendChild(alert);
-    
-    // Auto-remove after 5 seconds
-    setTimeout(() => {
-      if (alert.parentNode) {
-        alert.remove();
-      }
-    }, 5000);
-  }
 }
 
-// Create global instance
+// Create and export singleton instance
 export const recipeUI = new RecipeUI();
+export default recipeUI;
