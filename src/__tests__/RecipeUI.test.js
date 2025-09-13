@@ -29,7 +29,22 @@ jest.unstable_mockModule('../adapters/GitHubAPIAdapter.js', () => ({
   default: {}
 }));
 
-jest.unstable_mockModule('../utils/templateLoader.js', () => ({
+// Mock i18n system
+jest.unstable_mockModule('../i18n/i18n.js', () => ({
+t: jest.fn((key, params = {}) => {
+// Mock translations for test cases
+const translations = {
+'operations.deleteFailed': `Failed to delete recipe: ${params?.error || 'error'}`,
+'confirmations.deleteRecipeMessage': `Are you sure you want to delete the recipe "${params?.recipeName}"?
+
+This action cannot be undone and will permanently remove the recipe from your collection.`
+};
+return translations[key] || key;
+}),
+i18n: {
+getCurrentLanguage: jest.fn(() => 'en')
+}
+}));jest.unstable_mockModule('../utils/templateLoader.js', () => ({
   templateLoader: mockTemplateLoader
 }));
 
