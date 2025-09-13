@@ -76,6 +76,9 @@ async function initializeApp() {
   // Setup export button
   exportBtn.addEventListener('click', handleExportClick);
   
+  // Setup recipe selection change handler
+  setupRecipeSelectionHandler(exportBtn);
+  
   // Setup create recipe button
   const createBtn = document.getElementById('createRecipeBtn');
   if (createBtn) {
@@ -111,6 +114,41 @@ function setupRepositoryEventHandlers() {
     console.log('↩️ Repository rollback occurred:', event);
     refreshRecipesFromCache();
   });
+}
+
+/**
+ * Set up recipe selection handler for export button visibility
+ * @param {HTMLElement} exportBtn - The export button element
+ */
+function setupRecipeSelectionHandler(exportBtn) {
+  // Initially hide the export button
+  exportBtn.style.display = 'none';
+  
+  // Add event listener for checkbox changes
+  document.addEventListener('change', (e) => {
+    if (e.target.classList.contains('selectRecipe')) {
+      updateExportButtonVisibility(exportBtn);
+    }
+  });
+}
+
+/**
+ * Update export button visibility based on selected recipes
+ * @param {HTMLElement} exportBtn - The export button element
+ */
+function updateExportButtonVisibility(exportBtn) {
+  const selectedCheckboxes = document.querySelectorAll('.selectRecipe:checked');
+  const hasSelection = selectedCheckboxes.length > 0;
+  
+  if (hasSelection) {
+    exportBtn.style.display = 'block';
+    exportBtn.classList.add('sticky-export-btn');
+    exportBtn.innerHTML = `<i class="fas fa-download me-2"></i>Export ${selectedCheckboxes.length} Recipe${selectedCheckboxes.length > 1 ? 's' : ''} to Shopping List`;
+  } else {
+    exportBtn.style.display = 'none';
+    exportBtn.classList.remove('sticky-export-btn');
+    exportBtn.innerHTML = '<i class="fas fa-download me-2"></i>Export to Shopping List';
+  }
 }
 
 /**
@@ -176,6 +214,12 @@ function renderRecipes(recipes) {
   recipes.forEach(recipe => {
     renderRecipeCard(recipe, state.recipeListElement);
   });
+  
+  // Update export button visibility after rendering
+  const exportBtn = document.getElementById('exportBtn');
+  if (exportBtn) {
+    updateExportButtonVisibility(exportBtn);
+  }
 }
 
 // Make renderRecipes available globally for RecipeUI
