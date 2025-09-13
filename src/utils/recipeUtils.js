@@ -18,7 +18,7 @@ export function extractRecipeName(cardTitle) {
  * @returns {Object|undefined} Found recipe or undefined
  */
 export function findRecipeByName(recipes, recipeName) {
-  return recipes.find(r => r.nazev === recipeName);
+  return recipes.find(r => r.name === recipeName);
 }
 
 /**
@@ -32,8 +32,8 @@ export function collectIngredientsFromRecipes(recipes, selectedRecipeNames) {
   
   selectedRecipeNames.forEach(recipeName => {
     const recipe = findRecipeByName(recipes, recipeName);
-    if (recipe && recipe.ingredience) {
-      ingredients.push(...recipe.ingredience);
+    if (recipe && recipe.ingredients) {
+      ingredients.push(...recipe.ingredients);
     }
   });
   
@@ -67,7 +67,7 @@ export function validateRecipe(recipe) {
     return false;
   }
   
-  const requiredFields = ['nazev', 'ingredience', 'postup', 'tagy'];
+  const requiredFields = ['name', 'ingredients', 'instructions', 'tags'];
   return requiredFields.every(field => Object.prototype.hasOwnProperty.call(recipe, field));
 }
 
@@ -77,13 +77,13 @@ export function validateRecipe(recipe) {
  * @returns {string} Formatted display text
  */
 export function formatRecipeSubtitle(recipe) {
-  const portions = recipe.porce || '';
-  const time = recipe.cas_pripravy || '';
+  const servings = recipe.servings || '';
+  const time = recipe.cookingTime || '';
   
-  if (portions && time) {
-    return `${portions} porce, ${time}`;
-  } else if (portions) {
-    return `${portions} porce`;
+  if (servings && time) {
+    return `${servings} servings, ${time}`;
+  } else if (servings) {
+    return `${servings} servings`;
   } else if (time) {
     return time;
   }

@@ -66,25 +66,42 @@ class GitHubAuthService {
    * @returns {Promise<Object>} Authentication result with user info
    */
   async authenticate() {
+    console.log('🔐 Starting authentication process...');
+    
     try {
       // For now, show instructions for manual token creation
+      console.log('📋 Showing token instructions modal...');
       const token = await this.showManualTokenInstructions();
       
       if (token) {
+        console.log('✅ Token received from user (length:', token.length, ')');
+        console.log('🔑 Token format check:', token.startsWith('ghp_') ? 'Valid format' : 'Unexpected format');
+        
         this.accessToken = token;
         localStorage.setItem('github_access_token', this.accessToken);
+        console.log('💾 Token stored in localStorage');
+        
+        console.log('👤 Fetching user info...');
         await this.fetchUserInfo();
         
-        return {
+        const result = {
           success: true,
           user: this.userInfo,
           token: this.accessToken,
         };
+        
+        console.log('✅ Authentication completed successfully:', {
+          user: this.userInfo?.login,
+          tokenLength: this.accessToken?.length
+        });
+        
+        return result;
       } else {
+        console.log('❌ Authentication cancelled by user');
         throw new Error('Authentication was cancelled');
       }
     } catch (error) {
-      console.error('Authentication failed:', error);
+      console.error('💥 Authentication failed:', error);
       throw error;
     }
   }
@@ -195,21 +212,48 @@ class GitHubAuthService {
    * @returns {Promise<Response>} Fetch response
    */
   async makeAuthenticatedRequest(endpoint, options = {}) {
+    console.log('🔐 Making authenticated GitHub API request...');
+    
     if (!this.accessToken) {
+      console.error('❌ No access token available');
       throw new Error('User not authenticated');
     }
 
     const url = endpoint.startsWith('http') ? endpoint : `${CONFIG.GITHUB_API_BASE}/${endpoint}`;
+    console.log('🔗 Request URL:', url);
+    console.log('🔑 Using token (first 10 chars):', this.accessToken.substring(0, 10) + '...');
+    console.log('📊 Request method:', options.method || 'GET');
     
-    return fetch(url, {
+    const headers = {
+      'Authorization': `Bearer ${this.accessToken}`,
+      'Accept': 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json',
+      ...options.headers,
+    };
+    
+    console.log('📋 Request headers:', Object.keys(headers));
+    
+    const requestOptions = {
       ...options,
-      headers: {
-        'Authorization': `Bearer ${this.accessToken}`,
-        'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-    });
+      headers,
+    };
+    
+    console.log('🚀 Sending request...');
+    
+    try {
+      const response = await fetch(url, requestOptions);
+      console.log('📡 Response received:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
+        headers: Object.fromEntries(response.headers.entries())
+      });
+      
+      return response;
+    } catch (error) {
+      console.error('💥 Network error during API request:', error);
+      throw error;
+    }
   }
 }
 

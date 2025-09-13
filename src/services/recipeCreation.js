@@ -5,7 +5,6 @@
 
 import { githubAuth } from './githubAuth.js';
 import { CONFIG } from '../config/github.js';
-import { validateRecipe } from '../utils/recipeUtils.js';
 
 class RecipeCreationService {
   /**
@@ -14,69 +13,141 @@ class RecipeCreationService {
    * @returns {Promise<Object>} Creation result
    */
   async createRecipe(recipeData) {
+    console.log('🔄 Starting recipe creation process');
+    console.log('📝 Recipe data received:', recipeData);
+
     // Validate recipe data
-    const validation = validateRecipe(recipeData);
-    if (!validation.isValid) {
-      throw new Error(`Invalid recipe data: ${validation.errors.join(', ')}`);
+    console.log('✅ Validating recipe data...');
+    const validation = this.validateRecipeData(recipeData);
+    console.log('🔍 Validation result:', validation);
+    
+    if (!validation || typeof validation !== 'object') {
+      console.error('❌ Validation function returned invalid result:', validation);
+      throw new Error('Recipe validation failed - invalid validation response');
     }
+    
+    if (!validation.isValid) {
+      console.error('❌ Recipe validation failed:', validation.errors);
+      const errorMessage = Array.isArray(validation.errors) 
+        ? validation.errors.join(', ') 
+        : 'Unknown validation errors';
+      throw new Error(`Invalid recipe data: ${errorMessage}`);
+    }
+    console.log('✅ Recipe data validation passed');
 
     // Ensure user is authenticated
+    console.log('🔐 Checking authentication...');
     if (!githubAuth.isAuthenticated()) {
+      console.error('❌ User not authenticated');
       throw new Error('User must be authenticated to create recipes');
     }
+    
+    const userInfo = githubAuth.getUserInfo();
+    console.log('✅ User authenticated:', userInfo?.login || 'Unknown');
 
     try {
       // Generate filename from recipe name
+      console.log('📁 Generating filename...');
       const filename = this.generateFilename(recipeData.name);
       const filePath = `recipes/${filename}`;
+      console.log('✅ Generated filename:', filename);
+      console.log('✅ Full file path:', filePath);
 
       // Format recipe data as JSON
+      console.log('📄 Formatting recipe content...');
       const content = JSON.stringify(recipeData, null, 2);
+      console.log('✅ JSON content length:', content.length, 'characters');
+      console.log('📄 Recipe content preview:', content.substring(0, 200) + '...');
+      
       const encodedContent = btoa(unescape(encodeURIComponent(content)));
+      console.log('✅ Base64 encoded content length:', encodedContent.length, 'characters');
 
       // Check if file already exists
+      console.log('🔍 Checking if file already exists...');
       const existingFile = await this.checkFileExists(filePath);
       if (existingFile) {
+        console.error('❌ File already exists:', filePath);
         throw new Error(`Recipe "${recipeData.name}" already exists`);
       }
+      console.log('✅ File does not exist, proceeding with creation');
 
       // Create commit message
       const commitMessage = `Add recipe: ${recipeData.name}`;
-      const userInfo = githubAuth.getUserInfo();
+      console.log('💬 Commit message:', commitMessage);
+      
       const author = {
         name: userInfo?.name || userInfo?.login || 'Recipe Contributor',
         email: userInfo?.email || `${userInfo?.login}@users.noreply.github.com`,
       };
+      console.log('👤 Author info:', author);
+
+      // Prepare API request
+      const apiUrl = `repos/${CONFIG.REPO_OWNER}/${CONFIG.REPO_NAME}/contents/${filePath}`;
+      console.log('🔗 GitHub API URL:', `${CONFIG.GITHUB_API_BASE}/${apiUrl}`);
+      
+      const requestBody = {
+        message: commitMessage,
+        content: encodedContent,
+        author: author,
+        committer: author,
+      };
+      console.log('📦 Request body prepared (content truncated for logging)');
 
       // Create the file via GitHub API
-      const response = await githubAuth.makeAuthenticatedRequest(
-        `repos/${CONFIG.REPO_OWNER}/${CONFIG.REPO_NAME}/contents/${filePath}`,
-        {
-          method: 'PUT',
-          body: JSON.stringify({
-            message: commitMessage,
-            content: encodedContent,
-            author: author,
-            committer: author,
-          }),
-        }
-      );
+      console.log('🚀 Sending request to GitHub API...');
+      const response = await githubAuth.makeAuthenticatedRequest(apiUrl, {
+        method: 'PUT',
+        body: JSON.stringify(requestBody),
+      });
+
+      console.log('📡 GitHub API response status:', response.status);
+      console.log('📡 GitHub API response headers:', Object.fromEntries(response.headers.entries()));
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(`Failed to create recipe: ${error.message}`);
+        const errorText = await response.text();
+        console.error('❌ GitHub API Error Response:', errorText);
+        
+        let errorMessage;
+        try {
+          const error = JSON.parse(errorText);
+          console.error('❌ Parsed error:', error);
+          errorMessage = error.message || error.error || 'Unknown API error';
+        } catch {
+          errorMessage = `HTTP ${response.status}: ${errorText}`;
+        }
+        
+        throw new Error(`Failed to create recipe: ${errorMessage}`);
       }
 
+      console.log('✅ GitHub API request successful');
       const result = await response.json();
-      return {
+      console.log('📋 GitHub API response data:', {
+        commit: result.commit?.sha,
+        content: {
+          name: result.content?.name,
+          path: result.content?.path,
+          downloadUrl: result.content?.download_url
+        }
+      });
+
+      const successResult = {
         success: true,
         filename: filename,
         path: filePath,
         commitSha: result.commit.sha,
         downloadUrl: result.content.download_url,
       };
+      
+      console.log('🎉 Recipe creation completed successfully:', successResult);
+      return successResult;
+      
     } catch (error) {
-      console.error('Recipe creation failed:', error);
+      console.error('💥 Recipe creation failed with error:', error);
+      console.error('💥 Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
       throw error;
     }
   }

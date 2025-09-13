@@ -1,19 +1,19 @@
 {
-  "nazev": "Guláš",
-  "porce": 4,
-  "cas_pripravy": "90 min",
-  "ingredience": [
+  "name": "Guláš",
+  "servings": 4,
+  "cookingTime": "90 min",
+  "ingredients": [
     "500 g hovězí kližky",
     "2 cibule",
     "2 stroužky česneku",
     "1 lžíce sladké papriky",
     "olej, sůl, pepř"
   ],
-  "postup": [
+  "instructions": [
     "Nakrájej maso na kostky.",
     "Orestuj cibuli do zlatova.",
     "Přidej maso, česnek a koření.",
     "Podlij vodou a vař 1 hodinu."
   ],
-  "tagy": ["hlavní jídlo", "česká kuchyně", "maso"]
+  "tags": ["hlavní jídlo", "česká kuchyně", "maso"]
 }

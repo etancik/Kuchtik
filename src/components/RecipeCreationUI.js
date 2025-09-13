@@ -158,27 +158,10 @@ class RecipeCreationUI {
               </div>
             </div>
 
-            <!-- Description -->
+            <!-- Cooking Time -->
             <div class="mb-3">
-              <label for="recipe-description" class="form-label">Description</label>
-              <textarea class="form-control" id="recipe-description" rows="2" 
-                        placeholder="Brief description of the recipe"></textarea>
-            </div>
-
-            <!-- Time and Difficulty -->
-            <div class="row mb-3">
-              <div class="col-md-6">
-                <label for="recipe-time" class="form-label">Cooking Time</label>
-                <input type="text" class="form-control" id="recipe-time" placeholder="e.g., 30 minutes">
-              </div>
-              <div class="col-md-6">
-                <label for="recipe-difficulty" class="form-label">Difficulty</label>
-                <select class="form-select" id="recipe-difficulty">
-                  <option value="easy">Easy</option>
-                  <option value="medium" selected>Medium</option>
-                  <option value="hard">Hard</option>
-                </select>
-              </div>
+              <label for="recipe-time" class="form-label">Cooking Time</label>
+              <input type="text" class="form-control" id="recipe-time" placeholder="e.g., 30 minutes">
             </div>
 
             <!-- Ingredients -->
@@ -211,6 +194,22 @@ class RecipeCreationUI {
               </div>
               <button type="button" class="btn btn-sm btn-outline-primary" onclick="recipeCreationUI.addInstruction()">
                 <i class="fas fa-plus me-1"></i>Add Step
+              </button>
+            </div>
+
+            <!-- Notes -->
+            <div class="mb-3">
+              <label for="recipe-notes" class="form-label">Notes (Optional)</label>
+              <div id="notes-container">
+                <div class="input-group mb-2">
+                  <input type="text" class="form-control note-input" placeholder="Enter note">
+                  <button class="btn btn-outline-secondary" type="button" onclick="recipeCreationUI.removeNote(this)">
+                    <i class="fas fa-minus"></i>
+                  </button>
+                </div>
+              </div>
+              <button type="button" class="btn btn-sm btn-outline-primary" onclick="recipeCreationUI.addNote()">
+                <i class="fas fa-plus me-1"></i>Add Note
               </button>
             </div>
 
@@ -253,6 +252,7 @@ class RecipeCreationUI {
    */
   async handleFormSubmit(event) {
     event.preventDefault();
+    console.log('📝 Recipe form submitted');
 
     const submitBtn = event.target.querySelector('button[type="submit"]');
     const originalBtnText = submitBtn.innerHTML;
@@ -261,32 +261,51 @@ class RecipeCreationUI {
       // Show loading state
       submitBtn.disabled = true;
       submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Creating...';
+      console.log('🔄 Form UI updated to loading state');
 
       // Collect form data
+      console.log('📊 Collecting form data...');
       const recipeData = this.collectFormData();
+      console.log('✅ Form data collected:', recipeData);
 
       // Validate data
+      console.log('✅ Validating form data...');
       const validation = recipeCreation.validateRecipeData(recipeData);
       if (!validation.isValid) {
+        console.error('❌ Form validation failed:', validation.errors);
         throw new Error(validation.errors.join('\n'));
       }
+      console.log('✅ Form validation passed');
 
       // Create recipe
+      console.log('🚀 Starting recipe creation...');
       const result = await recipeCreation.createRecipe(recipeData);
+      console.log('✅ Recipe creation completed:', result);
 
       // Show success message
+      console.log('🎉 Showing success message');
       this.showSuccessMessage(result);
 
       // Hide form
+      console.log('🙈 Hiding form');
       this.hide();
 
       // Reload recipes to show the new one
+      console.log('🔄 Reloading page to show new recipe');
       window.location.reload();
 
     } catch (error) {
+      console.error('💥 Recipe creation failed in UI:', error);
+      console.error('💥 Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+      
       alert(`Failed to create recipe:\n${error.message}`);
     } finally {
       // Reset button
+      console.log('🔄 Resetting form button');
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalBtnText;
     }
@@ -298,29 +317,68 @@ class RecipeCreationUI {
    * @returns {Object} Recipe data
    */
   collectFormData() {
-    const ingredients = Array.from(document.querySelectorAll('.ingredient-input'))
+    console.log('📊 Collecting form data from DOM elements...');
+
+    const ingredientElements = document.querySelectorAll('.ingredient-input');
+    console.log('🥕 Found ingredient elements:', ingredientElements.length);
+    const ingredients = Array.from(ingredientElements)
       .map(input => input.value.trim())
       .filter(value => value !== '');
+    console.log('🥕 Processed ingredients:', ingredients);
 
-    const instructions = Array.from(document.querySelectorAll('.instruction-input'))
+    const instructionElements = document.querySelectorAll('.instruction-input');
+    console.log('📋 Found instruction elements:', instructionElements.length);
+    const instructions = Array.from(instructionElements)
       .map(input => input.value.trim())
       .filter(value => value !== '');
+    console.log('📋 Processed instructions:', instructions);
 
-    const tagsInput = document.getElementById('recipe-tags').value;
+    const nameElement = document.getElementById('recipe-name');
+    const name = nameElement ? nameElement.value.trim() : '';
+    console.log('📝 Recipe name:', name);
+
+    const timeElement = document.getElementById('recipe-time');
+    const cookingTime = timeElement ? timeElement.value.trim() : '';
+    console.log('⏰ Cooking time:', cookingTime);
+
+    const servingsElement = document.getElementById('recipe-servings');
+    const servings = servingsElement ? parseInt(servingsElement.value) || 1 : 1;
+    console.log('👥 Servings:', servings);
+
+    const noteElements = document.querySelectorAll('.note-input');
+    console.log('📝 Found note elements:', noteElements.length);
+    const notes = Array.from(noteElements)
+      .map(input => input.value.trim())
+      .filter(value => value !== '');
+    console.log('📝 Processed notes:', notes);
+
+    const tagsElement = document.getElementById('recipe-tags');
+    const tagsInput = tagsElement ? tagsElement.value : '';
     const tags = tagsInput ? tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag !== '') : [];
+    console.log('🏷️ Tags input:', tagsInput);
+    console.log('🏷️ Processed tags:', tags);
 
-    return {
-      name: document.getElementById('recipe-name').value.trim(),
-      description: document.getElementById('recipe-description').value.trim(),
-      ingredients: ingredients,
-      instructions: instructions,
-      cookingTime: document.getElementById('recipe-time').value.trim(),
-      servings: parseInt(document.getElementById('recipe-servings').value) || 1,
-      difficulty: document.getElementById('recipe-difficulty').value,
-      tags: tags,
-      author: githubAuth.getUserInfo()?.login || 'Anonymous',
-      created: new Date().toISOString(),
+    const userInfo = githubAuth.getUserInfo();
+    const author = userInfo?.login || 'Anonymous';
+    console.log('👤 Author:', author);
+
+    const created = new Date().toISOString();
+    console.log('📅 Created timestamp:', created);
+
+    const recipeData = {
+      name,
+      ingredients,
+      instructions,
+      cookingTime,
+      servings,
+      notes,
+      tags,
+      author,
+      created,
     };
+
+    console.log('✅ Complete recipe data collected:', recipeData);
+    return recipeData;
   }
 
   /**
@@ -385,6 +443,34 @@ class RecipeCreationUI {
           numberSpan.textContent = `${index + 1}.`;
         }
       });
+    }
+  }
+
+  /**
+   * Add new note input
+   */
+  addNote() {
+    const container = document.getElementById('notes-container');
+    const noteDiv = document.createElement('div');
+    noteDiv.className = 'input-group mb-2';
+    noteDiv.innerHTML = `
+      <input type="text" class="form-control note-input" placeholder="Enter note">
+      <button class="btn btn-outline-secondary" type="button" onclick="recipeCreationUI.removeNote(this)">
+        <i class="fas fa-minus"></i>
+      </button>
+    `;
+    container.appendChild(noteDiv);
+    noteDiv.querySelector('input').focus();
+  }
+
+  /**
+   * Remove note input
+   * @param {HTMLElement} button - Remove button element
+   */
+  removeNote(button) {
+    const container = document.getElementById('notes-container');
+    if (container.children.length > 0) {
+      button.parentElement.remove();
     }
   }
 

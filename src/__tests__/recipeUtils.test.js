@@ -30,13 +30,13 @@ describe('recipeUtils', () => {
 
   describe('findRecipeByName', () => {
     const recipes = [
-      { nazev: 'Guláš', ingredience: ['maso'] },
-      { nazev: 'Palačinky', ingredience: ['mouka'] }
+      { name: 'Guláš', ingredients: ['maso'] },
+      { name: 'Palačinky', ingredients: ['mouka'] }
     ];
 
     test('should find existing recipe', () => {
       const result = findRecipeByName(recipes, 'Guláš');
-      expect(result).toEqual({ nazev: 'Guláš', ingredience: ['maso'] });
+      expect(result).toEqual({ name: 'Guláš', ingredients: ['maso'] });
     });
 
     test('should return undefined for non-existing recipe', () => {
@@ -47,8 +47,8 @@ describe('recipeUtils', () => {
 
   describe('collectIngredientsFromRecipes', () => {
     const recipes = [
-      { nazev: 'Guláš', ingredience: ['maso', 'cibule'] },
-      { nazev: 'Palačinky', ingredience: ['mouka', 'mléko'] }
+      { name: 'Guláš', ingredients: ['maso', 'cibule'] },
+      { name: 'Palačinky', ingredients: ['mouka', 'mléko'] }
     ];
 
     test('should collect ingredients from selected recipes', () => {
@@ -72,16 +72,16 @@ describe('recipeUtils', () => {
   describe('validateRecipe', () => {
     test('should validate complete recipe', () => {
       const recipe = {
-        nazev: 'Test',
-        ingredience: ['test'],
-        postup: ['step'],
-        tagy: ['tag']
+        name: 'Test',
+        ingredients: ['test'],
+        instructions: ['step'],
+        tags: ['tag']
       };
       expect(validateRecipe(recipe)).toBe(true);
     });
 
     test('should reject recipe with missing fields', () => {
-      const recipe = { nazev: 'Test' };
+      const recipe = { name: 'Test' };
       expect(validateRecipe(recipe)).toBe(false);
     });
 
@@ -93,17 +93,17 @@ describe('recipeUtils', () => {
 
   describe('formatRecipeSubtitle', () => {
     test('should format complete recipe info', () => {
-      const recipe = { porce: '4', cas_pripravy: '90 min' };
-      expect(formatRecipeSubtitle(recipe)).toBe('4 porce, 90 min');
+      const recipe = { servings: '4', cookingTime: '90 min' };
+      expect(formatRecipeSubtitle(recipe)).toBe('4 servings, 90 min');
     });
 
     test('should handle missing time', () => {
-      const recipe = { porce: '4' };
-      expect(formatRecipeSubtitle(recipe)).toBe('4 porce');
+      const recipe = { servings: '4' };
+      expect(formatRecipeSubtitle(recipe)).toBe('4 servings');
     });
 
     test('should handle missing portions', () => {
-      const recipe = { cas_pripravy: '90 min' };
+      const recipe = { cookingTime: '90 min' };
       expect(formatRecipeSubtitle(recipe)).toBe('90 min');
     });
 
