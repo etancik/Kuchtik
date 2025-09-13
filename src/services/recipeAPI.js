@@ -1,16 +1,15 @@
 /**
- * Service for loading recipe data from GitHub API and local files
+ * Service for loading recipe data from GitHub API
  */
 
 const GITHUB_API_BASE = 'https://api.github.com/repos/etancik/Kuchtik';
-const FALLBACK_RECIPES = ['recepty/gulas.json', 'recepty/palacinky.json'];
 
 /**
  * Get list of recipe files from GitHub API
  * @returns {Promise<string[]>} Array of recipe filenames
  */
 export async function getRecipeFileList() {
-  const apiUrl = `${GITHUB_API_BASE}/contents/recepty`;
+  const apiUrl = `${GITHUB_API_BASE}/contents/recipes`;
   const response = await fetch(apiUrl);
   
   if (!response.ok) {
@@ -48,32 +47,17 @@ export async function loadRecipe(url) {
 export async function loadAllRecipes() {
   const recipes = [];
   
-  try {
-    const recipeFiles = await getRecipeFileList();
-    console.log(`Found ${recipeFiles.length} recipes:`, recipeFiles);
-    
-    // Load all recipes
-    for (const recipeFile of recipeFiles) {
-      try {
-        const url = `recepty/${recipeFile}`;
-        const data = await loadRecipe(url);
-        recipes.push(data);
-      } catch (error) {
-        console.error(`Error loading recipe ${recipeFile}:`, error);
-      }
-    }
-  } catch (error) {
-    console.error('Error loading recipes from GitHub API:', error);
-    
-    // Fallback to hardcoded list
-    console.log('Using fallback loading...');
-    for (const url of FALLBACK_RECIPES) {
-      try {
-        const data = await loadRecipe(url);
-        recipes.push(data);
-      } catch (error) {
-        console.error(`Error loading fallback recipe ${url}:`, error);
-      }
+  const recipeFiles = await getRecipeFileList();
+  console.log(`Found ${recipeFiles.length} recipes:`, recipeFiles);
+  
+  // Load all recipes
+  for (const recipeFile of recipeFiles) {
+    try {
+      const url = `recipes/${recipeFile}`;
+      const data = await loadRecipe(url);
+      recipes.push(data);
+    } catch (error) {
+      console.error(`Error loading recipe ${recipeFile}:`, error);
     }
   }
   

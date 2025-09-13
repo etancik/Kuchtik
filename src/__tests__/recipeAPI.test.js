@@ -22,7 +22,7 @@ describe('recipeAPI', () => {
       const result = await getRecipeFileList();
       
       expect(fetch).toHaveBeenCalledWith(
-        'https://api.github.com/repos/etancik/Kuchtik/contents/recepty'
+        'https://api.github.com/repos/etancik/Kuchtik/contents/recipes'
       );
       expect(result).toEqual(['gulas.json', 'palacinky.json']);
     });
@@ -46,9 +46,9 @@ describe('recipeAPI', () => {
         json: async () => mockRecipe
       });
 
-      const result = await loadRecipe('recepty/test.json');
+      const result = await loadRecipe('recipes/test.json');
       
-      expect(fetch).toHaveBeenCalledWith('recepty/test.json');
+      expect(fetch).toHaveBeenCalledWith('recipes/test.json');
       expect(result).toEqual(mockRecipe);
     });
 
@@ -58,8 +58,8 @@ describe('recipeAPI', () => {
         status: 404
       });
 
-      await expect(loadRecipe('recepty/missing.json')).rejects.toThrow(
-        'Failed to load recipe: recepty/missing.json (404)'
+      await expect(loadRecipe('recipes/missing.json')).rejects.toThrow(
+        'Failed to load recipe: recipes/missing.json (404)'
       );
     });
   });
@@ -97,31 +97,42 @@ describe('recipeAPI', () => {
       expect(fetch).toHaveBeenCalledTimes(3); // 1 for file list + 2 for recipes
     });
 
-    test('should fallback to hardcoded list on GitHub API failure', async () => {
-      const mockRecipe = { nazev: 'Fallback Recipe' };
-
+    test('should handle GitHub API failure gracefully', async () => {
       // Mock GitHub API failure
+      fetch.mockRejectedValueOnce(new Error('GitHub API unavailable'));
+
+      await expect(loadAllRecipes()).rejects.toThrow('GitHub API unavailable');
+    });
+
+    test('should handle individual recipe load failures', async () => {
+      const mockFiles = [
+        { type: 'file', name: 'recipe1.json' },
+        { type: 'file', name: 'recipe2.json' }
+      ];
+      
+      const mockRecipe1 = { nazev: 'Recipe 1' };
+
+      // Mock GitHub API call
       fetch.mockResolvedValueOnce({
-        ok: false,
-        status: 500
+        ok: true,
+        json: async () => mockFiles
       });
 
-      // Mock fallback recipe loads
+      // Mock first recipe success, second recipe failure
       fetch
         .mockResolvedValueOnce({
           ok: true,
-          json: async () => mockRecipe
+          json: async () => mockRecipe1
         })
         .mockResolvedValueOnce({
-          ok: true,
-          json: async () => mockRecipe
+          ok: false,
+          status: 404
         });
 
       const result = await loadAllRecipes();
       
-      expect(result).toEqual([mockRecipe, mockRecipe]);
-      expect(fetch).toHaveBeenCalledWith('recepty/gulas.json');
-      expect(fetch).toHaveBeenCalledWith('recepty/palacinky.json');
+      expect(result).toEqual([mockRecipe1]); // Only successful recipe
+      expect(fetch).toHaveBeenCalledTimes(3);
     });
   });
 });

@@ -23,7 +23,7 @@ A recipe management application with iOS Shortcuts integration, built with vanil
 │   │   └── shortcutsUtils.js # iOS Shortcuts integration
 │   ├── __tests__/         # Unit tests
 │   └── main.js           # Application entry point
-├── recepty/              # Recipe JSON files
+├── recipes/              # Recipe JSON files
 ├── index.html           # Main HTML file
 └── style.css           # Styles
 ```

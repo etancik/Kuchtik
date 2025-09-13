@@ -70,7 +70,7 @@ jobs:
           cp index.html deploy/
           cp style.css deploy/
           cp -r src deploy/
-          cp -r recepty deploy/
+          cp -r recipes deploy/
       
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
