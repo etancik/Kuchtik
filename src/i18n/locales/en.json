@@ -1,0 +1,103 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "close": "Close",
+    "yes": "Yes",
+    "no": "No",
+    "retry": "Retry",
+    "optional": "Optional"
+  },
+  "navigation": {
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "user": "User"
+  },
+  "recipes": {
+    "title": "Kuchtik",
+    "subtitle": "Tancer Family Cookbook",
+    "noRecipesTitle": "No Recipes Found",
+    "noRecipesMessage": "You don't have any recipes yet. Create your first recipe to get started!",
+    "createRecipe": "Create Recipe",
+    "editRecipe": "Edit Recipe",
+    "deleteRecipe": "Delete Recipe",
+    "signInToManage": "Sign in to create and manage recipes.",
+    "loadingError": "Unable to Load Recipes",
+    "loadingErrorMessage": "There was a problem loading the recipes: {{error}}",
+    "connectionMessage": "Please check your internet connection and try refreshing the page.",
+    "exportToShoppingList": "Export to Shopping List",
+    "exportRecipes": "Export {{count}} Recipe{{plural}} to Shopping List",
+    "selectAtLeastOne": "Please select at least one recipe!",
+    "noIngredientsToExport": "No ingredients to export!",
+    "exportFailed": "Export failed!",
+    "tags": "Tags",
+    "servings": "Servings",
+    "cookingTime": "Cooking Time",
+    "ingredients": "Ingredients", 
+    "instructions": "Instructions",
+    "notes": "Notes"
+  },
+  "recipeForm": {
+    "createNewRecipe": "Create New Recipe",
+    "editRecipeTitle": "Edit Recipe",
+    "recipeName": "Recipe Name",
+    "recipeNamePlaceholder": "Enter recipe name",
+    "recipeNameRequired": "Please provide a recipe name.",
+    "servings": "Servings",
+    "servingsPlaceholder": "Number of servings",
+    "cookingTime": "Cooking Time",
+    "cookingTimePlaceholder": "e.g., 30 minutes",
+    "ingredients": "Ingredients",
+    "ingredientPlaceholder": "Enter ingredient",
+    "addIngredient": "Add Ingredient",
+    "instructions": "Instructions",
+    "instructionPlaceholder": "Enter instruction step",
+    "addStep": "Add Step",
+    "notes": "Notes",
+    "notePlaceholder": "Enter note",
+    "addNote": "Add Note",
+    "tagsField": "Tags",
+    "tagsPlaceholder": "Enter tags separated by commas (e.g., vegetarian, quick, dinner)",
+    "tagsHelp": "Separate multiple tags with commas",
+    "createRecipeBtn": "Create Recipe",
+    "updateRecipeBtn": "Update Recipe",
+    "processing": "Processing..."
+  },
+  "operations": {
+    "creating": "Creating new recipe...",
+    "updating": "Updating existing recipe...",
+    "deleting": "Deleting recipe:",
+    "operationSuccess": "Operation completed successfully!",
+    "createSuccess": "Recipe created successfully!",
+    "updateSuccess": "Recipe updated successfully!",
+    "deleteSuccess": "Recipe deleted successfully!",
+    "createFailed": "Failed to create recipe: {{error}}",
+    "updateFailed": "Failed to update recipe: {{error}}",
+    "deleteFailed": "Failed to delete recipe: {{error}}",
+    "operationFailed": "Operation failed: {{error}}",
+    "rollbackMessage": "{{operation}} operation for \"{{recipeId}}\" was rolled back due to: {{error}}"
+  },
+  "confirmations": {
+    "deleteRecipeTitle": "Delete Recipe",
+    "deleteRecipeMessage": "Are you sure you want to delete the recipe \"{{recipeName}}\"?\n\nThis action cannot be undone and will permanently remove the recipe from your collection.",
+    "signOutConfirm": "Are you sure you want to sign out?",
+    "authenticationFailed": "Authentication failed: {{error}}"
+  },
+  "auth": {
+    "signInPrompt": "Sign in to access your recipes",
+    "authenticationFailed": "Authentication failed",
+    "signedOut": "You have been signed out"
+  },
+  "validation": {
+    "servingsPositiveNumber": "Servings must be a positive number",
+    "recipeNameRequired": "Recipe name is required",
+    "ingredientsRequired": "At least one ingredient is required",
+    "instructionsRequired": "At least one instruction is required"
+  }
+}

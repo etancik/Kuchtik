@@ -1,6 +1,9 @@
 /**
- * Recipe card rendering component
+ * Recipe card component for displaying recipe information
+ * Handles recipe card generation and interactions
  */
+
+import { t } from '../i18n/i18n.js';
 
 /**
  * Simple recipe validation for English format
@@ -45,10 +48,11 @@ export function createRecipeCard(recipe) {
   const servings = recipe.servings || '';
 
   let subtitleParts = [];
-  if (servings)
+  if (servings) {
     subtitleParts.push(
-      `${servings} ${typeof servings === 'number' ? 'servings' : servings}`
+      `${servings} ${typeof servings === 'number' ? t('recipes.servings').toLowerCase() : servings}`
     );
+  }
   if (cookingTime) subtitleParts.push(cookingTime);
   const subtitleText =
     subtitleParts.length > 0 ? ` (${subtitleParts.join(', ')})` : '';
@@ -90,10 +94,10 @@ export function createRecipeCard(recipe) {
             </button>
           </div>
         </div>
-        <p class="card-subtitle mb-2 text-muted">Tags: ${tags}</p>
-        <h6>Ingredients:</h6>
+        <p class="card-subtitle mb-2 text-muted">${t('recipes.tags')}: ${tags}</p>
+        <h6>${t('recipeForm.ingredients')}:</h6>
         <ul>${ingredients}</ul>
-        <h6>Instructions:</h6>
+        <h6>${t('recipeForm.instructions')}:</h6>
         <ol>${steps}</ol>
         ${notes}
       </div>

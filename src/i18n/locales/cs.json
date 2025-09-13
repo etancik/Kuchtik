@@ -1,0 +1,108 @@
+{
+  "common": {
+    "loading": "Načítání...",
+    "error": "Chyba",
+    "success": "Úspěch",
+    "cancel": "Zrušit",
+    "save": "Uložit",
+    "delete": "Smazat",
+    "edit": "Upravit",
+    "create": "Vytvořit",
+    "close": "Zavřít",
+    "yes": "Ano",
+    "no": "Ne",
+    "retry": "Opakovat",
+    "optional": "Volitelné"
+  },
+  "navigation": {
+    "signIn": "Přihlásit se",
+    "signOut": "Odhlásit se",
+    "user": "Uživatel"
+  },
+  "recipes": {
+    "title": "Kuchtík",
+    "subtitle": "Rodinná kuchařka rodiny Tancerů",
+    "noRecipesTitle": "Žádné Recepty",
+    "noRecipesMessage": "Zatím nemáte žádné recepty. Vytvořte svůj první recept!",
+    "createRecipe": "Vytvořit Recept",
+    "editRecipe": "Upravit Recept",
+    "deleteRecipe": "Smazat Recept",
+    "signInToManage": "Přihlaste se pro vytváření a správu receptů.",
+    "loadingError": "Nelze Načíst Recepty",
+    "loadingErrorMessage": "Při načítání receptů došlo k problému: {{error}}",
+    "connectionMessage": "Zkontrolujte prosím připojení k internetu a zkuste stránku obnovit.",
+    "exportToShoppingList": "Export do Nákupního Seznamu",
+    "exportRecipes": "Exportovat {{count}} {{plural}} do Nákupního Seznamu",
+    "selectAtLeastOne": "Prosím vyberte alespoň jeden recept!",
+    "noIngredientsToExport": "Žádné ingredience k exportu!",
+    "exportFailed": "Chyba při exportu receptů!",
+    "tags": "Štítky",
+    "servings": "Porce",
+    "cookingTime": "Doba Přípravy",
+    "ingredients": "Ingredience",
+    "instructions": "Postup",
+    "notes": "Poznámky"
+  },
+  "recipeForm": {
+    "createNewRecipe": "Vytvořit Nový Recept",
+    "editRecipeTitle": "Upravit Recept",
+    "recipeName": "Název Receptu",
+    "recipeNamePlaceholder": "Zadejte název receptu",
+    "recipeNameRequired": "Prosím zadejte název receptu.",
+    "servings": "Porce",
+    "servingsPlaceholder": "Počet porcí",
+    "cookingTime": "Doba Přípravy",
+    "cookingTimePlaceholder": "např. 30 minut",
+    "ingredients": "Ingredience",
+    "ingredientPlaceholder": "Zadejte ingredienci",
+    "addIngredient": "Přidat Ingredienci",
+    "instructions": "Postup",
+    "instructionPlaceholder": "Zadejte krok postupu",
+    "addStep": "Přidat Krok",
+    "notes": "Poznámky",
+    "notePlaceholder": "Zadejte poznámku",
+    "addNote": "Přidat Poznámku",
+    "tagsField": "Štítky",
+    "tagsPlaceholder": "Zadejte štítky oddělené čárkami (např. vegetariánské, rychlé, večeře)",
+    "tagsHelp": "Více štítků oddělte čárkami",
+    "createRecipeBtn": "Vytvořit Recept",
+    "updateRecipeBtn": "Aktualizovat Recept",
+    "processing": "Zpracovávám..."
+  },
+  "operations": {
+    "creating": "Vytvářím nový recept...",
+    "updating": "Aktualizuji existující recept...",
+    "deleting": "Mažu recept:",
+    "operationSuccess": "Operace byla úspěšně dokončena!",
+    "createSuccess": "Recept byl úspěšně vytvořen!",
+    "updateSuccess": "Recept byl úspěšně aktualizován!",
+    "deleteSuccess": "Recept byl úspěšně smazán!",
+    "createFailed": "Nepodařilo se vytvořit recept: {{error}}",
+    "updateFailed": "Nepodařilo se aktualizovat recept: {{error}}",
+    "deleteFailed": "Nepodařilo se smazat recept: {{error}}",
+    "operationFailed": "Operace selhala: {{error}}",
+    "rollbackMessage": "Operace {{operation}} pro \"{{recipeId}}\" byla vrácena zpět kvůli: {{error}}"
+  },
+  "confirmations": {
+    "deleteRecipeTitle": "Smazat Recept",
+    "deleteRecipeMessage": "Jste si jisti, že chcete smazat recept \"{{recipeName}}\"?\n\nTuto akci nelze vrátit zpět a recept bude trvale odstraněn z vaší kolekce.",
+    "signOutConfirm": "Jste si jisti, že se chcete odhlásit?",
+    "authenticationFailed": "Autentizace selhala: {{error}}"
+  },
+  "auth": {
+    "signInPrompt": "Přihlaste se pro přístup k receptům",
+    "authenticationFailed": "Autentizace selhala",
+    "signedOut": "Byli jste odhlášeni"
+  },
+  "validation": {
+    "servingsPositiveNumber": "Počet porcí musí být kladné číslo",
+    "recipeNameRequired": "Název receptu je povinný",
+    "ingredientsRequired": "Alespoň jedna ingredience je povinná",
+    "instructionsRequired": "Alespoň jeden krok postupu je povinný"
+  },
+  "plurals": {
+    "recipe": "recept",
+    "recipes2to4": "recepty", 
+    "recipes5plus": "receptů"
+  }
+}

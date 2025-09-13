@@ -4,7 +4,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="recipe-modal-title">
-          <i class="fas fa-utensils me-2"></i>Create New Recipe
+          <i class="fas fa-utensils me-2"></i><span data-i18n="recipeForm.createNewRecipe">Create New Recipe</span>
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
@@ -12,89 +12,96 @@
         <div class="modal-body">
           <!-- Recipe Name -->
           <div class="mb-3">
-            <label for="recipe-name" class="form-label">Recipe Name *</label>
+            <label for="recipe-name" class="form-label" data-i18n="recipeForm.recipeName">Recipe Name *</label>
             <input type="text" class="form-control" id="recipe-name" required 
-                   placeholder="Enter recipe name">
-            <div class="invalid-feedback">Please provide a recipe name.</div>
+                   data-i18n-placeholder="recipeForm.recipeNamePlaceholder">
+            <div class="invalid-feedback" data-i18n="recipeForm.recipeNameRequired">Please provide a recipe name.</div>
           </div>
 
           <!-- Servings and Time -->
           <div class="row mb-3">
             <div class="col-md-6">
-              <label for="recipe-servings" class="form-label">Servings</label>
+              <label for="recipe-servings" class="form-label" data-i18n="recipeForm.servings">Servings</label>
               <input type="number" class="form-control" id="recipe-servings" min="1" value="4" 
-                     placeholder="Number of servings">
+                     data-i18n-placeholder="recipeForm.servingsPlaceholder">
             </div>
             <div class="col-md-6">
-              <label for="recipe-time" class="form-label">Cooking Time</label>
-              <input type="text" class="form-control" id="recipe-time" placeholder="e.g., 30 minutes">
+              <label for="recipe-time" class="form-label" data-i18n="recipeForm.cookingTime">Cooking Time</label>
+              <input type="text" class="form-control" id="recipe-time" 
+                     data-i18n-placeholder="recipeForm.cookingTimePlaceholder">
             </div>
           </div>
 
           <!-- Ingredients -->
           <div class="mb-3">
-            <label class="form-label">Ingredients *</label>
+            <label class="form-label" data-i18n="recipeForm.ingredients">Ingredients *</label>
             <div id="ingredients-container">
               <div class="input-group mb-2">
-                <input type="text" class="form-control ingredient-input" placeholder="Enter ingredient" required>
+                <input type="text" class="form-control ingredient-input" 
+                       data-i18n-placeholder="recipeForm.ingredientPlaceholder" required>
                 <button class="btn btn-outline-secondary" type="button" onclick="recipeUI.removeIngredient(this)">
                   <i class="fas fa-minus"></i>
                 </button>
               </div>
             </div>
             <button type="button" class="btn btn-sm btn-outline-primary" onclick="recipeUI.addIngredient()">
-              <i class="fas fa-plus me-1"></i>Add Ingredient
+              <i class="fas fa-plus me-1"></i><span data-i18n="recipeForm.addIngredient">Add Ingredient</span>
             </button>
           </div>
 
           <!-- Instructions -->
           <div class="mb-3">
-            <label class="form-label">Instructions *</label>
+            <label class="form-label" data-i18n="recipeForm.instructions">Instructions *</label>
             <div id="instructions-container">
               <div class="input-group mb-2">
                 <span class="input-group-text">1.</span>
-                <textarea class="form-control instruction-input" rows="2" placeholder="Enter instruction step" required></textarea>
+                <textarea class="form-control instruction-input" rows="2" 
+                         data-i18n-placeholder="recipeForm.instructionPlaceholder" required></textarea>
                 <button class="btn btn-outline-secondary" type="button" onclick="recipeUI.removeInstruction(this)">
                   <i class="fas fa-minus"></i>
                 </button>
               </div>
             </div>
             <button type="button" class="btn btn-sm btn-outline-primary" onclick="recipeUI.addInstruction()">
-              <i class="fas fa-plus me-1"></i>Add Step
+              <i class="fas fa-plus me-1"></i><span data-i18n="recipeForm.addStep">Add Step</span>
             </button>
           </div>
 
           <!-- Notes -->
           <div class="mb-3">
-            <label for="recipe-notes" class="form-label">Notes (Optional)</label>
+            <label for="recipe-notes" class="form-label">
+              <span data-i18n="recipeForm.notes">Notes</span> 
+              (<span data-i18n="common.optional">Optional</span>)
+            </label>
             <div id="notes-container">
               <div class="input-group mb-2">
-                <input type="text" class="form-control note-input" placeholder="Enter note">
+                <input type="text" class="form-control note-input" 
+                       data-i18n-placeholder="recipeForm.notePlaceholder">
                 <button class="btn btn-outline-secondary" type="button" onclick="recipeUI.removeNote(this)">
                   <i class="fas fa-minus"></i>
                 </button>
               </div>
             </div>
             <button type="button" class="btn btn-sm btn-outline-primary" onclick="recipeUI.addNote()">
-              <i class="fas fa-plus me-1"></i>Add Note
+              <i class="fas fa-plus me-1"></i><span data-i18n="recipeForm.addNote">Add Note</span>
             </button>
           </div>
 
           <!-- Tags -->
           <div class="mb-3">
-            <label for="recipe-tags" class="form-label">Tags</label>
+            <label for="recipe-tags" class="form-label" data-i18n="recipeForm.tagsField">Tags</label>
             <input type="text" class="form-control" id="recipe-tags" 
-                   placeholder="Enter tags separated by commas (e.g., vegetarian, quick, dinner)">
-            <div class="form-text">Separate multiple tags with commas</div>
+                   data-i18n-placeholder="recipeForm.tagsPlaceholder">
+            <div class="form-text" data-i18n="recipeForm.tagsHelp">Separate multiple tags with commas</div>
           </div>
         </div>
         
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="common.cancel">
             Cancel
           </button>
           <button type="submit" class="btn btn-primary" id="recipe-submit-btn">
-            <i class="fas fa-save me-2"></i>Create Recipe
+            <i class="fas fa-save me-2"></i><span data-i18n="recipeForm.createRecipeBtn">Create Recipe</span>
           </button>
         </div>
       </form>

@@ -1,9 +1,11 @@
 /**
- * Refactored Unified Recipe UI component using RecipeRepository
+ * Recipe UI component for managing recipe forms and interactions
+ * Handles recipe creation, editing, and deletion workflows
  */
 
 import { templateLoader } from '../utils/templateLoader.js';
 import RecipeRepository from '../repositories/RecipeRepository.js';
+import { t } from '../i18n/i18n.js';
 import gitHubAPIAdapter from '../adapters/GitHubAPIAdapter.js';
 
 class RecipeUI {
@@ -129,23 +131,28 @@ class RecipeUI {
   }
 
   /**
-   * Handle successful operations
+   * Handle operation success
    * @param {Object} event - Event data
    */
   handleOperationSuccess(event) {
-    const { operation, recipeId, recipe } = event;
+    const { operation, recipe } = event;
     
+    let message;
     switch (operation) {
       case 'create':
-        this.showSuccessMessage(`Recipe "${recipe.name}" created successfully!`);
+        message = t('operations.createSuccess');
         break;
       case 'update':
-        this.showSuccessMessage(`Recipe "${recipe.name}" updated successfully!`);
+        message = t('operations.updateSuccess');
         break;
       case 'delete':
-        this.showSuccessMessage(`Recipe "${recipeId}" deleted successfully!`);
+        message = t('operations.deleteSuccess');
         break;
+      default:
+        message = t('operations.operationSuccess');
     }
+    
+    this.showSuccessMessage(message);
   }
 
   /**
@@ -153,21 +160,21 @@ class RecipeUI {
    * @param {Object} event - Event data
    */
   handleOperationFailure(event) {
-    const { operation, recipeId, error } = event;
+    const { operation, error } = event;
     
     let message;
     switch (operation) {
       case 'create':
-        message = `Failed to create recipe: ${error.message}`;
+        message = t('operations.createFailed', { error: error.message });
         break;
       case 'update':
-        message = `Failed to update recipe: ${error.message}`;
+        message = t('operations.updateFailed', { error: error.message });
         break;
       case 'delete':
-        message = `Failed to delete recipe "${recipeId}": ${error.message}`;
+        message = t('operations.deleteFailed', { error: error.message });
         break;
       default:
-        message = `Operation failed: ${error.message}`;
+        message = t('operations.operationFailed', { error: error.message });
     }
     
     this.showErrorMessage(message);
@@ -179,7 +186,7 @@ class RecipeUI {
    */
   handleRollback(event) {
     const { operation, recipeId, error } = event;
-    this.showWarningMessage(`${operation} operation for "${recipeId}" was rolled back due to: ${error.message}`);
+    this.showWarningMessage(t('operations.rollbackMessage', { operation, recipeId, error: error.message }));
     this.refreshRecipesDisplay();
   }
 
@@ -229,9 +236,9 @@ class RecipeUI {
     
     // Update modal title and button
     document.getElementById('recipe-modal-title').innerHTML = 
-      '<i class="fas fa-utensils me-2"></i>Create New Recipe';
+      `<i class="fas fa-utensils me-2"></i><span data-i18n="recipeForm.createNewRecipe">${t('recipeForm.createNewRecipe')}</span>`;
     document.getElementById('recipe-submit-btn').innerHTML = 
-      '<i class="fas fa-save me-2"></i>Create Recipe';
+      `<i class="fas fa-save me-2"></i><span data-i18n="recipeForm.createRecipeBtn">${t('recipeForm.createRecipeBtn')}</span>`;
     
     // Clear form
     this.clearForm();
@@ -251,9 +258,9 @@ class RecipeUI {
     
     // Update modal title and button
     document.getElementById('recipe-modal-title').innerHTML = 
-      '<i class="fas fa-edit me-2"></i>Edit Recipe';
+      `<i class="fas fa-edit me-2"></i><span data-i18n="recipeForm.editRecipeTitle">${t('recipeForm.editRecipeTitle')}</span>`;
     document.getElementById('recipe-submit-btn').innerHTML = 
-      '<i class="fas fa-save me-2"></i>Update Recipe';
+      `<i class="fas fa-save me-2"></i><span data-i18n="recipeForm.updateRecipeBtn">${t('recipeForm.updateRecipeBtn')}</span>`;
     
     // Populate form with recipe data
     this.populateForm(recipe);
@@ -270,10 +277,7 @@ class RecipeUI {
   async showDeleteConfirmation(recipeId, recipeName) {
     console.log('🗑️ Showing delete confirmation for:', recipeName);
     
-    const confirmed = confirm(
-      `Are you sure you want to delete the recipe "${recipeName}"?\\n\\n` +
-      `This action cannot be undone and will permanently remove the recipe from your collection.`
-    );
+    const confirmed = confirm(t('confirmations.deleteRecipeMessage', { recipeName }));
     
     if (confirmed) {
       await this.handleDeleteRecipe(recipeId);
@@ -293,7 +297,7 @@ class RecipeUI {
       
     } catch (error) {
       console.error('❌ Failed to delete recipe:', error);
-      this.showErrorMessage(`Failed to delete recipe: ${error.message}`);
+      this.showErrorMessage(t('operations.deleteFailed', { error: error.message }));
     }
   }
 
@@ -309,7 +313,7 @@ class RecipeUI {
     
     try {
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+      submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i>${t('recipeForm.processing')}`;
       
       const formData = this.collectFormData();
       
@@ -325,7 +329,7 @@ class RecipeUI {
         this.modal.hide();
         
       } else {
-        console.log('🔄 Creating new recipe...');
+        console.log(t('operations.creating'));
         console.log('📄 Recipe data:', formData);
         
         // Create the recipe using repository (optimistic updates handled automatically)
@@ -337,7 +341,7 @@ class RecipeUI {
       
     } catch (error) {
       console.error('❌ Failed to process recipe:', error);
-      this.showErrorMessage(`Failed to ${this.isEditing ? 'update' : 'create'} recipe: ${error.message}`);
+      this.showErrorMessage(t(this.isEditing ? 'operations.updateFailed' : 'operations.createFailed', { error: error.message }));
     } finally {
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalBtnText;

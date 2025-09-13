@@ -5,6 +5,7 @@
 
 import { githubAuth } from './githubAuth.js';
 import { CONFIG } from '../config/github.js';
+import { t } from '../i18n/i18n.js';
 
 class RecipeCreationService {
   /**
@@ -506,7 +507,7 @@ class RecipeCreationService {
     }
 
     if (recipeData.servings && (typeof recipeData.servings !== 'number' || recipeData.servings <= 0)) {
-      errors.push('Servings must be a positive number');
+      errors.push(t('validation.servingsPositiveNumber'));
     }
 
     if (recipeData.difficulty && !['easy', 'medium', 'hard'].includes(recipeData.difficulty.toLowerCase())) {

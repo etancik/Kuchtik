@@ -9,6 +9,7 @@ import { getSelectedRecipeNames, collectIngredientsFromRecipes } from './utils/r
 import { openShortcut } from './utils/shortcutsUtils.js';
 import { recipeUI } from './components/RecipeUI.js';
 import { githubAuth } from './services/githubAuth.js';
+import { i18n, t } from './i18n/i18n.js';
 
 // Application state
 const state = {
@@ -22,6 +23,20 @@ const state = {
  */
 async function initializeApp() {
   console.log('🚀 Initializing main application with RecipeRepository...');
+  
+  // Initialize i18n system first
+  try {
+    await i18n.initialize();
+    console.log('✅ i18n system initialized');
+    
+    // Update HTML content with translations
+    updateHTMLTranslations();
+    setupLanguageSwitcher();
+  } catch (error) {
+    console.error('❌ Failed to initialize i18n:', error);
+  }
+  
+  // Initialize RecipeRepository
   
   // Initialize RecipeRepository
   try {
@@ -143,12 +158,79 @@ function updateExportButtonVisibility(exportBtn) {
   if (hasSelection) {
     exportBtn.style.display = 'block';
     exportBtn.classList.add('sticky-export-btn');
-    exportBtn.innerHTML = `<i class="fas fa-download me-2"></i>Export ${selectedCheckboxes.length} Recipe${selectedCheckboxes.length > 1 ? 's' : ''} to Shopping List`;
+    
+    const count = selectedCheckboxes.length;
+    let recipesText = '';
+    
+    if (i18n.getCurrentLanguage() === 'cs') {
+      // Czech plural handling
+      if (count === 1) {
+        recipesText = t('plurals.recipe');
+      } else if (count >= 2 && count <= 4) {
+        recipesText = t('plurals.recipes2to4');
+      } else {
+        recipesText = t('plurals.recipes5plus');
+      }
+      exportBtn.innerHTML = `<i class="fas fa-download me-2"></i>Exportovat ${count} ${recipesText} do Nákupního Seznamu`;
+    } else {
+      // English plural handling
+      const plural = count > 1 ? 's' : '';
+      exportBtn.innerHTML = `<i class="fas fa-download me-2"></i>Export ${count} Recipe${plural} to Shopping List`;
+    }
   } else {
     exportBtn.style.display = 'none';
     exportBtn.classList.remove('sticky-export-btn');
-    exportBtn.innerHTML = '<i class="fas fa-download me-2"></i>Export to Shopping List';
+    exportBtn.innerHTML = `<i class="fas fa-download me-2"></i><span data-i18n="recipes.exportToShoppingList">${t('recipes.exportToShoppingList')}</span>`;
   }
+}
+
+/**
+ * Update HTML translations
+ */
+function updateHTMLTranslations() {
+  // Update document language
+  document.documentElement.lang = i18n.getCurrentLanguage();
+  
+  // Update title
+  document.title = t('recipes.title');
+  
+  // Update all elements with data-i18n attributes
+  document.querySelectorAll('[data-i18n]').forEach(element => {
+    const key = element.getAttribute('data-i18n');
+    element.textContent = t(key);
+  });
+  
+  // Update placeholders
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+    const key = element.getAttribute('data-i18n-placeholder');
+    element.placeholder = t(key);
+  });
+}
+
+/**
+ * Setup language switcher functionality
+ */
+function setupLanguageSwitcher() {
+  const currentLangFlag = document.getElementById('currentLanguageFlag');
+  const langLinks = document.querySelectorAll('[data-lang]');
+  
+  // Update current language flag display
+  const currentLang = i18n.getCurrentLanguage();
+  const langFlags = { en: '🇺🇸', cs: '🇨🇿' };
+  if (currentLangFlag) {
+    currentLangFlag.textContent = langFlags[currentLang] || '🇺🇸';
+  }
+  
+  // Add click handlers for language links
+  langLinks.forEach(link => {
+    link.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const newLang = link.getAttribute('data-lang');
+      if (newLang !== currentLang) {
+        await i18n.setLanguage(newLang);
+      }
+    });
+  });
 }
 
 /**
@@ -174,11 +256,11 @@ function showLoadingError(error) {
   state.recipeListElement.innerHTML = `
     <div class="col-12">
       <div class="alert alert-warning" role="alert">
-        <h4 class="alert-heading">Unable to Load Recipes</h4>
-        <p>There was a problem loading the recipes: ${error.message}</p>
+        <h4 class="alert-heading">${t('recipes.loadingError')}</h4>
+        <p>${t('recipes.loadingErrorMessage', { error: error.message })}</p>
         <hr>
-        <p class="mb-0">Please check your internet connection and try refreshing the page.</p>
-        <button class="btn btn-primary mt-2" onclick="location.reload()">Retry</button>
+        <p class="mb-0">${t('recipes.connectionMessage')}</p>
+        <button class="btn btn-primary mt-2" onclick="location.reload()">${t('common.retry')}</button>
       </div>
     </div>
   `;
@@ -199,11 +281,11 @@ function renderRecipes(recipes) {
     state.recipeListElement.innerHTML = `
       <div class="col-12">
         <div class="alert alert-info text-center" role="alert">
-          <h4><i class="fas fa-utensils me-2"></i>No Recipes Found</h4>
-          <p>You don't have any recipes yet. Create your first recipe to get started!</p>
+          <h4><i class="fas fa-utensils me-2"></i>${t('recipes.noRecipesTitle')}</h4>
+          <p>${t('recipes.noRecipesMessage')}</p>
           ${githubAuth.isAuthenticated() ? 
-            '<button class="btn btn-primary" onclick="recipeUI.showCreateForm()"><i class="fas fa-plus me-2"></i>Create Recipe</button>' : 
-            '<p><i class="fas fa-info-circle me-2"></i>Sign in to create and manage recipes.</p>'
+            `<button class="btn btn-primary" onclick="recipeUI.showCreateForm()"><i class="fas fa-plus me-2"></i>${t('recipes.createRecipe')}</button>` : 
+            `<p><i class="fas fa-info-circle me-2"></i>${t('recipes.signInToManage')}</p>`
           }
         </div>
       </div>
@@ -239,21 +321,21 @@ function handleExportClick() {
     const selectedNames = getSelectedRecipeNames();
     
     if (selectedNames.length === 0) {
-      alert('Prosím vyberte alespoň jeden recept!');
+      alert(t('recipes.selectAtLeastOne'));
       return;
     }
     
     const ingredients = collectIngredientsFromRecipes(state.recipes, selectedNames);
     
     if (ingredients.length === 0) {
-      alert('Žádné ingredience k exportu!');
+      alert(t('recipes.noIngredientsToExport'));
       return;
     }
     
     openShortcut(ingredients);
   } catch (error) {
     console.error('Export failed:', error);
-    alert('Chyba při exportu receptů!');
+    alert(t('recipes.exportFailed'));
   }
 }
 
@@ -268,7 +350,7 @@ function updateAuthStatus() {
   
   if (githubAuth.isAuthenticated()) {
     const userInfo = githubAuth.getUserInfo();
-    const userName = userInfo?.name || userInfo?.login || 'User';
+    const userName = userInfo?.name || userInfo?.login || t('navigation.user');
     authBtn.innerHTML = `<i class="fas fa-user me-2"></i>${userName}`;
     authBtn.classList.remove('btn-outline-primary');
     authBtn.classList.add('btn-outline-success');
@@ -279,14 +361,14 @@ function updateAuthStatus() {
     
     // Add sign out functionality
     authBtn.onclick = () => {
-      if (confirm('Are you sure you want to sign out?')) {
+      if (confirm(t('confirmations.signOutConfirm'))) {
         githubAuth.signOut();
         updateAuthStatus();
         location.reload();
       }
     };
   } else {
-    authBtn.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>Sign In';
+    authBtn.innerHTML = `<i class="fas fa-sign-in-alt me-2"></i><span data-i18n="navigation.signIn">${t('navigation.signIn')}</span>`;
     authBtn.classList.remove('btn-outline-success');
     authBtn.classList.add('btn-outline-primary');
     
@@ -304,7 +386,7 @@ function updateAuthStatus() {
           await refreshRecipesFromCache();
         }
       } catch (error) {
-        alert(`Authentication failed: ${error.message}`);
+        alert(t('confirmations.authenticationFailed', { error: error.message }));
       }
     };
   }
