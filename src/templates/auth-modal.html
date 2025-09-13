@@ -1,0 +1,41 @@
+<!-- GitHub Personal Access Token Authentication Modal -->
+<div class="modal fade show" style="display: block; background-color: rgba(0,0,0,0.5);">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">GitHub Authentication Setup</h5>
+      </div>
+      <div class="modal-body">
+        <p class="mb-3">To create recipes, you need a GitHub Personal Access Token:</p>
+        
+        <ol class="mb-4">
+          <li>Go to <a href="https://github.com/settings/tokens/new" target="_blank" class="text-primary">
+            GitHub Settings → Personal access tokens → Tokens (classic)</a></li>
+          <li>Click "Generate new token (classic)"</li>
+          <li>Set a note (e.g., "Kuchtik Recipe App")</li>
+          <li>Select scopes: <code>repo</code> and <code>user</code></li>
+          <li>Click "Generate token"</li>
+          <li>Copy the token and paste it below</li>
+        </ol>
+        
+        <div class="alert alert-warning">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          <strong>Security Note:</strong> The token will be stored locally in your browser.
+          Never share your token with others.
+        </div>
+        
+        <div class="mb-3">
+          <label for="github-token-input" class="form-label">GitHub Personal Access Token:</label>
+          <input type="password" class="form-control" id="github-token-input" 
+                 placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="cancel-token-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" id="submit-token-btn">
+          <i class="fas fa-check me-2"></i>Save Token
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

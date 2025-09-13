@@ -21,6 +21,7 @@ export default [
         unescape: 'readonly',
         confirm: 'readonly',
         location: 'readonly',
+        sessionStorage: 'readonly',
       },
     },
     rules: {
@@ -39,6 +40,7 @@ export default [
         beforeEach: 'readonly',
         afterEach: 'readonly',
         global: 'readonly',
+        HTMLElement: 'readonly',
       },
     },
   },
