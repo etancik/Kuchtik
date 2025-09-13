@@ -41,6 +41,9 @@ class RecipeUI {
       const modalHtml = await templateLoader.loadTemplate('src/templates/recipe-modal.html');
       document.body.insertAdjacentHTML('beforeend', modalHtml);
       
+      // Update translations for the modal
+      this.updateModalTranslations();
+      
       // Get modal instance
       this.modal = new window.bootstrap.Modal(document.getElementById('recipe-modal'));
       
@@ -116,13 +119,13 @@ class RecipeUI {
     
     switch (operation) {
       case 'create':
-        this.showSuccessMessage(`Recipe "${recipe.name}" is being created...`);
+        this.showSuccessMessage(t('operations.creating', { recipeName: recipe.name }));
         break;
       case 'update':
-        this.showSuccessMessage(`Recipe "${recipe.name}" is being updated...`);
+        this.showSuccessMessage(t('operations.updating', { recipeName: recipe.name }));
         break;
       case 'delete':
-        this.showSuccessMessage(`Recipe "${recipeId}" is being deleted...`);
+        this.showSuccessMessage(t('operations.deleting', { recipeId }));
         break;
     }
 
@@ -245,6 +248,9 @@ class RecipeUI {
     
     // Show modal
     this.modal.show();
+    
+    // Update modal translations
+    this.updateModalTranslations();
   }
 
   /**
@@ -267,6 +273,9 @@ class RecipeUI {
     
     // Show modal
     this.modal.show();
+    
+    // Update modal translations
+    this.updateModalTranslations();
   }
 
   /**
@@ -446,7 +455,7 @@ class RecipeUI {
    * Show success message
    * @param {string} message - Success message
    */
-  showSuccessMessage(message = 'Operation completed successfully!') {
+  showSuccessMessage(message = t('operations.operationSuccess')) {
     // Implementation depends on your UI framework
     // This could be a toast, alert, or custom notification
     console.log('✅', message);
@@ -496,10 +505,10 @@ class RecipeUI {
     document.getElementById('recipe-time').value = '';
     document.getElementById('recipe-tags').value = '';
     
-    // Clear dynamic lists
-    this.resetContainer('ingredients-container', 'ingredient-input', 'Enter ingredient', 'input');
-    this.resetContainer('instructions-container', 'instruction-input', 'Enter instruction step', 'textarea');
-    this.resetContainer('notes-container', 'note-input', 'Enter note', 'input');
+        // Clear dynamic lists
+    this.resetContainer('ingredients-container', 'ingredient-input', t('recipeForm.ingredientPlaceholder'), 'input');
+    this.resetContainer('instructions-container', 'instruction-input', t('recipeForm.instructionPlaceholder'), 'textarea');
+    this.resetContainer('notes-container', 'note-input', t('recipeForm.notePlaceholder'), 'input');
     
     // Setup auto-resize for the default instruction textarea
     setTimeout(() => this.setupAllAutoResize(), 0);
@@ -513,13 +522,13 @@ class RecipeUI {
     document.getElementById('recipe-tags').value = (recipe.tags || []).join(', ');
     
     // Populate ingredients
-    this.populateContainer('ingredients-container', recipe.ingredients || [], 'ingredient-input', 'Enter ingredient', 'input');
+    this.populateContainer('ingredients-container', recipe.ingredients || [], 'ingredient-input', t('recipeForm.ingredientPlaceholder'), 'input');
     
     // Populate instructions
-    this.populateContainer('instructions-container', recipe.instructions || [], 'instruction-input', 'Enter instruction step', 'textarea');
+    this.populateContainer('instructions-container', recipe.instructions || [], 'instruction-input', t('recipeForm.instructionPlaceholder'), 'textarea');
     
     // Populate notes
-    this.populateContainer('notes-container', recipe.notes || [], 'note-input', 'Enter note', 'input');
+    this.populateContainer('notes-container', recipe.notes || [], 'note-input', t('recipeForm.notePlaceholder'), 'input');
     
     // Setup auto-resize for all instruction textareas
     setTimeout(() => this.setupAllAutoResize(), 0);
@@ -601,7 +610,7 @@ class RecipeUI {
     const ingredientDiv = document.createElement('div');
     ingredientDiv.className = 'input-group mb-2';
     ingredientDiv.innerHTML = `
-      <input type="text" class="form-control ingredient-input" placeholder="Enter ingredient" required>
+      <input type="text" class="form-control ingredient-input" placeholder="${t('recipeForm.ingredientPlaceholder')}" required>
       <button class="btn btn-outline-secondary" type="button" onclick="recipeUI.removeIngredient(this)">
         <i class="fas fa-minus"></i>
       </button>
@@ -624,7 +633,7 @@ class RecipeUI {
     instructionDiv.className = 'input-group mb-2';
     instructionDiv.innerHTML = `
       <span class="input-group-text">${stepNumber}.</span>
-      <textarea class="form-control instruction-input" rows="2" placeholder="Enter instruction step" required></textarea>
+      <textarea class="form-control instruction-input" rows="2" placeholder="${t('recipeForm.instructionPlaceholder')}" required></textarea>
       <button class="btn btn-outline-secondary" type="button" onclick="recipeUI.removeInstruction(this)">
         <i class="fas fa-minus"></i>
       </button>
@@ -654,7 +663,7 @@ class RecipeUI {
     const noteDiv = document.createElement('div');
     noteDiv.className = 'input-group mb-2';
     noteDiv.innerHTML = `
-      <input type="text" class="form-control note-input" placeholder="Enter note">
+      <input type="text" class="form-control note-input" placeholder="${t('recipeForm.notePlaceholder')}">
       <button class="btn btn-outline-secondary" type="button" onclick="recipeUI.removeNote(this)">
         <i class="fas fa-minus"></i>
       </button>
@@ -696,6 +705,26 @@ class RecipeUI {
     document.querySelectorAll('.instruction-input').forEach(textarea => {
       this.setupAutoResize(textarea);
     });
+  }
+
+  /**
+   * Update modal translations after modal is loaded
+   */
+  updateModalTranslations() {
+    // Update all elements with data-i18n attributes in the modal
+    const modal = document.getElementById('recipe-modal');
+    if (modal) {
+      modal.querySelectorAll('[data-i18n]').forEach(element => {
+        const key = element.getAttribute('data-i18n');
+        element.textContent = t(key);
+      });
+
+      // Update placeholders
+      modal.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+        const key = element.getAttribute('data-i18n-placeholder');
+        element.placeholder = t(key);
+      });
+    }
   }
 }
 

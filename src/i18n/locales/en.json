@@ -71,9 +71,9 @@
     "processing": "Processing..."
   },
   "operations": {
-    "creating": "Creating new recipe...",
-    "updating": "Updating existing recipe...",
-    "deleting": "Deleting recipe:",
+    "creating": "Creating recipe \"{{recipeName}}\"...",
+    "updating": "Updating recipe \"{{recipeName}}\"...",
+    "deleting": "Deleting recipe \"{{recipeId}}\"...",
     "operationSuccess": "Operation completed successfully!",
     "createSuccess": "Recipe created successfully!",
     "updateSuccess": "Recipe updated successfully!",

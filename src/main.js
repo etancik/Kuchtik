@@ -228,6 +228,10 @@ function setupLanguageSwitcher() {
       const newLang = link.getAttribute('data-lang');
       if (newLang !== currentLang) {
         await i18n.setLanguage(newLang);
+        // Update modal translations if RecipeUI is available
+        if (window.recipeUI && window.recipeUI.updateModalTranslations) {
+          window.recipeUI.updateModalTranslations();
+        }
       }
     });
   });

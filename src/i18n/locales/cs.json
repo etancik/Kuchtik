@@ -71,9 +71,9 @@
     "processing": "Zpracovávám..."
   },
   "operations": {
-    "creating": "Vytvářím nový recept...",
-    "updating": "Aktualizuji existující recept...",
-    "deleting": "Mažu recept:",
+    "creating": "Vytvářím recept \"{{recipeName}}\"...",
+    "updating": "Aktualizuji recept \"{{recipeName}}\"...",
+    "deleting": "Mažu recept \"{{recipeId}}\"...",
     "operationSuccess": "Operace byla úspěšně dokončena!",
     "createSuccess": "Recept byl úspěšně vytvořen!",
     "updateSuccess": "Recept byl úspěšně aktualizován!",
