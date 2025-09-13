@@ -13,7 +13,10 @@
     "build": "echo 'No build step needed for now'",
     "dev": "echo 'Open index.html in browser or use Live Server'"
   },
-  "keywords": ["recipes", "cooking"],
+  "keywords": [
+    "recipes",
+    "cooking"
+  ],
   "author": "",
   "license": "MIT",
   "devDependencies": {
@@ -26,8 +29,12 @@
   "type": "module",
   "jest": {
     "testEnvironment": "jsdom",
-    "setupFilesAfterEnv": ["<rootDir>/src/__tests__/setup.js"],
-    "testMatch": ["<rootDir>/src/**/*.test.js"],
+    "setupFilesAfterEnv": [
+      "<rootDir>/src/__tests__/setup.js"
+    ],
+    "testMatch": [
+      "<rootDir>/src/**/*.test.js"
+    ],
     "transform": {},
     "collectCoverageFrom": [
       "src/**/*.js",
@@ -35,7 +42,11 @@
       "!src/main.js"
     ],
     "coverageDirectory": "coverage",
-    "coverageReporters": ["text", "lcov", "html"]
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html"
+    ]
   },
   "prettier": {
     "semi": true,

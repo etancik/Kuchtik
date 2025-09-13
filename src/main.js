@@ -6,6 +6,8 @@ import { loadAllRecipes } from './services/recipeAPI.js';
 import { renderRecipeCard } from './components/RecipeCard.js';
 import { getSelectedRecipeNames, collectIngredientsFromRecipes } from './utils/recipeUtils.js';
 import { openShortcut } from './utils/shortcutsUtils.js';
+import { recipeCreationUI } from './components/RecipeCreationUI.js';
+import { githubAuth } from './services/githubAuth.js';
 
 // Application state
 const state = {
@@ -36,6 +38,17 @@ async function initializeApp() {
   
   // Setup export button
   exportBtn.addEventListener('click', handleExportClick);
+  
+  // Setup create recipe button
+  const createBtn = document.getElementById('createRecipeBtn');
+  if (createBtn) {
+    createBtn.addEventListener('click', () => {
+      recipeCreationUI.show();
+    });
+  }
+  
+  // Update auth status
+  updateAuthStatus();
 }
 
 /**
@@ -73,6 +86,55 @@ function handleExportClick() {
   } catch (error) {
     console.error('Export failed:', error);
     alert('Chyba při exportu receptů!');
+  }
+}
+
+/**
+ * Update authentication status in UI
+ */
+function updateAuthStatus() {
+  const authBtn = document.getElementById('authBtn');
+  const createBtn = document.getElementById('createRecipeBtn');
+  
+  if (!authBtn) return;
+  
+  if (githubAuth.isAuthenticated()) {
+    const userInfo = githubAuth.getUserInfo();
+    const userName = userInfo?.name || userInfo?.login || 'User';
+    authBtn.innerHTML = `<i class="fas fa-user me-2"></i>${userName}`;
+    authBtn.classList.remove('btn-outline-primary');
+    authBtn.classList.add('btn-outline-success');
+    
+    if (createBtn) {
+      createBtn.style.display = 'inline-block';
+    }
+    
+    // Add sign out functionality
+    authBtn.onclick = () => {
+      if (confirm('Are you sure you want to sign out?')) {
+        githubAuth.signOut();
+        updateAuthStatus();
+        location.reload();
+      }
+    };
+  } else {
+    authBtn.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>Sign In';
+    authBtn.classList.remove('btn-outline-success');
+    authBtn.classList.add('btn-outline-primary');
+    
+    if (createBtn) {
+      createBtn.style.display = 'none';
+    }
+    
+    // Add sign in functionality
+    authBtn.onclick = async () => {
+      try {
+        await githubAuth.authenticate();
+        updateAuthStatus();
+      } catch (error) {
+        alert(`Authentication failed: ${error.message}`);
+      }
+    };
   }
 }
 

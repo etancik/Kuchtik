@@ -1,3 +1,55 @@
-body { font-family: sans-serif; }
-ul, ol { margin-left: 20px; }
-button { width: 100%; max-width: 300px; }
+body { 
+  font-family: sans-serif; 
+}
+
+ul, ol { 
+  margin-left: 20px; 
+}
+
+button { 
+  width: 100%; 
+  max-width: 300px; 
+}
+
+/* Recipe creation form styles */
+.recipe-creation-form {
+  margin-bottom: 2rem;
+}
+
+.recipe-creation-form .card {
+  border: 2px solid #007bff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.recipe-creation-form .card-header {
+  background: linear-gradient(45deg, #007bff, #0056b3);
+  color: white;
+}
+
+/* Form input groups */
+.recipe-creation-form .input-group-text {
+  min-width: 45px;
+  justify-content: center;
+}
+
+/* Success/error states */
+.alert {
+  border-radius: 8px;
+}
+
+/* Button group spacing */
+.btn-group .btn {
+  max-width: none;
+  width: auto;
+}
+
+/* Header styling */
+.container h1 {
+  color: #333;
+}
+
+/* Export button styling */
+#exportBtn {
+  max-width: none;
+  width: auto;
+}

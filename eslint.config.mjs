@@ -14,6 +14,13 @@ export default [
         alert: 'readonly',
         encodeURIComponent: 'readonly',
         navigator: 'readonly',
+        localStorage: 'readonly',
+        URLSearchParams: 'readonly',
+        setTimeout: 'readonly',
+        btoa: 'readonly',
+        unescape: 'readonly',
+        confirm: 'readonly',
+        location: 'readonly',
       },
     },
     rules: {
