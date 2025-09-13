@@ -246,18 +246,28 @@ class RecipeUI {
       if (containerId === 'instructions-container') {
         div.innerHTML = `
           <span class="input-group-text">${index + 1}.</span>
-          <${inputType} class="form-control ${inputClass}" ${inputType === 'textarea' ? 'rows="2"' : ''} placeholder="${placeholder}" required>${item}</${inputType}>
+          <${inputType} class="form-control ${inputClass}" ${inputType === 'textarea' ? 'rows="2"' : ''} placeholder="${placeholder}" required>${this.escapeHtml(item)}</${inputType}>
           <button class="btn btn-outline-secondary" type="button" onclick="recipeUI.remove${this.getMethodSuffix(containerId)}(this)">
             <i class="fas fa-minus"></i>
           </button>
         `;
       } else {
-        div.innerHTML = `
-          <${inputType} class="form-control ${inputClass}" placeholder="${placeholder}" ${containerId === 'ingredients-container' ? 'required' : ''}>${item}</${inputType}>
-          <button class="btn btn-outline-secondary" type="button" onclick="recipeUI.remove${this.getMethodSuffix(containerId)}(this)">
-            <i class="fas fa-minus"></i>
-          </button>
-        `;
+        // Handle input vs textarea differently for value setting
+        if (inputType === 'input') {
+          div.innerHTML = `
+            <${inputType} class="form-control ${inputClass}" placeholder="${placeholder}" value="${this.escapeHtml(item)}" ${containerId === 'ingredients-container' ? 'required' : ''}></${inputType}>
+            <button class="btn btn-outline-secondary" type="button" onclick="recipeUI.remove${this.getMethodSuffix(containerId)}(this)">
+              <i class="fas fa-minus"></i>
+            </button>
+          `;
+        } else {
+          div.innerHTML = `
+            <${inputType} class="form-control ${inputClass}" placeholder="${placeholder}" ${containerId === 'ingredients-container' ? 'required' : ''}>${this.escapeHtml(item)}</${inputType}>
+            <button class="btn btn-outline-secondary" type="button" onclick="recipeUI.remove${this.getMethodSuffix(containerId)}(this)">
+              <i class="fas fa-minus"></i>
+            </button>
+          `;
+        }
       }
       
       container.appendChild(div);
@@ -274,6 +284,18 @@ class RecipeUI {
     if (containerId.includes('instruction')) return 'Instruction';
     if (containerId.includes('note')) return 'Note';
     return '';
+  }
+
+  /**
+   * Escape HTML characters to prevent XSS
+   * @param {string} text - Text to escape
+   * @returns {string} Escaped text
+   */
+  escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
 
   /**
