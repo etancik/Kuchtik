@@ -11,9 +11,11 @@ function validateEnglishRecipe(recipe) {
   if (!recipe || typeof recipe !== 'object') {
     return false;
   }
-  
+
   const requiredFields = ['name', 'ingredients', 'instructions', 'tags'];
-  return requiredFields.every(field => Object.prototype.hasOwnProperty.call(recipe, field));
+  return requiredFields.every((field) =>
+    Object.prototype.hasOwnProperty.call(recipe, field)
+  );
 }
 
 /**
@@ -37,29 +39,48 @@ export function createRecipeCard(recipe) {
   const recipeIngredients = recipe.ingredients || [];
   const recipeSteps = recipe.instructions || [];
   const recipeNotes = recipe.notes || [];
-  
+
   // Format time and servings info
   const cookingTime = recipe.cookingTime || '';
   const servings = recipe.servings || '';
-  
+
   let subtitleParts = [];
-  if (servings) subtitleParts.push(`${servings} ${typeof servings === 'number' ? 'servings' : servings}`);
+  if (servings)
+    subtitleParts.push(
+      `${servings} ${typeof servings === 'number' ? 'servings' : servings}`
+    );
   if (cookingTime) subtitleParts.push(cookingTime);
-  const subtitleText = subtitleParts.length > 0 ? ` (${subtitleParts.join(', ')})` : '';
-  
+  const subtitleText =
+    subtitleParts.length > 0 ? ` (${subtitleParts.join(', ')})` : '';
+
   // Handle fields safely
   const tags = Array.isArray(recipeTags) ? recipeTags.join(', ') : '';
-  const ingredients = Array.isArray(recipeIngredients) ? recipeIngredients.map(i => `<li>${i}</li>`).join('') : '';
-  const steps = Array.isArray(recipeSteps) ? recipeSteps.map(k => `<li>${k}</li>`).join('') : '';
-  const notes = Array.isArray(recipeNotes) && recipeNotes.length > 0 ? `<h6>Notes:</h6><ul>${recipeNotes.map(n => `<li>${n}</li>`).join('')}</ul>` : '';
+  const ingredients = Array.isArray(recipeIngredients)
+    ? recipeIngredients.map((i) => `<li>${i}</li>`).join('')
+    : '';
+  const steps = Array.isArray(recipeSteps)
+    ? recipeSteps.map((k) => `<li>${k}</li>`).join('')
+    : '';
+  const notes =
+    Array.isArray(recipeNotes) && recipeNotes.length > 0
+      ? `<h6>Notes:</h6><ul>${recipeNotes.map((n) => `<li>${n}</li>`).join('')}</ul>`
+      : '';
 
   div.innerHTML = `
     <div class="card h-100">
       <div class="card-body">
-        <h5 class="card-title">
-          <input type="checkbox" class="selectRecipe me-2">
-          ${recipeName}${subtitleText}
-        </h5>
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <h5 class="card-title mb-0">
+            <input type="checkbox" class="selectRecipe me-2">
+            ${recipeName}${subtitleText}
+          </h5>
+          <button class="btn btn-outline-primary edit-recipe-btn" 
+                  data-recipe='${JSON.stringify(recipe).replace(/'/g, '&apos;')}' 
+                  title="Edit Recipe"
+                  style="padding: 4px 6px; font-size: 14px; border-width: 1px; flex: none; width: auto; display: inline-block;">
+            <i class="fas fa-edit"></i>
+          </button>
+        </div>
         <p class="card-subtitle mb-2 text-muted">Tags: ${tags}</p>
         <h6>Ingredients:</h6>
         <ul>${ingredients}</ul>
@@ -69,7 +90,7 @@ export function createRecipeCard(recipe) {
       </div>
     </div>
   `;
-  
+
   return div;
 }
 
@@ -81,11 +102,11 @@ export function createRecipeCard(recipe) {
  */
 export function renderRecipeCard(recipe, container) {
   const card = createRecipeCard(recipe);
-  
+
   if (card && container) {
     container.appendChild(card);
   }
-  
+
   return card;
 }
 

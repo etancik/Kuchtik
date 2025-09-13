@@ -6,7 +6,7 @@ import { loadAllRecipes } from './services/recipeAPI.js';
 import { renderRecipeCard } from './components/RecipeCard.js';
 import { getSelectedRecipeNames, collectIngredientsFromRecipes } from './utils/recipeUtils.js';
 import { openShortcut } from './utils/shortcutsUtils.js';
-import { recipeCreationUI } from './components/RecipeCreationUI.js';
+import { recipeUI } from './components/RecipeUI.js';
 import { githubAuth } from './services/githubAuth.js';
 
 // Application state
@@ -35,7 +35,14 @@ async function initializeApp() {
   } catch (error) {
     console.error('Failed to initialize app:', error);
   }
-  
+
+  // Initialize Recipe UI
+  try {
+    await recipeUI.initialize();
+  } catch (error) {
+    console.error('Failed to initialize RecipeUI:', error);
+  }
+
   // Setup export button
   exportBtn.addEventListener('click', handleExportClick);
   
@@ -43,11 +50,9 @@ async function initializeApp() {
   const createBtn = document.getElementById('createRecipeBtn');
   if (createBtn) {
     createBtn.addEventListener('click', () => {
-      recipeCreationUI.show();
+      recipeUI.showCreateForm();
     });
-  }
-  
-  // Update auth status
+  }  // Update auth status
   updateAuthStatus();
 }
 
@@ -58,10 +63,19 @@ async function initializeApp() {
 function renderRecipes(recipes) {
   if (!state.recipeListElement) return;
   
+  // Clear existing recipes
+  state.recipeListElement.innerHTML = '';
+  
   recipes.forEach(recipe => {
     renderRecipeCard(recipe, state.recipeListElement);
   });
 }
+
+// Make renderRecipes available globally for RecipeUI
+window.renderRecipes = renderRecipes;
+
+// Make recipeUI available globally for template click handlers
+window.recipeUI = recipeUI;
 
 /**
  * Handle export button click

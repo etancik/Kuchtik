@@ -153,6 +153,151 @@ class RecipeCreationService {
   }
 
   /**
+   * Update an existing recipe file in the GitHub repository
+   * @param {Object} recipeData - Recipe data object
+   * @param {string} originalName - Original recipe name (for filename)
+   * @returns {Promise<Object>} Update result
+   */
+  async updateRecipe(recipeData, originalName) {
+    console.log('🔄 Starting recipe update process');
+    console.log('📝 Recipe data received:', recipeData);
+    console.log('📝 Original recipe name:', originalName);
+
+    // Validate recipe data
+    console.log('✅ Validating recipe data...');
+    const validation = this.validateRecipeData(recipeData);
+    console.log('🔍 Validation result:', validation);
+    
+    if (!validation || typeof validation !== 'object') {
+      console.error('❌ Validation function returned invalid result:', validation);
+      throw new Error('Recipe validation failed - invalid validation response');
+    }
+    
+    if (!validation.isValid) {
+      console.error('❌ Recipe validation failed:', validation.errors);
+      const errorMessage = Array.isArray(validation.errors) 
+        ? validation.errors.join(', ') 
+        : 'Unknown validation errors';
+      throw new Error(`Invalid recipe data: ${errorMessage}`);
+    }
+    console.log('✅ Recipe data validation passed');
+
+    // Ensure user is authenticated
+    console.log('🔐 Checking authentication...');
+    if (!githubAuth.isAuthenticated()) {
+      console.error('❌ User not authenticated');
+      throw new Error('User must be authenticated to update recipes');
+    }
+    
+    const userInfo = githubAuth.getUserInfo();
+    console.log('✅ User authenticated:', userInfo?.login || 'Unknown');
+
+    try {
+      // Generate filename from original name (recipes shouldn't change filenames)
+      console.log('📁 Generating filename from original name...');
+      const filename = this.generateFilename(originalName);
+      const filePath = `recipes/${filename}`;
+      console.log('✅ Generated filename:', filename);
+      console.log('✅ Full file path:', filePath);
+
+      // Get current file info to get SHA (required for updates)
+      console.log('🔍 Getting current file info...');
+      const currentFile = await this.getFileInfo(filePath);
+      if (!currentFile) {
+        throw new Error(`Recipe file not found: ${filename}`);
+      }
+      console.log('✅ Current file SHA:', currentFile.sha);
+
+      // Format recipe data as JSON
+      console.log('📄 Formatting recipe content...');
+      const content = JSON.stringify(recipeData, null, 2);
+      console.log('✅ JSON content length:', content.length, 'characters');
+      
+      const encodedContent = btoa(unescape(encodeURIComponent(content)));
+      console.log('✅ Base64 encoded content length:', encodedContent.length, 'characters');
+
+      // Create commit message
+      const commitMessage = `Update recipe: ${recipeData.name}`;
+      console.log('💬 Commit message:', commitMessage);
+      
+      const author = {
+        name: userInfo?.name || userInfo?.login || 'Recipe Contributor',
+        email: userInfo?.email || `${userInfo?.login}@users.noreply.github.com`,
+      };
+      console.log('👤 Commit author:', author);
+
+      const apiUrl = `${CONFIG.GITHUB_API_BASE}/repos/${CONFIG.REPO_OWNER}/${CONFIG.REPO_NAME}/contents/${filePath}`;
+      console.log('🌐 GitHub API URL:', apiUrl);
+
+      const requestBody = {
+        message: commitMessage,
+        content: encodedContent,
+        sha: currentFile.sha, // Required for updates
+        author: author,
+        committer: author,
+      };
+      console.log('📦 Request body prepared (content truncated for logging)');
+
+      // Update the file via GitHub API
+      console.log('🚀 Sending update request to GitHub API...');
+      const response = await githubAuth.makeAuthenticatedRequest(apiUrl, {
+        method: 'PUT',
+        body: JSON.stringify(requestBody),
+      });
+
+      console.log('📡 GitHub API response status:', response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ GitHub API Error Response:', errorText);
+        
+        let errorMessage;
+        try {
+          const error = JSON.parse(errorText);
+          console.error('❌ Parsed error:', error);
+          errorMessage = error.message || error.error || 'Unknown API error';
+        } catch {
+          errorMessage = `HTTP ${response.status}: ${errorText}`;
+        }
+        
+        throw new Error(`Failed to update recipe: ${errorMessage}`);
+      }
+
+      console.log('✅ GitHub API request successful');
+      const result = await response.json();
+      console.log('📋 GitHub API response data:', {
+        commit: result.commit?.sha,
+        content: {
+          name: result.content?.name,
+          path: result.content?.path,
+          downloadUrl: result.content?.download_url
+        }
+      });
+
+      const successResult = {
+        success: true,
+        filename: filename,
+        path: filePath,
+        commitSha: result.commit.sha,
+        downloadUrl: result.content.download_url,
+        updated: true
+      };
+      
+      console.log('🎉 Recipe update completed successfully:', successResult);
+      return successResult;
+      
+    } catch (error) {
+      console.error('💥 Recipe update failed with error:', error);
+      console.error('💥 Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+      throw error;
+    }
+  }
+
+  /**
    * Generate a safe filename from recipe name
    * @private
    * @param {string} recipeName - Recipe name
@@ -184,6 +329,38 @@ class RecipeCreationService {
     } catch {
       // File doesn't exist or other error
       return false;
+    }
+  }
+
+  /**
+   * Get file information including SHA (needed for updates)
+   * @private
+   * @param {string} filePath - File path to get info for
+   * @returns {Promise<Object|null>} File info object or null if not found
+   */
+  async getFileInfo(filePath) {
+    try {
+      console.log('🔍 Getting file info for:', filePath);
+      const response = await githubAuth.makeAuthenticatedRequest(
+        `repos/${CONFIG.REPO_OWNER}/${CONFIG.REPO_NAME}/contents/${filePath}`
+      );
+      
+      if (response.ok) {
+        const fileInfo = await response.json();
+        console.log('✅ File info retrieved:', {
+          name: fileInfo.name,
+          path: fileInfo.path,
+          sha: fileInfo.sha,
+          size: fileInfo.size
+        });
+        return fileInfo;
+      } else {
+        console.log('❌ File not found:', filePath);
+        return null;
+      }
+    } catch (error) {
+      console.error('❌ Error getting file info:', error);
+      return null;
     }
   }
 
