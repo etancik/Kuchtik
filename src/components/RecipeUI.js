@@ -4,7 +4,7 @@
 
 import { templateLoader } from '../utils/templateLoader.js';
 import { recipeCreation } from '../services/recipeCreation.js';
-import { loadAllRecipes, clearRecipeCache, getCacheStatus } from '../services/recipeAPI.js';
+import { loadAllRecipes, clearRecipeCache, getCacheStatus, loadRecipe, getRecipeFileList } from '../services/recipeAPI.js';
 import { githubAuth } from '../services/githubAuth.js';
 
 class RecipeUI {
@@ -139,11 +139,14 @@ class RecipeUI {
       const result = await recipeCreation.deleteRecipe(recipeName);
       console.log('✅ Recipe deleted successfully:', result);
       
-      // Refresh the recipe list with delayed worker
-      await this.refreshRecipes('delete', recipeName);
+      // OPTIMISTIC UPDATE: Immediately reflect the deletion in UI
+      await this.optimisticDeleteUpdate(recipeName);
       
       // Show success message
       this.showSuccessMessage(`Recipe "${recipeName}" deleted successfully!`);
+      
+      // Start delayed worker to verify the deletion was processed by GitHub
+      this.startDelayedRefreshWorker('delete', recipeName);
       
     } catch (error) {
       console.error('❌ Failed to delete recipe:', error);
@@ -489,13 +492,75 @@ class RecipeUI {
   }
 
   /**
-   * Refresh recipes display with immediate and delayed retries
-   * @param {string} [operationType] - Type of operation ('create', 'update', 'delete')
-   * @param {string} [recipeName] - Name of the affected recipe
+   * Perform optimistic update for delete operations
+   * @param {string} recipeName - Name of the deleted recipe
    */
+  async optimisticDeleteUpdate(recipeName) {
+    console.log('⚡ Performing optimistic delete update for:', recipeName);
+    
+    try {
+      // 1. Remove from cache if it exists
+      clearRecipeCache(recipeName);
+      
+      // 2. Get current recipes from cache/memory and filter out deleted one
+      let currentRecipes = [];
+      try {
+        // Try to get recipes without forcing a GitHub call
+        currentRecipes = await this.getCurrentRecipesFromMemory();
+      } catch (error) {
+        console.warn('Could not get current recipes from memory, loading fresh:', error);
+        currentRecipes = await loadAllRecipes(true);
+      }
+      
+      // 3. Filter out the deleted recipe
+      const updatedRecipes = currentRecipes.filter(recipe => recipe.name !== recipeName);
+      console.log(`⚡ Filtered out deleted recipe. Recipes: ${currentRecipes.length} → ${updatedRecipes.length}`);
+      
+      // 4. Update UI immediately
+      if (window.renderRecipes) {
+        window.renderRecipes(updatedRecipes);
+        console.log('⚡ UI updated optimistically - deleted recipe removed from display');
+      }
+      
+    } catch (error) {
+      console.error('❌ Optimistic delete update failed:', error);
+      // Fallback to normal refresh if optimistic update fails
+      await this.refreshRecipes('delete', recipeName);
+    }
+  }
+
+  /**
+   * Get current recipes from memory/cache without forcing GitHub requests
+   * @returns {Promise<Array>} Current recipes
+   */
+  async getCurrentRecipesFromMemory() {
+    // This is a lightweight way to get recipes, preferring cache hits
+    const recipeFiles = await getRecipeFileList();
+    const recipes = [];
+    
+    for (const filename of recipeFiles) {
+      try {
+        // Try to load from cache first (don't force refresh)
+        const recipe = await loadRecipe(filename, false);
+        recipes.push(recipe);
+      } catch (error) {
+        console.warn(`Could not load ${filename} from cache:`, error);
+        // Continue with other recipes, don't fail completely
+      }
+    }
+    
+    return recipes;
+  }
   async refreshRecipes(operationType = null, recipeName = null) {
     try {
       console.log('🔄 Refreshing recipes display...');
+      
+      // For delete operations, we've already done optimistic updates,
+      // so this is mainly for create/update operations
+      if (operationType === 'delete') {
+        console.log('⚡ Delete operation: optimistic update already performed, skipping immediate refresh');
+        return; // Skip immediate refresh for deletes, rely on delayed worker
+      }
       
       // Clear cache for better reliability after operations
       if (operationType && recipeName) {

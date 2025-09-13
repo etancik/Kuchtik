@@ -2,7 +2,18 @@
 
 ## Overview
 
-The Recipe Management System provides comprehensive logging for all cache operations. This document shows you exactly what logs to expect and when they appear.
+The Recipe Management System provides comprehensive logging for all cache operations. This document shows you exactly what// 4. Delete operation (optimistic update)
+🗑️ Deleting recipe: old-recipe.json
+✅ Recipe deleted successfully
+⚡ Performing optimistic delete update for: old-recipe.json
+🗑️ Cleared cache for: old-recipe.json (was 45s old, 1 remaining)
+⚡ Filtered out deleted recipe. Recipes: 2 → 1
+⚡ UI updated optimistically - deleted recipe removed from display
+⚡ Delete operation: optimistic update already performed, skipping immediate refresh
+
+// 5. Delayed delete verification (background)
+🔄 Executing delayed refresh attempt 1 for: old-recipe.json
+✅ Recipe "old-recipe.json" delete confirmed, refreshing displayto expect and when they appear.
 
 ## 📋 **Complete Cache Logging Scenarios**
 
@@ -96,8 +107,19 @@ When a recipe needs to be loaded fresh (cache miss), the system tries 3 strategi
 🔄 Refreshing recipes display...
 🌐 Loading recipe attempt 1 for: new-recipe.json
 ```
-- **When**: After create/update/delete operations
+- **When**: After create/update operations (deletes use optimistic updates)
 - **Info**: Shows which operation triggered the clear
+
+### 8. **Optimistic Delete Update**
+```javascript
+⚡ Performing optimistic delete update for: old-recipe.json
+🗑️ Cleared cache for: old-recipe.json (was 125s old, 2 remaining)
+⚡ Filtered out deleted recipe. Recipes: 3 → 2
+⚡ UI updated optimistically - deleted recipe removed from display
+⚡ Delete operation: optimistic update already performed, skipping immediate refresh
+```
+- **When**: Immediately after delete operations
+- **Info**: Shows immediate UI update without waiting for GitHub confirmation
 
 ### 8. **Cache Miss (Recipe Not Cached)**
 ```javascript
