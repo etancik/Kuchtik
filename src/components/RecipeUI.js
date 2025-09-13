@@ -12,6 +12,7 @@ class RecipeUI {
     this.isEditing = false;
     this.editingRecipe = null;
     this.modal = null;
+    this.refreshWorkers = new Map(); // Track active refresh workers
   }
 
   /**
@@ -138,8 +139,8 @@ class RecipeUI {
       const result = await recipeCreation.deleteRecipe(recipeName);
       console.log('✅ Recipe deleted successfully:', result);
       
-      // Refresh the recipe list
-      await this.refreshRecipes();
+      // Refresh the recipe list with delayed worker
+      await this.refreshRecipes('delete', recipeName);
       
       // Show success message
       this.showSuccessMessage(`Recipe "${recipeName}" deleted successfully!`);
@@ -301,7 +302,7 @@ class RecipeUI {
         
         // Close modal and refresh recipes
         this.modal.hide();
-        await this.refreshRecipes();
+        await this.refreshRecipes('update', formData.name);
         
         // Show success message
         this.showSuccessMessage();
@@ -311,7 +312,7 @@ class RecipeUI {
         
         // Close modal and refresh recipes
         this.modal.hide();
-        await this.refreshRecipes();
+        await this.refreshRecipes('create', formData.name);
         
         // Show success message
         this.showSuccessMessage();
@@ -466,19 +467,221 @@ class RecipeUI {
   }
 
   /**
-   * Refresh recipes display
+   * Refresh recipes display with immediate and delayed retries
+   * @param {string} [operationType] - Type of operation ('create', 'update', 'delete')
+   * @param {string} [recipeName] - Name of the affected recipe
    */
-  async refreshRecipes() {
+  async refreshRecipes(operationType = null, recipeName = null) {
     try {
       console.log('🔄 Refreshing recipes display...');
+      
+      // Immediate refresh attempt
       const recipes = await loadAllRecipes();
       
       // Assuming there's a global function to render recipes
       if (window.renderRecipes) {
         window.renderRecipes(recipes);
       }
+
+      // If this is after a create/update/delete operation, start a delayed worker
+      if (operationType && recipeName) {
+        this.startDelayedRefreshWorker(operationType, recipeName);
+      }
+      
     } catch (error) {
       console.error('❌ Failed to refresh recipes:', error);
+    }
+  }
+
+  /**
+   * Start a delayed refresh worker to handle GitHub API delays
+   * @param {string} operationType - 'create', 'update', or 'delete'
+   * @param {string} recipeName - Name of the affected recipe
+   */
+  startDelayedRefreshWorker(operationType, recipeName) {
+    const workerId = `${operationType}-${recipeName}-${Date.now()}`;
+    console.log(`🔄 Starting delayed refresh worker for ${operationType} of "${recipeName}"...`);
+    
+    // Cancel any existing worker for the same recipe
+    const existingWorkerId = Array.from(this.refreshWorkers.keys())
+      .find(id => id.includes(recipeName));
+    if (existingWorkerId) {
+      globalThis.clearTimeout(this.refreshWorkers.get(existingWorkerId));
+      this.refreshWorkers.delete(existingWorkerId);
+      console.log(`🔄 Cancelled existing worker for "${recipeName}"`);
+    }
+
+    // Create new worker with exponential backoff
+    this.scheduleDelayedRefresh(workerId, operationType, recipeName, 0);
+  }
+
+  /**
+   * Schedule delayed refresh with exponential backoff
+   * @param {string} workerId - Unique worker identifier
+   * @param {string} operationType - 'create', 'update', or 'delete'
+   * @param {string} recipeName - Name of the affected recipe
+   * @param {number} attempt - Current attempt number (0-based)
+   */
+  scheduleDelayedRefresh(workerId, operationType, recipeName, attempt) {
+    const delays = [3000, 8000, 20000, 45000, 60000]; // 3s, 8s, 20s, 45s, 60s
+    
+    if (attempt >= delays.length) {
+      console.log(`⏰ Max refresh attempts reached for "${recipeName}"`);
+      this.refreshWorkers.delete(workerId);
+      return;
+    }
+
+    const delay = delays[attempt];
+    const delaySeconds = Math.round(delay / 1000);
+    console.log(`⏰ Scheduling refresh attempt ${attempt + 1} for "${recipeName}" in ${delaySeconds}s (${delay}ms)`);
+    
+    const timeoutId = globalThis.setTimeout(async () => {
+      try {
+        console.log(`🔄 Executing delayed refresh attempt ${attempt + 1} for "${recipeName}"`);
+        
+        // Check if the operation was successful by verifying recipe state
+        const success = await this.verifyRecipeOperation(operationType, recipeName);
+        
+        if (success) {
+          console.log(`✅ Recipe "${recipeName}" ${operationType} confirmed, refreshing display`);
+          
+          // Refresh the display
+          const recipes = await loadAllRecipes();
+          if (window.renderRecipes) {
+            window.renderRecipes(recipes);
+          }
+          
+          // Show status update
+          this.showDelayedRefreshStatus(operationType, recipeName, true);
+          
+          // Clean up worker
+          this.refreshWorkers.delete(workerId);
+        } else {
+          console.log(`⏰ Recipe "${recipeName}" ${operationType} not yet confirmed, scheduling retry`);
+          
+          // Schedule next attempt
+          this.scheduleDelayedRefresh(workerId, operationType, recipeName, attempt + 1);
+        }
+        
+      } catch (error) {
+        console.error(`❌ Error in delayed refresh worker for "${recipeName}":`, error);
+        
+        // Schedule retry on error (unless max attempts reached)
+        if (attempt + 1 < delays.length) {
+          this.scheduleDelayedRefresh(workerId, operationType, recipeName, attempt + 1);
+        } else {
+          console.log(`❌ Max retry attempts reached for "${recipeName}"`);
+          this.showDelayedRefreshStatus(operationType, recipeName, false);
+          this.refreshWorkers.delete(workerId);
+        }
+      }
+    }, delay);
+    
+    this.refreshWorkers.set(workerId, timeoutId);
+  }
+
+  /**
+   * Verify if a recipe operation was successful
+   * @param {string} operationType - 'create', 'update', or 'delete'
+   * @param {string} recipeName - Name of the affected recipe
+   * @returns {boolean} True if operation is confirmed
+   */
+  async verifyRecipeOperation(operationType, recipeName) {
+    try {
+      const recipes = await loadAllRecipes();
+      const recipeExists = recipes.some(recipe => recipe.name === recipeName);
+      
+      switch (operationType) {
+        case 'create':
+        case 'update':
+          return recipeExists; // Recipe should exist after create/update
+        case 'delete':
+          return !recipeExists; // Recipe should not exist after delete
+        default:
+          return false;
+      }
+    } catch (error) {
+      console.error(`❌ Error verifying ${operationType} operation for "${recipeName}":`, error);
+      return false;
+    }
+  }
+
+  /**
+   * Show status update for delayed refresh operations
+   * @param {string} operationType - 'create', 'update', or 'delete'
+   * @param {string} recipeName - Name of the affected recipe
+   * @param {boolean} success - Whether the operation was confirmed
+   */
+  showDelayedRefreshStatus(operationType, recipeName, success) {
+    const alert = document.createElement('div');
+    alert.className = `alert ${success ? 'alert-info' : 'alert-warning'} alert-dismissible fade show position-fixed`;
+    alert.style.cssText = 'top: 80px; right: 20px; z-index: 1060; min-width: 300px;';
+    
+    const icon = success ? 'fa-sync-alt' : 'fa-exclamation-triangle';
+    const message = success 
+      ? `Recipe list updated - "${recipeName}" ${operationType} confirmed`
+      : `Recipe "${recipeName}" ${operationType} may still be processing`;
+    
+    alert.innerHTML = `
+      <i class="fas ${icon} me-2"></i>
+      ${message}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(alert);
+    
+    // Auto-remove after 4 seconds
+    globalThis.setTimeout(() => {
+      if (alert.parentNode) {
+        alert.remove();
+      }
+    }, 4000);
+  }
+
+  /**
+   * Cancel all active refresh workers
+   */
+  cancelAllRefreshWorkers() {
+    console.log(`🛑 Cancelling ${this.refreshWorkers.size} active refresh workers`);
+    for (const [workerId, timeoutId] of this.refreshWorkers.entries()) {
+      globalThis.clearTimeout(timeoutId);
+      console.log(`🛑 Cancelled worker: ${workerId}`);
+    }
+    this.refreshWorkers.clear();
+  }
+
+  /**
+   * Get status of active refresh workers
+   * @returns {Array} Array of active worker information
+   */
+  getActiveRefreshWorkers() {
+    return Array.from(this.refreshWorkers.keys()).map(workerId => {
+      const [operationType, recipeName, timestamp] = workerId.split('-');
+      return {
+        id: workerId,
+        operationType,
+        recipeName,
+        startedAt: new Date(parseInt(timestamp)),
+        duration: Date.now() - parseInt(timestamp)
+      };
+    });
+  }
+
+  /**
+   * Manually trigger a recipe list refresh (useful for debugging or user-initiated refresh)
+   */
+  async forceRefresh() {
+    console.log('🔄 Manual refresh triggered');
+    try {
+      const recipes = await loadAllRecipes();
+      if (window.renderRecipes) {
+        window.renderRecipes(recipes);
+      }
+      
+      this.showSuccessMessage('Recipe list refreshed successfully');
+    } catch (error) {
+      console.error('❌ Manual refresh failed:', error);
+      alert(`Failed to refresh recipe list: ${error.message}`);
     }
   }
 
