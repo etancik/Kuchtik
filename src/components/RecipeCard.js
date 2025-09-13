@@ -74,12 +74,20 @@ export function createRecipeCard(recipe) {
             <input type="checkbox" class="selectRecipe me-2">
             ${recipeName}${subtitleText}
           </h5>
-          <button class="btn btn-outline-primary edit-recipe-btn" 
-                  data-recipe='${JSON.stringify(recipe).replace(/'/g, '&apos;')}' 
-                  title="Edit Recipe"
-                  style="padding: 4px 6px; font-size: 14px; border-width: 1px; flex: none; width: auto; display: inline-block;">
-            <i class="fas fa-edit"></i>
-          </button>
+          <div class="d-flex gap-1">
+            <button class="btn btn-outline-primary edit-recipe-btn" 
+                    data-recipe='${JSON.stringify(recipe).replace(/'/g, '&apos;')}' 
+                    title="Edit Recipe"
+                    style="padding: 4px 6px; font-size: 14px; border-width: 1px; flex: none; width: auto; display: inline-block;">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn btn-outline-danger delete-recipe-btn" 
+                    data-recipe-name='${recipeName}' 
+                    title="Delete Recipe"
+                    style="padding: 4px 6px; font-size: 14px; border-width: 1px; flex: none; width: auto; display: inline-block;">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
         </div>
         <p class="card-subtitle mb-2 text-muted">Tags: ${tags}</p>
         <h6>Ingredients:</h6>

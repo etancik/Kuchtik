@@ -44,7 +44,7 @@ class RecipeUI {
   }
 
   /**
-   * Setup edit button event handlers
+   * Setup edit and delete button event handlers
    */
   setupEditHandlers() {
     document.addEventListener('click', (e) => {
@@ -52,6 +52,10 @@ class RecipeUI {
         const button = e.target.closest('.edit-recipe-btn');
         const recipeData = JSON.parse(button.getAttribute('data-recipe'));
         this.showEditForm(recipeData);
+      } else if (e.target.closest('.delete-recipe-btn')) {
+        const button = e.target.closest('.delete-recipe-btn');
+        const recipeName = button.getAttribute('data-recipe-name');
+        this.showDeleteConfirmation(recipeName);
       }
     });
   }
@@ -97,6 +101,53 @@ class RecipeUI {
     
     // Show modal
     this.modal.show();
+  }
+
+  /**
+   * Show delete confirmation dialog
+   * @param {string} recipeName - Name of the recipe to delete
+   */
+  async showDeleteConfirmation(recipeName) {
+    console.log('🗑️ Showing delete confirmation for:', recipeName);
+    
+    const confirmed = confirm(
+      `Are you sure you want to delete the recipe "${recipeName}"?\n\n` +
+      `This action cannot be undone and will permanently remove the recipe from your collection.`
+    );
+    
+    if (confirmed) {
+      await this.handleDeleteRecipe(recipeName);
+    }
+  }
+
+  /**
+   * Handle recipe deletion
+   * @param {string} recipeName - Name of the recipe to delete
+   */
+  async handleDeleteRecipe(recipeName) {
+    try {
+      console.log('🗑️ Deleting recipe:', recipeName);
+      
+      // Check authentication
+      if (!githubAuth.isAuthenticated()) {
+        alert('Authentication required. Please authenticate first.');
+        return;
+      }
+      
+      // Delete the recipe
+      const result = await recipeCreation.deleteRecipe(recipeName);
+      console.log('✅ Recipe deleted successfully:', result);
+      
+      // Refresh the recipe list
+      await this.refreshRecipes();
+      
+      // Show success message
+      this.showSuccessMessage(`Recipe "${recipeName}" deleted successfully!`);
+      
+    } catch (error) {
+      console.error('❌ Failed to delete recipe:', error);
+      alert(`Failed to delete recipe: ${error.message}`);
+    }
   }
 
   /**
@@ -433,14 +484,18 @@ class RecipeUI {
 
   /**
    * Show success message
+   * @param {string} [customMessage] - Optional custom message to display
    */
-  showSuccessMessage() {
+  showSuccessMessage(customMessage) {
     const alert = document.createElement('div');
     alert.className = 'alert alert-success alert-dismissible fade show position-fixed';
     alert.style.cssText = 'top: 20px; right: 20px; z-index: 1060; min-width: 300px;';
+    
+    const message = customMessage || `Recipe ${this.isEditing ? 'updated' : 'created'} successfully!`;
+    
     alert.innerHTML = `
       <i class="fas fa-check-circle me-2"></i>
-      Recipe ${this.isEditing ? 'updated' : 'created'} successfully!
+      ${message}
       <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     `;
     

@@ -298,6 +298,101 @@ class RecipeCreationService {
   }
 
   /**
+   * Delete a recipe file from the GitHub repository
+   * @param {string} recipeName - Name of the recipe to delete
+   * @returns {Promise<Object>} Deletion result
+   */
+  async deleteRecipe(recipeName) {
+    console.log('🗑️ Starting recipe deletion process');
+    console.log('📝 Recipe name:', recipeName);
+
+    try {
+      // Validate authentication
+      if (!githubAuth.isAuthenticated()) {
+        throw new Error('Authentication required. Please authenticate first.');
+      }
+      console.log('✅ User authenticated');
+
+      // Generate filename
+      const filename = this.generateFilename(recipeName);
+      const filePath = `recipes/${filename}`;
+      console.log('✅ Generated filename:', filename);
+      console.log('✅ Full file path:', filePath);
+
+      // Get current file info to get SHA (required for deletion)
+      console.log('🔍 Getting current file info...');
+      const currentFile = await this.getFileInfo(filePath);
+      if (!currentFile) {
+        throw new Error(`Recipe file not found: ${filename}`);
+      }
+      console.log('✅ Current file SHA:', currentFile.sha);
+
+      // Create commit message
+      const commitMessage = `Delete recipe: ${recipeName}`;
+      console.log('✅ Commit message:', commitMessage);
+
+      // Prepare API request
+      const apiUrl = `https://api.github.com/repos/${CONFIG.REPO_OWNER}/${CONFIG.REPO_NAME}/contents/${filePath}`;
+      console.log('✅ GitHub API URL:', apiUrl);
+
+      const requestBody = {
+        message: commitMessage,
+        sha: currentFile.sha
+      };
+
+      console.log('🔄 Making GitHub API request to delete file...');
+      const response = await githubAuth.makeAuthenticatedRequest(apiUrl, {
+        method: 'DELETE',
+        body: JSON.stringify(requestBody)
+      });
+
+      if (!response.ok) {
+        console.error('💥 GitHub API request failed');
+        console.error('💥 Response status:', response.status, response.statusText);
+        
+        let errorMessage;
+        try {
+          const errorData = await response.json();
+          console.error('💥 API error response:', errorData);
+          errorMessage = errorData.message || `HTTP ${response.status}: ${response.statusText}`;
+        } catch {
+          const errorText = await response.text();
+          console.error('💥 Raw error response:', errorText);
+          errorMessage = `HTTP ${response.status}: ${errorText}`;
+        }
+        
+        throw new Error(`Failed to delete recipe: ${errorMessage}`);
+      }
+
+      console.log('✅ GitHub API request successful');
+      const result = await response.json();
+      console.log('📋 GitHub API response data:', {
+        commit: result.commit?.sha
+      });
+
+      const successResult = {
+        success: true,
+        filename: filename,
+        path: filePath,
+        commitSha: result.commit.sha,
+        deleted: true
+      };
+      
+      console.log('🎉 Recipe deletion completed successfully:', successResult);
+      return successResult;
+      
+    } catch (error) {
+      console.error('💥 Recipe deletion failed with error:', error);
+      console.error('💥 Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+      throw error;
+    }
+  }
+
+  /**
    * Generate a safe filename from recipe name
    * @private
    * @param {string} recipeName - Recipe name
@@ -306,6 +401,8 @@ class RecipeCreationService {
   generateFilename(recipeName) {
     return recipeName
       .toLowerCase()
+      .normalize('NFD') // Decompose accented characters
+      .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
       .replace(/[^\w\s-]/g, '') // Remove special characters
       .replace(/\s+/g, '_') // Replace spaces with underscores
       .replace(/-+/g, '_') // Replace hyphens with underscores
