@@ -1,23 +1,24 @@
 {
-  "nazev": "Stava z aronie",
-  "porce": "",
-  "cas_pripravy": "",
+  "nazev": "Šťáva z arónie",
+  "porce": "1 litr",
+  "cas_pripravy": "5 dní",
   "ingredience": [
-    "aronie",
-    "citronka",
-    "cukr"
+    "500 g arónie",
+    "citrónová kůra nebo citrónka",
+    "cukr podle chuti"
   ],
   "postup": [
-    "Zamrazit aronii",
-    "Vyndat a zalit vodou, aby byla cela ponorena a dat do lednice",
-    "Az rozmrzne, rozmixovat, pridat citronku a nechat v lednici",
-    "Po 2 dnech precedit pres platno",
-    "Pridavat cukr po lzicich a privest k varu.",
-    "Trochu povarit a pak nalit do lahvi"
+    "Zmrazit arónii na několik hodin nebo přes noc",
+    "Vyndat a zalít vodou, aby byla celá ponořená, a dát do lednice",
+    "Až rozmrzne, rozmixovat, přidat citrónovou kůru a nechat v lednici",
+    "Po 2 dnech přecedit přes plátno nebo jemné síto",
+    "Přidávat cukr po lžících a přivést k varu",
+    "Trochu povařit (5-10 minut) a pak nalít do sterilních lahví"
   ],
-  "tagy": ["stava", "aronie"],
+  "tagy": ["šťáva", "arónie", "nápoj", "domácí"],
   "poznamky": [
-    "skladovat v lednici pouze",
-    "pridat stavu z jablek"
+    "Skladovat v lednici pouze - vydrží cca 2-3 týdny",
+    "Lze přidat šťávu z jablek pro jemnější chuť",
+    "Pro delší trvanlivost pasterizovat"
   ]
 }
