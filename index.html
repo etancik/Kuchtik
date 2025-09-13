@@ -44,7 +44,15 @@
 
     <!-- Recipe cards container -->
     <div id="recipe-cards">
-      <div id="recipeList" class="row row-cols-1 row-cols-md-2 g-4"></div>
+      <!-- Search bar -->
+      <div class="mb-3">
+        <div class="input-group">
+          <span class="input-group-text"><i class="fas fa-search"></i></span>
+          <input type="text" class="form-control" id="searchInput" placeholder="" data-i18n-placeholder="recipes.searchPlaceholder">
+        </div>
+      </div>
+      
+      <div id="recipeList" class="row row-cols-1 g-3"></div>
     </div>
 
     <!-- Export button -->

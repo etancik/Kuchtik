@@ -22,9 +22,9 @@
   "recipes": {
     "title": "Kuchtik",
     "subtitle": "Tancer Family Cookbook",
+    "createRecipe": "Create Recipe",
     "noRecipesTitle": "No Recipes Found",
     "noRecipesMessage": "You don't have any recipes yet. Create your first recipe to get started!",
-    "createRecipe": "Create Recipe",
     "editRecipe": "Edit Recipe",
     "deleteRecipe": "Delete Recipe",
     "signInToManage": "Sign in to create and manage recipes.",
@@ -36,6 +36,7 @@
     "selectAtLeastOne": "Please select at least one recipe!",
     "noIngredientsToExport": "No ingredients to export!",
     "exportFailed": "Export failed!",
+    "searchPlaceholder": "Search recipes...",
     "tags": "Tags",
     "servings": "Servings",
     "cookingTime": "Cooking Time",

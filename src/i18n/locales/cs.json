@@ -36,6 +36,7 @@
     "selectAtLeastOne": "Prosím vyberte alespoň jeden recept!",
     "noIngredientsToExport": "Žádné ingredience k exportu!",
     "exportFailed": "Chyba při exportu receptů!",
+    "searchPlaceholder": "Hledat recepty...",
     "tags": "Štítky",
     "servings": "Porce",
     "cookingTime": "Doba Přípravy",
