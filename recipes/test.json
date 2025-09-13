@@ -1,0 +1,19 @@
+{
+  "name": "Test",
+  "ingredients": [
+    "sdfdsfds",
+    "dsfsdfds"
+  ],
+  "instructions": [
+    "asdad",
+    "adads"
+  ],
+  "cookingTime": "50",
+  "servings": 4,
+  "notes": [],
+  "tags": [
+    "ggg"
+  ],
+  "author": "etancik",
+  "created": "2025-09-13T14:17:56.352Z"
+}
