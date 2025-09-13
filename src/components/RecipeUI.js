@@ -496,6 +496,9 @@ class RecipeUI {
     this.resetContainer('ingredients-container', 'ingredient-input', 'Enter ingredient', 'input');
     this.resetContainer('instructions-container', 'instruction-input', 'Enter instruction step', 'textarea');
     this.resetContainer('notes-container', 'note-input', 'Enter note', 'input');
+    
+    // Setup auto-resize for the default instruction textarea
+    setTimeout(() => this.setupAllAutoResize(), 0);
   }
 
   populateForm(recipe) {
@@ -513,6 +516,9 @@ class RecipeUI {
     
     // Populate notes
     this.populateContainer('notes-container', recipe.notes || [], 'note-input', 'Enter note', 'input');
+    
+    // Setup auto-resize for all instruction textareas
+    setTimeout(() => this.setupAllAutoResize(), 0);
   }
 
   resetContainer(containerId, inputClass, placeholder, inputType) {
@@ -620,7 +626,9 @@ class RecipeUI {
       </button>
     `;
     container.appendChild(instructionDiv);
-    instructionDiv.querySelector('textarea').focus();
+    const textarea = instructionDiv.querySelector('textarea');
+    this.setupAutoResize(textarea);
+    textarea.focus();
   }
 
   removeInstruction(button) {
@@ -656,6 +664,34 @@ class RecipeUI {
     if (container.children.length > 0) {
       button.parentElement.remove();
     }
+  }
+
+  /**
+   * Setup auto-resize functionality for textarea elements
+   * @param {HTMLTextAreaElement} textarea - The textarea element to setup
+   */
+  setupAutoResize(textarea) {
+    // Auto-resize function
+    const autoResize = () => {
+      textarea.style.height = 'auto';
+      textarea.style.height = Math.max(38, textarea.scrollHeight) + 'px';
+    };
+
+    // Setup event listeners
+    textarea.addEventListener('input', autoResize);
+    textarea.addEventListener('paste', () => setTimeout(autoResize, 0));
+    
+    // Initial resize
+    setTimeout(autoResize, 0);
+  }
+
+  /**
+   * Setup auto-resize for all existing instruction textareas
+   */
+  setupAllAutoResize() {
+    document.querySelectorAll('.instruction-input').forEach(textarea => {
+      this.setupAutoResize(textarea);
+    });
   }
 }
 
