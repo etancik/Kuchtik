@@ -1,6 +1,32 @@
-# Kuchtik - Recipe Manager
+# Kuchtik 🍳
 
-Simple recipe manager with iOS Shortcuts integration.
+A recipe management application with iOS Shortcuts integration, built with vanilla JavaScript and a modular architecture.
+
+## Features
+
+- 📱 **iOS Shortcuts Integration** - Export ingredients directly to iOS Reminders
+- 🔄 **Dynamic Recipe Loading** - Automatically discovers recipes from GitHub repository
+- 🃏 **Bootstrap UI** - Clean, responsive card-based interface
+- ✅ **Recipe Selection** - Multi-select recipes for batch ingredient export
+- 🔍 **GitHub API Integration** - Fetches recipe files dynamically
+
+## Project Structure
+
+```
+├── src/
+│   ├── components/        # UI components
+│   │   └── RecipeCard.js  # Recipe card rendering
+│   ├── services/          # External integrations
+│   │   └── recipeAPI.js   # GitHub API & data loading
+│   ├── utils/             # Utility functions
+│   │   ├── recipeUtils.js # Recipe data processing
+│   │   └── shortcutsUtils.js # iOS Shortcuts integration
+│   ├── __tests__/         # Unit tests
+│   └── main.js           # Application entry point
+├── recepty/              # Recipe JSON files
+├── index.html           # Main HTML file
+└── style.css           # Styles
+```
 
 ## Development Setup
 
@@ -48,8 +74,8 @@ ESLint v9 with recommended rules. Configuration in `eslint.config.mjs`.
 - ✅ Load recipes dynamically via GitHub API
 - ✅ Export ingredients to iOS Reminders
 - ✅ Bootstrap UI with responsive design
-- 🚧 Modular architecture (in progress)
-- 🚧 Unit tests (in progress)
+- ✅ Modular architecture
+- ✅ Unit tests
 
 ## Browser Support
 

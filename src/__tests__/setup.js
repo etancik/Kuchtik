@@ -1,6 +1,9 @@
 // Jest setup file
 // This runs before each test file
 
+// Import jest globals
+import { jest } from '@jest/globals';
+
 // Mock fetch globally
 global.fetch = jest.fn();
 

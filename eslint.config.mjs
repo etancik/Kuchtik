@@ -13,6 +13,7 @@ export default [
         fetch: 'readonly',
         alert: 'readonly',
         encodeURIComponent: 'readonly',
+        navigator: 'readonly',
       },
     },
     rules: {

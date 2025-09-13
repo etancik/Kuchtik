@@ -4,9 +4,9 @@
   "description": "Simple recipe manager with iOS Shortcuts integration",
   "main": "src/main.js",
   "scripts": {
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
+    "test": "NODE_OPTIONS='--experimental-vm-modules' jest",
+    "test:watch": "NODE_OPTIONS='--experimental-vm-modules' jest --watch",
+    "test:coverage": "NODE_OPTIONS='--experimental-vm-modules' jest --coverage",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
     "format": "prettier --write src/",
@@ -23,10 +23,12 @@
     "jest-environment-jsdom": "^29.7.0",
     "prettier": "^3.0.0"
   },
+  "type": "module",
   "jest": {
     "testEnvironment": "jsdom",
     "setupFilesAfterEnv": ["<rootDir>/src/__tests__/setup.js"],
     "testMatch": ["<rootDir>/src/**/*.test.js"],
+    "transform": {},
     "collectCoverageFrom": [
       "src/**/*.js",
       "!src/__tests__/**",

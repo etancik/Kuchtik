@@ -1,4 +1,6 @@
 // Basic test to verify Jest setup
+import { jest } from '@jest/globals';
+
 describe('Jest Setup', () => {
   test('should run tests successfully', () => {
     expect(true).toBe(true);
