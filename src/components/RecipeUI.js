@@ -4,7 +4,7 @@
 
 import { templateLoader } from '../utils/templateLoader.js';
 import { recipeCreation } from '../services/recipeCreation.js';
-import { loadAllRecipes } from '../services/recipeAPI.js';
+import { loadAllRecipes, clearRecipeCache, getCacheStatus } from '../services/recipeAPI.js';
 import { githubAuth } from '../services/githubAuth.js';
 
 class RecipeUI {
@@ -497,8 +497,15 @@ class RecipeUI {
     try {
       console.log('🔄 Refreshing recipes display...');
       
-      // Immediate refresh attempt
-      const recipes = await loadAllRecipes();
+      // Clear cache for better reliability after operations
+      if (operationType && recipeName) {
+        clearRecipeCache(); // Clear all cache after operations
+        console.log('🗑️ Cleared recipe cache due to operation:', operationType);
+      }
+      
+      // Immediate refresh attempt with force refresh for operations
+      const forceRefresh = Boolean(operationType);
+      const recipes = await loadAllRecipes(forceRefresh);
       
       // Assuming there's a global function to render recipes
       if (window.renderRecipes) {
@@ -567,8 +574,8 @@ class RecipeUI {
         if (success) {
           console.log(`✅ Recipe "${recipeName}" ${operationType} confirmed, refreshing display`);
           
-          // Refresh the display
-          const recipes = await loadAllRecipes();
+          // Refresh the display with forced refresh
+          const recipes = await loadAllRecipes(true);
           if (window.renderRecipes) {
             window.renderRecipes(recipes);
           }
@@ -695,7 +702,8 @@ class RecipeUI {
   async forceRefresh() {
     console.log('🔄 Manual refresh triggered');
     try {
-      const recipes = await loadAllRecipes();
+      clearRecipeCache(); // Clear cache for manual refresh
+      const recipes = await loadAllRecipes(true);
       if (window.renderRecipes) {
         window.renderRecipes(recipes);
       }
@@ -705,6 +713,22 @@ class RecipeUI {
       console.error('❌ Manual refresh failed:', error);
       alert(`Failed to refresh recipe list: ${error.message}`);
     }
+  }
+
+  /**
+   * Show current cache status (useful for debugging)
+   * @returns {Object} Cache status information
+   */
+  showCacheStatus() {
+    const status = getCacheStatus();
+    console.log('📊 Recipe Cache Status:', {
+      'Total entries': status.totalEntries,
+      'Valid entries': status.validEntries,
+      'Expired entries': status.expiredEntries,
+      'Cache duration': `${status.cacheDurationMinutes} minutes`,
+      'Entries': status.entries
+    });
+    return status;
   }
 
   /**

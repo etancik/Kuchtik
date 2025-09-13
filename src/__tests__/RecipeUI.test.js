@@ -31,7 +31,9 @@ jest.unstable_mockModule('../utils/templateLoader.js', () => ({
 }));
 
 jest.unstable_mockModule('../services/recipeAPI.js', () => ({
-  loadAllRecipes: jest.fn()
+  loadAllRecipes: jest.fn(),
+  clearRecipeCache: jest.fn(),
+  getCacheStatus: jest.fn()
 }));
 
 // Import the class after mocking
