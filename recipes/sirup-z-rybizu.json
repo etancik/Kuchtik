@@ -1,32 +1,41 @@
 {
-  "name": "Sirup z rybizu",
+  "name": "Sirup z rybízu",
   "ingredients": [
     {
-      "text": "650 g Cerveny rybiz",
+      "text": "650 g červeného rybízu",
       "exportDefault": true
     },
     {
-      "text": "300g Cukr",
+      "text": "300 g cukru",
       "exportDefault": false
     },
     {
-      "text": "1 lzice kyseliny citronove",
+      "text": "1 lžíce kyseliny citrónové",
       "exportDefault": false
     }
   ],
   "instructions": [
-    "Zalit trochou vody a zahrat",
-    "Rozmackat a precedit",
-    "Pridat vodu, citron, cukr a zahrat"
+    "Zalít rybíz trochou vody a zahřát",
+    "Rozmačkat a vařit 5 minut",
+    "Precedit přes jemné síto nebo plátno",
+    "Přidat k čisté šťávě cukr a kyselinu citrónovou",
+    "Zahřát do varu a povařit 5 minut",
+    "Nalít do sterilních lahví"
   ],
-  "cookingTime": "120 minut",
-  "servings": 1,
+  "cookingTime": "45 min",
+  "servings": "1 láhev (cca 500 ml)",
   "notes": [
-    "Skladovat v lednici"
+    "Skladovat v lednici, vydrží 2-3 měsíce",
+    "Ředit vodou v poměru 1:4 až 1:6"
   ],
   "tags": [
-    "sirup"
+    "sirup",
+    "rybíz",
+    "nápoje"
   ],
-  "author": "eBarborka",
-  "created": "2025-09-14T11:10:15.955Z"
+  "metadata": {
+    "createdDate": "2025-09-14T11:10:16Z",
+    "author": "eBarborka",
+    "lastModified": "2025-09-14T13:47:15Z"
+  }
 }

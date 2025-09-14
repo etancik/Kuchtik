@@ -1,7 +1,7 @@
 {
   "name": "Palačinky",
   "servings": 4,
-  "cookingTime": "20 min",
+  "cookingTime": "30 min",
   "ingredients": [
     {
       "text": "250 g hladké mouky",
@@ -18,12 +18,28 @@
     {
       "text": "špetka soli",
       "exportDefault": false
+    },
+    {
+      "text": "olej nebo máslo na smažení",
+      "exportDefault": false
     }
   ],
   "instructions": [
-    "Smíchej všechny ingredience.",
-    "Rozehřej pánev a smaž palačinky dozlatova.",
-    "Podávej s marmeládou nebo ovocem."
+    "Smíchej všechny ingredience v míse do hladkého těsta.",
+    "Nech těsto odpočinout alespoň 15 minut.",
+    "Rozehřej pánev s trochou oleje nebo másla.",
+    "Nalij těsto a rozlej po celé pánvi.",
+    "Smaž palačinky z obou stran dozlatova.",
+    "Podávej teplé s oblíbenou náplní."
   ],
-  "tags": ["dezert", "snídaně", "pečení"]
+  "notes": [
+    "Těsto by mělo mít konzistenci řídké smetany",
+    "První palačinka často nevyjde, to je normální"
+  ],
+  "tags": ["dezert", "snídaně", "pečení"],
+  "metadata": {
+    "createdDate": "2025-09-12T22:01:00Z",
+    "author": "Lukáš Tancer",
+    "lastModified": "2025-09-14T13:47:15Z"
+  }
 }

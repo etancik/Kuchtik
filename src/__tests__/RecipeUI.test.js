@@ -102,7 +102,7 @@ describe('RecipeUI Repository Integration Tests', () => {
     test('should update recipe through repository when editing', async () => {
       const testRecipe = { name: 'Test Recipe', ingredients: ['ingredient1'] };
       mockRepository.update.mockResolvedValue({ success: true });
-      recipeUI.editingRecipe = { name: 'original-name' };
+      recipeUI.editingRecipe = { id: 'original-name', name: 'original-name' }; // Include id field
       recipeUI.isEditing = true;
       recipeUI.modal = { hide: jest.fn() };
       recipeUI.collectFormData = jest.fn().mockReturnValue(testRecipe);

@@ -1,32 +1,38 @@
 {
-  "name": "Marmelada z rybizu",
+  "name": "Marmeláda z rybízu",
   "ingredients": [
     {
-      "text": "500 ml ciste stavy",
+      "text": "500 ml čisté šťávy z rybízu",
       "exportDefault": true
     },
     {
-      "text": "250-300g cukru",
+      "text": "250-300 g cukru",
       "exportDefault": false
     },
     {
-      "text": "lzice citronove stavy",
+      "text": "1 lžíce citrónové šťávy",
       "exportDefault": false
     }
   ],
   "instructions": [
-    "povarit s trochou vody a vymackat rybiz",
-    "dat varit s cukrem a citronem",
-    "varit dokud se nezacnou delat cesticky"
+    "Povařit rybíz s trochou vody a vymačkat přes síto",
+    "Dát vařit šťávu s cukrem a citrónovou šťávou",
+    "Vařit dokud se nezačnou dělat cesťičky při míchání"
   ],
-  "cookingTime": "120 minut",
-  "servings": 1,
+  "cookingTime": "120 min",
+  "servings": "1 sklenice (cca 400 ml)",
   "notes": [
-    "Marmelada je hotova, kdyz v lednici na lzicce ztuhne a netece"
+    "Marmeláda je hotová, když v lednici na lžičce ztuhne a neteče",
+    "Sterilní sklenice naplnit po okraj a otočit dnem vzhůru"
   ],
   "tags": [
-    "marmelada"
+    "marmeláda",
+    "rybíz",
+    "zavařeniny"
   ],
-  "author": "eBarborka",
-  "created": "2025-09-14T11:15:05.885Z"
+  "metadata": {
+    "createdDate": "2025-09-14T11:15:06Z",
+    "author": "eBarborka",
+    "lastModified": "2025-09-14T13:47:15Z"
+  }
 }

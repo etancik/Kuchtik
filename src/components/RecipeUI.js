@@ -331,8 +331,8 @@ class RecipeUI {
         console.log('📝 Original recipe ID:', this.editingRecipe.id);
         console.log('📄 Updated data:', formData);
         
-        // Update the recipe using repository (optimistic updates handled automatically)
-        await this.repository.update(this.editingRecipe.name, formData);
+        // Update the recipe using the original recipe ID, not the current name
+        await this.repository.update(this.editingRecipe.id, formData);
         
         // Close modal
         this.modal.hide();

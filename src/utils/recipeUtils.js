@@ -7,7 +7,7 @@
  * @param {string} text - Text to normalize
  * @returns {string} Normalized text without diacritics
  */
-function normalizeText(text) {
+export function normalizeText(text) {
   if (!text) return '';
   return text
     .toLowerCase()
@@ -492,4 +492,22 @@ export function formatRecipeSubtitle(recipe) {
   }
   
   return '';
+}
+
+/**
+ * Generate a consistent filename from recipe name
+ * Handles diacritics properly: "Guláš" -> "gulas", "Šťáva z arónie" -> "stava-z-aronie"
+ * @param {string} recipeName - Recipe name to convert
+ * @returns {string} Filename-safe string with diacritics removed and spaces as hyphens
+ */
+export function generateFilenameFromRecipeName(recipeName) {
+  if (!recipeName) return '.json';
+  
+  const filename = normalizeText(recipeName)
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/[^a-z0-9-]/g, '') // Remove any remaining non-alphanumeric characters except hyphens
+    .replace(/-+/g, '-') // Replace multiple consecutive hyphens with single hyphen
+    .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+  
+  return `${filename}.json`;
 }

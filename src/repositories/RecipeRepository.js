@@ -1,3 +1,5 @@
+import { generateFilenameFromRecipeName } from '../utils/recipeUtils.js';
+
 /**
  * RecipeRepository - A comprehensive data layer for recipe management
  * 
@@ -861,9 +863,8 @@ class RecipeRepository {
       return recipeName;
     }
     
-    // Convert recipe name to filename
-    // This is a simple conversion - in reality you might want more sophisticated logic
-    return `${recipeName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}.json`;
+    // Use the proper filename generation that handles Czech diacritics correctly
+    return generateFilenameFromRecipeName(recipeName);
   }
 }
 

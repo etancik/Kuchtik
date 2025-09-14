@@ -7,7 +7,8 @@ import {
   findRecipeByName,
   collectIngredientsFromRecipes,
   validateRecipe,
-  formatRecipeSubtitle
+  formatRecipeSubtitle,
+  generateFilenameFromRecipeName
 } from '../utils/recipeUtils.js';
 
 describe('recipeUtils', () => {
@@ -110,6 +111,47 @@ describe('recipeUtils', () => {
     test('should handle empty recipe', () => {
       const recipe = {};
       expect(formatRecipeSubtitle(recipe)).toBe('');
+    });
+  });
+
+  describe('generateFilenameFromRecipeName', () => {
+    test('should generate filename from recipe name with Czech diacritics', () => {
+      expect(generateFilenameFromRecipeName('Guláš')).toBe('gulas.json');
+    });
+
+    test('should generate filename from complex recipe names', () => {
+      expect(generateFilenameFromRecipeName('Šťáva z arónie')).toBe('stava-z-aronie.json');
+    });
+
+    test('should handle spaces and special characters', () => {
+      expect(generateFilenameFromRecipeName('Palačinky & šlehačka!')).toBe('palacinky-slehacka.json');
+    });
+
+    test('should handle already lowercased names', () => {
+      expect(generateFilenameFromRecipeName('bramborový salát')).toBe('bramborovy-salat.json');
+    });
+
+    test('should handle multiple consecutive spaces and hyphens', () => {
+      expect(generateFilenameFromRecipeName('Test   Recipe -- Name')).toBe('test-recipe-name.json');
+    });
+
+    test('should handle leading and trailing special characters', () => {
+      expect(generateFilenameFromRecipeName('  --Test Recipe--  ')).toBe('test-recipe.json');
+    });
+
+    test('should handle empty or invalid names', () => {
+      expect(generateFilenameFromRecipeName('')).toBe('.json');
+      expect(generateFilenameFromRecipeName(' ')).toBe('.json');
+      expect(generateFilenameFromRecipeName(null)).toBe('.json');
+      expect(generateFilenameFromRecipeName(undefined)).toBe('.json');
+    });
+
+    test('should match existing recipe filenames', () => {
+      // Test that our function generates consistent filenames
+      // (Note: Legacy files may have inconsistent naming)
+      expect(generateFilenameFromRecipeName('Palačinky')).toBe('palacinky.json');
+      expect(generateFilenameFromRecipeName('Guláš')).toBe('gulas.json');
+      expect(generateFilenameFromRecipeName('Šťáva z arónie')).toBe('stava-z-aronie.json');
     });
   });
 });
