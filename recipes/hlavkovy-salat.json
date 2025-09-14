@@ -1,0 +1,44 @@
+{
+  "name": "Hlavkovy salat",
+  "ingredients": [
+    {
+      "text": "1 salat",
+      "exportDefault": true
+    },
+    {
+      "text": "3 lzice mouckoveho cukru",
+      "exportDefault": true
+    },
+    {
+      "text": "2.5 lzice octa",
+      "exportDefault": true
+    },
+    {
+      "text": "0.5 lzicky soli",
+      "exportDefault": true
+    },
+    {
+      "text": "0.5 spetka mleteho cerneho pepre",
+      "exportDefault": true
+    },
+    {
+      "text": "200 ml ledove vody",
+      "exportDefault": true
+    }
+  ],
+  "instructions": [
+    "Salat natrhat",
+    "Zalivku smichat a pridat k salatu"
+  ],
+  "cookingTime": "15 min",
+  "servings": 2,
+  "notes": [
+    "Prvni zalivku ochutnej, nez ji nalijes na salat",
+    "Radeji mene pepre, s casem je salat palivejsi"
+  ],
+  "tags": [
+    "salat"
+  ],
+  "author": "eBarborka",
+  "created": "2025-09-14T16:16:48.804Z"
+}
