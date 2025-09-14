@@ -1,120 +1,141 @@
 # Kuchtik 🍳
 
-A recipe management application with iOS Shortcuts integration, built with vanilla JavaScript and a modular architecture.
+A recipe management web application with iOS Shortcuts integration, built with vanilla JavaScript.
 
 ## Features
 
-- 📱 **iOS Shortcuts Integration** - Export ingredients directly to iOS Reminders
-- 🔄 **Dynamic Recipe Loading** - Automatically discovers recipes from GitHub repository
-- 🃏 **Bootstrap UI** - Clean, responsive card-based interface
-- ✅ **Recipe Selection** - Multi-select recipes for batch ingredient export
-- 🔍 **GitHub API Integration** - Fetches recipe files dynamically
-- 🆕 **Recipe Creation** - Create new recipes through web UI with GitHub authentication
-- 🔐 **GitHub Authentication** - Personal Access Token for secure recipe creation
+- **Recipe Management**: Create, edit, and delete recipes with form validation
+- **GitHub Storage**: Recipes stored as JSON files in GitHub repository
+- **iOS Shortcuts Export**: Export selected recipe ingredients to iOS Shortcuts (can forward to Reminders)
+- **Search**: Filter recipes by name, tags, and ingredients with highlighting
+- **Internationalization**: Czech and English language support
+- **Drag & Drop**: Reorder recipe steps in the editor
+- **Caching**: 5-minute client-side caching for faster loading
+- **Authentication**: GitHub Personal Access Token authentication
+
+## Architecture
+
+Three-layer architecture:
+
+1. **RecipeRepository** (`src/repositories/RecipeRepository.js`)
+   - Recipe CRUD operations
+   - Client-side caching (5 minute expiry)
+   - Event emission for UI updates
+
+2. **GitHubAPIAdapter** (`src/adapters/GitHubAPIAdapter.js`)
+   - GitHub API communication
+   - Multiple loading strategies with fallbacks
+   - UTF-8 encoding handling
+
+3. **RecipeUI** (`src/components/RecipeUI.js`)
+   - Form handling and validation
+   - Drag & drop functionality
+   - Modal management
 
 ## Project Structure
 
-```
 ├── src/
-│   ├── components/           # UI components
-│   │   ├── RecipeCard.js     # Recipe card rendering
-│   │   └── RecipeCreationUI.js # Recipe creation form
-│   ├── services/             # External integrations
-│   │   ├── recipeAPI.js      # GitHub API & data loading
-│   │   ├── githubAuth.js     # GitHub authentication service
-│   │   └── recipeCreation.js # Recipe creation service
-│   ├── utils/                # Utility functions
-│   │   ├── recipeUtils.js    # Recipe data processing
-│   │   ├── shortcutsUtils.js # iOS Shortcuts integration
-│   │   └── templateLoader.js # HTML template loading utility
-│   ├── templates/            # HTML templates
-│   │   └── auth-modal.html   # Authentication modal template
-│   ├── config/               # Configuration
-│   │   └── github.js         # GitHub API configuration
-│   ├── __tests__/            # Unit tests
-│   └── main.js              # Application entry point
-├── recipes/              # Recipe JSON files
-├── index.html           # Main HTML file
-└── style.css           # Styles
-```
+│   ├── main.js                   # Application entry point
+│   ├── repositories/             # Data access layer
+│   ├── adapters/                 # GitHub API integration
+│   ├── components/               # UI components (RecipeCard, RecipeUI)
+│   ├── services/                 # Business services
+│   ├── utils/                    # Utility functions
+│   ├── templates/                # HTML templates
+│   ├── i18n/                     # Translation files
+│   ├── config/                   # Configuration
+│   └── __tests__/                # Test files
+├── recipes/                      # Recipe JSON files
+├── index.html                    # Main HTML
+└── style.css                     # Styles
 
-## Development Setup
+## Setup
 
-### Prerequisites
-- Node.js (v18 or higher)
-- npm
+**Requirements:**
+- Node.js (v18+)
+- Modern browser with ES modules support
 
-### Installation
+**Install:**
 ```bash
 npm install
+npm test  # Verify setup
 ```
 
-### GitHub Authentication Setup
+**Run:**
+```bash
+python3 -m http.server 8000
+# Open http://localhost:8000
+```
 
-To enable recipe creation, you need to authenticate with GitHub:
+## GitHub Authentication
 
-**Option 1: Personal Access Token (Recommended for personal use)**
+To create/edit recipes, authenticate with GitHub:
 
-1. **Create Personal Access Token**:
-   - Go to [GitHub Settings → Personal access tokens → Tokens (classic)](https://github.com/settings/tokens/new)
-   - Click "Generate new token (classic)"
-   - Set a note (e.g., "Kuchtik Recipe App")
+1. **Create Personal Access Token:**
+   - Go to [GitHub Settings → Personal access tokens](https://github.com/settings/tokens/new)
+   - Generate new token (classic)
    - Select scopes: `repo` and `user`
-   - Click "Generate token"
 
-2. **Use in Application**:
-   - Click "Sign In" in the app
-   - Follow the instructions to paste your token
-   - Token is stored securely in your browser's local storage
+2. **Configure:**
+   - Update `src/config/github.js` with your repository details
+   - Click "Sign In" in the app and paste your token
 
-**Configuration**:
-- Update `src/config/github.js` if your repository details differ:
-  ```javascript
-  export const CONFIG = {
-    REPO_OWNER: 'your-username',  // Update if different
-    REPO_NAME: 'your-repo-name',  // Update if different
-    // ... rest of config
-  };
-  ```
+## Available Scripts
 
-### Available Scripts
-
-- `npm test` - Run all tests
-- `npm run test:watch` - Run tests in watch mode  
-- `npm run test:coverage` - Run tests with coverage report
-- `npm run lint` - Lint code with ESLint
-- `npm run lint:fix` - Auto-fix linting issues
-- `npm run format` - Format code with Prettier
-
-### Project Structure
-
-```
-src/
-├── main.js              # Entry point
-├── services/            # API services
-├── utils/               # Utility functions  
-├── components/          # UI components
-└── __tests__/          # Test files
-    ├── setup.js        # Jest setup
-    └── *.test.js       # Test files
+```bash
+npm test              # Run tests
+npm run test:watch    # Watch mode
+npm run test:coverage # Coverage report
+npm run lint          # Check code style
+npm run lint:fix      # Fix style issues
 ```
 
-### Testing
+## API Usage
 
-We use Jest for testing with jsdom environment for DOM testing. All tests should be placed in `src/__tests__/` with `.test.js` extension.
+**RecipeRepository:**
+```javascript
+const repo = new RecipeRepository();
+const recipes = await repo.getAll();
+const recipe = await repo.get('recipe-id');
+await repo.create(recipeData);
+await repo.update('recipe-id', recipeData);
+await repo.delete('recipe-id');
+```
 
-### Linting
+**Events:**
+```javascript
+repo.on('recipesUpdated', (recipes) => {
+  // Handle recipe list changes
+});
+```
 
-ESLint v9 with recommended rules. Configuration in `eslint.config.mjs`.
+## Testing
 
-## Features
+214+ tests across 20 test files covering:
+- Unit tests for utilities and services
+- Integration tests for component interactions
+- Repository caching and event system
+- Form validation and error handling
 
-- ✅ Load recipes dynamically via GitHub API
-- ✅ Export ingredients to iOS Reminders
-- ✅ Bootstrap UI with responsive design
-- ✅ Modular architecture
-- ✅ Unit tests
+## Development Features
 
-## Browser Support
+**Caching:**
+- 5-minute client-side cache
+- Automatic cache invalidation
+- Debug tools: `recipeUI.showCacheStatus()`
 
-Modern browsers with ES2022 support.
+**Internationalization:**
+- Language files in `src/i18n/locales/`
+- Runtime language switching
+- Translation helper: `t('key')`
+
+**Error Handling:**
+- Network failure fallbacks
+- GitHub API rate limiting
+- Validation error display
+
+## Technical Details
+
+**Browser Support:** Modern browsers with ES2022 support
+**Dependencies:** Jest, ESLint, Prettier (dev only)
+**Deployment:** Static files, no build process required
