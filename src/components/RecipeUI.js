@@ -365,7 +365,11 @@ class RecipeUI {
     const ingredientElements = document.querySelectorAll('.ingredient-input');
     const ingredients = Array.from(ingredientElements)
       .map(input => input.value.trim())
-      .filter(value => value !== '');
+      .filter(value => value !== '')
+      .map(text => ({
+        text: text,
+        exportDefault: this.getDefaultExportValue()
+      }));
 
     const instructionElements = document.querySelectorAll('.instruction-input');
     const instructions = Array.from(instructionElements)
@@ -583,8 +587,13 @@ class RecipeUI {
           </button>
         `;
       } else {
+        // Handle ingredient objects vs strings
+        const displayValue = (containerId === 'ingredients-container' && typeof item === 'object' && item.text) 
+          ? item.text 
+          : item;
+        
         div.innerHTML = `
-          <${inputType} class="form-control ${inputClass}" value="${item}" ${containerId === 'ingredients-container' ? 'required' : ''}></${inputType}>
+          <${inputType} class="form-control ${inputClass}" value="${displayValue}" ${containerId === 'ingredients-container' ? 'required' : ''}></${inputType}>
           <button class="btn btn-outline-secondary" type="button" onclick="recipeUI.remove${this.getMethodSuffix(containerId)}(this)">
             <i class="fas fa-minus"></i>
           </button>
@@ -677,6 +686,16 @@ class RecipeUI {
     if (container.children.length > 0) {
       button.parentElement.remove();
     }
+  }
+
+  /**
+   * Determine the default export value for an ingredient
+   * @returns {boolean} - Default export value (currently true for all ingredients)
+   */
+  getDefaultExportValue() {
+    // For now, default all ingredients to be exported
+    // This could be enhanced in the future with smart detection
+    return true;
   }
 
   /**

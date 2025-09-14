@@ -21,7 +21,7 @@
   },
   "recipes": {
     "title": "Kuchtik",
-    "subtitle": "Tancer Family Cookbook",
+    "subtitle": "A Family Cookbook",
     "createRecipe": "Create Recipe",
     "searchPlaceholder": "Search recipes by name, tags, or ingredients...",
     "noRecipesTitle": "No Recipes Found",
@@ -51,6 +51,8 @@
     "description": "Review and select the ingredients you want to add to your shopping list. All ingredients are selected by default.",
     "selectAll": "Select All",
     "deselectAll": "Deselect All",
+    "portionScale": "Portion Scale",
+    "scaleDescription": "Multiply quantities by this factor",
     "selectedCount": "Selected:",
     "of": "of",
     "ingredients": "ingredients",

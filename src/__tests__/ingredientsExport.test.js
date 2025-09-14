@@ -10,6 +10,24 @@ jest.unstable_mockModule('../utils/shortcutsUtils.js', () => ({
   openShortcut: mockOpenShortcut
 }));
 
+// Mock template loader
+const mockLoadTemplate = jest.fn().mockResolvedValue(`
+  <div id="ingredientsModal" class="modal">
+    <div id="ingredientsList"></div>
+    <button id="selectAllIngredients"></button>
+    <button id="deselectAllIngredients"></button>
+    <button id="exportSelectedIngredients"></button>
+    <span id="selectedIngredientsCount">0</span>
+    <span id="totalIngredientsCount">0</span>
+  </div>
+`);
+
+jest.unstable_mockModule('../utils/templateLoader.js', () => ({
+  templateLoader: {
+    loadTemplate: mockLoadTemplate
+  }
+}));
+
 // Import after mocking
 const { ingredientsExportService } = await import('../services/ingredientsExport.js');
 
@@ -81,20 +99,27 @@ describe('IngredientsExportService', () => {
     });
 
     test('should handle individual ingredient checkbox changes', () => {
+      // Setup ingredients first
+      const testIngredients = [
+        { text: 'test ingredient 1', exportDefault: true },
+        { text: 'test ingredient 2', exportDefault: false }
+      ];
+      ingredientsExportService.ingredients = testIngredients;
+      
       const mockCheckbox = {
-        value: 'test ingredient',
+        dataset: { index: '0' },
         checked: true
       };
       
       ingredientsExportService.handleIngredientCheckboxChange(mockCheckbox);
       
-      expect(ingredientsExportService.selectedIngredients.has('test ingredient')).toBe(true);
+      expect(ingredientsExportService.selectedIngredients.has(testIngredients[0])).toBe(true);
       
       // Test unchecking
       mockCheckbox.checked = false;
       ingredientsExportService.handleIngredientCheckboxChange(mockCheckbox);
       
-      expect(ingredientsExportService.selectedIngredients.has('test ingredient')).toBe(false);
+      expect(ingredientsExportService.selectedIngredients.has(testIngredients[0])).toBe(false);
     });
   });
 
@@ -167,6 +192,89 @@ describe('IngredientsExportService', () => {
       
       const exportBtn = document.getElementById('exportSelectedIngredients');
       expect(exportBtn.disabled).toBe(false);
+    });
+  });
+
+  describe('exportDefault flag integration', () => {
+    test('should respect exportDefault flags from recipe ingredients', async () => {
+      // Simulate gulas recipe ingredients
+      const gulasIngredients = [
+        { text: "500 g hovězí kližky", exportDefault: true },
+        { text: "2 cibule", exportDefault: true },
+        { text: "2 stroužky česneku", exportDefault: true },
+        { text: "1 lžíce sladké papriky", exportDefault: true },
+        { text: "olej", exportDefault: false },
+        { text: "sůl", exportDefault: false },
+        { text: "pepř", exportDefault: false }
+      ];
+
+      await ingredientsExportService.showModal(gulasIngredients);
+
+      // Check that selected ingredients match exportDefault flags
+      const selectedArray = Array.from(ingredientsExportService.selectedIngredients);
+      const selectedTexts = selectedArray.map(ing => ing.text);
+
+      expect(selectedTexts).toContain("500 g hovězí kližky");
+      expect(selectedTexts).toContain("2 cibule");
+      expect(selectedTexts).toContain("2 stroužky česneku");
+      expect(selectedTexts).toContain("1 lžíce sladké papriky");
+      expect(selectedTexts).not.toContain("olej");
+      expect(selectedTexts).not.toContain("sůl");
+      expect(selectedTexts).not.toContain("pepř");
+
+      expect(ingredientsExportService.selectedIngredients.size).toBe(4);
+    });
+
+    test('should render checkboxes with correct checked state based on exportDefault', async () => {
+      const ingredients = [
+        { text: "test ingredient 1", exportDefault: true },
+        { text: "test ingredient 2", exportDefault: false }
+      ];
+
+      await ingredientsExportService.showModal(ingredients);
+
+      const checkboxes = document.querySelectorAll('.ingredient-checkbox');
+      expect(checkboxes).toHaveLength(2);
+      
+      expect(checkboxes[0].checked).toBe(true);  // exportDefault: true
+      expect(checkboxes[1].checked).toBe(false); // exportDefault: false
+    });
+
+    test('should handle object ingredients with explicit exportDefault flags', async () => {
+      const ingredients = [
+        { text: "test ingredient 1", exportDefault: true },
+        { text: "test ingredient 2", exportDefault: false }
+      ];
+
+      await ingredientsExportService.showModal(ingredients);
+
+      const selectedArray = Array.from(ingredientsExportService.selectedIngredients);
+      expect(selectedArray).toHaveLength(1);
+      expect(selectedArray[0].text).toBe("test ingredient 1");
+    });
+
+    test('should preserve exportDefault through normalization pipeline', async () => {
+      const ingredients = [
+        { text: "2 cibule", exportDefault: true },
+        { text: "1 cibule", exportDefault: false }, // Same ingredient name, different exportDefault
+        { text: "olej", exportDefault: false }
+      ];
+
+      await ingredientsExportService.showModal(ingredients);
+
+      // Should have 3 ingredients (no merging)
+      expect(ingredientsExportService.ingredients).toHaveLength(3);
+
+      const onionIngredient1 = ingredientsExportService.ingredients.find(ing => ing.text === '2 cibule');
+      const onionIngredient2 = ingredientsExportService.ingredients.find(ing => ing.text === '1 cibule');
+      const oilIngredient = ingredientsExportService.ingredients.find(ing => ing.text === 'olej');
+
+      expect(onionIngredient1.exportDefault).toBe(true);
+      expect(onionIngredient2.exportDefault).toBe(false);
+      expect(oilIngredient.exportDefault).toBe(false);
+
+      // Only ingredients with exportDefault: true should be selected
+      expect(ingredientsExportService.selectedIngredients.size).toBe(1);
     });
   });
 });

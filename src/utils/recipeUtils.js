@@ -437,6 +437,30 @@ export function collectIngredientsFromRecipes(recipes, selectedRecipeNames) {
 }
 
 /**
+ * Collect ingredients from selected recipes grouped by recipe
+ * @param {Object[]} recipes - Array of recipe objects
+ * @param {string[]} selectedRecipeNames - Array of selected recipe names
+ * @returns {Array} Array of recipe objects with ingredients and metadata
+ */
+export function collectIngredientsGroupedByRecipe(recipes, selectedRecipeNames) {
+  const groupedIngredients = [];
+  
+  selectedRecipeNames.forEach(recipeName => {
+    const recipe = findRecipeByName(recipes, recipeName);
+    if (recipe && recipe.ingredients) {
+      groupedIngredients.push({
+        recipeName: recipe.name,
+        recipeId: recipeName, // Use filename as ID
+        ingredients: recipe.ingredients,
+        defaultScale: 1
+      });
+    }
+  });
+  
+  return groupedIngredients;
+}
+
+/**
  * Validate recipe object structure
  * @param {Object} recipe - Recipe object to validate
  * @returns {boolean} True if recipe is valid

@@ -6,6 +6,7 @@
 import { templateLoader } from '../utils/templateLoader.js';
 import { t } from '../i18n/i18n.js';
 import { openShortcut } from '../utils/shortcutsUtils.js';
+import { normalizeIngredientsList, scaleIngredient, parseIngredient } from '../utils/smartIngredients.js';
 
 class IngredientsExportService {
   constructor() {
@@ -66,7 +67,6 @@ class IngredientsExportService {
     exportBtn.addEventListener('click', () => {
       this.exportSelectedIngredients();
     });
-    
     // Update translations when modal is shown
     modal.addEventListener('shown.bs.modal', () => {
       this.updateModalTranslations();
@@ -77,15 +77,73 @@ class IngredientsExportService {
    * Show the ingredients export modal with given ingredients
    * @param {string[]} ingredients - Array of ingredient strings
    */
-  async showModal(ingredients) {
+  /**
+   * Show the ingredients export modal
+   * @param {Array<string|Object>} rawIngredients - Raw ingredients in mixed format
+   */
+  async showModal(rawIngredients) {
     if (!this.isInitialized) {
       await this.init();
     }
 
-    this.ingredients = [...ingredients];
-    this.selectedIngredients = new Set(ingredients); // Select all by default
+    // Normalize ingredients (no merging)
+    const normalizedIngredients = normalizeIngredientsList(rawIngredients);
+
+    // Store processed ingredients
+    this.ingredients = normalizedIngredients;
+    
+    // Select ingredients based on their export defaults
+    this.selectedIngredients = new Set();
+    this.ingredients.forEach(ingredient => {
+      if (ingredient.exportDefault) {
+        this.selectedIngredients.add(ingredient);
+      }
+    });
     
     this.renderIngredientsList();
+    this.updateSelectionCounter();
+    this.modal.show();
+  }
+
+  /**
+   * Show the ingredients export modal with grouped recipes (each recipe has its own scale)
+   * @param {Array} groupedRecipes - Array of recipe objects with ingredients
+   */
+  async showModalWithGroupedRecipes(groupedRecipes) {
+    if (!this.isInitialized) {
+      await this.init();
+    }
+
+    // Store grouped recipes data
+    this.groupedRecipes = groupedRecipes;
+    this.recipeScales = new Map();
+    
+    // Initialize scales for each recipe
+    groupedRecipes.forEach(recipe => {
+      this.recipeScales.set(recipe.recipeId, recipe.defaultScale || 1);
+    });
+
+    // Flatten and normalize all ingredients for selection tracking
+    const allIngredients = [];
+    groupedRecipes.forEach(recipe => {
+      const normalizedIngredients = normalizeIngredientsList(recipe.ingredients);
+      normalizedIngredients.forEach(ingredient => {
+        ingredient._recipeId = recipe.recipeId; // Add recipe reference
+        allIngredients.push(ingredient);
+      });
+    });
+
+    this.ingredients = allIngredients;
+    
+    // Select ingredients based on their export defaults
+    this.selectedIngredients = new Set();
+    this.ingredients.forEach(ingredient => {
+      if (ingredient.exportDefault) {
+        this.selectedIngredients.add(ingredient);
+      }
+    });
+    
+    this.renderGroupedIngredientsList();
     this.updateSelectionCounter();
     this.modal.show();
   }
@@ -95,6 +153,7 @@ class IngredientsExportService {
    */
   renderIngredientsList() {
     const container = document.getElementById('ingredientsList');
+    if (!container) return;
     
     if (this.ingredients.length === 0) {
       container.innerHTML = `
@@ -106,19 +165,69 @@ class IngredientsExportService {
       return;
     }
 
+    // Single-recipe mode: no scaling applied (scale = 1)
+    const scale = 1;
+
     const ingredientsHTML = this.ingredients.map((ingredient, index) => {
       const isSelected = this.selectedIngredients.has(ingredient);
       const ingredientId = `ingredient-${index}`;
+      const originalText = ingredient.text || ingredient;
+      
+      // Apply scaling to the ingredient text if scale is not 1
+      let displayText;
+      let showMultiplier = false;
+      
+      if (scale !== 1) {
+        try {
+          // If it's a simple string ingredient, parse it first
+          if (typeof ingredient === 'string') {
+            const parsed = parseIngredient(originalText);
+            if (parsed.amount && !isNaN(parsed.amount)) {
+              // We have a numeric amount, calculate the scaled amount
+              const scaledAmount = (parsed.amount * scale).toString();
+              const unit = parsed.unit || '';
+              const ingredientName = parsed.ingredient || '';
+              displayText = `${scaledAmount} ${unit} ${ingredientName}`.trim();
+              showMultiplier = false;
+            } else {
+              // No numeric amount, show original with multiplier
+              displayText = originalText;
+              showMultiplier = true;
+            }
+          } else {
+            // For ingredient objects, check if they have numeric amounts
+            if (ingredient.amount && !isNaN(ingredient.amount)) {
+              const scaledAmount = (ingredient.amount * scale).toString();
+              const unit = ingredient.unit || '';
+              const ingredientName = ingredient.ingredient || '';
+              displayText = `${scaledAmount} ${unit} ${ingredientName}`.trim();
+              showMultiplier = false;
+            } else {
+              displayText = ingredient.text || originalText;
+              showMultiplier = true;
+            }
+          }
+        } catch {
+          // If parsing fails, show original with multiplier
+          displayText = originalText;
+          showMultiplier = true;
+        }
+      } else {
+        displayText = originalText;
+        showMultiplier = false;
+      }
       
       return `
         <div class="form-check mb-2">
           <input class="form-check-input ingredient-checkbox" 
                  type="checkbox" 
-                 value="${this.escapeHtml(ingredient)}" 
+                 value="${this.escapeHtml(displayText)}" 
                  id="${ingredientId}"
+                 data-index="${index}"
                  ${isSelected ? 'checked' : ''}>
           <label class="form-check-label" for="${ingredientId}">
-            ${this.escapeHtml(ingredient)}
+            ${this.escapeHtml(displayText)}
+            ${showMultiplier && scale !== 1 ? `<small class="text-muted ms-2">(×${scale})</small>` : ''}
           </label>
         </div>
       `;
@@ -135,11 +244,170 @@ class IngredientsExportService {
   }
 
   /**
+   * Render ingredients list grouped by recipe with individual scaling
+   */
+  renderGroupedIngredientsList() {
+    const container = document.getElementById('ingredientsList');
+    if (!container) return;
+
+    if (!this.groupedRecipes || this.groupedRecipes.length === 0) {
+      container.innerHTML = `
+        <div class="text-muted text-center py-4">
+          <i class="fas fa-list-ul fa-3x mb-3 opacity-50"></i><br>
+          <span data-i18n="ingredientsExport.noIngredients">No ingredients found</span>
+        </div>
+      `;
+      return;
+    }
+
+    const recipeSectionsHTML = this.groupedRecipes.map((recipe, recipeIndex) => {
+      const recipeScale = this.recipeScales.get(recipe.recipeId) || 1;
+      const normalizedIngredients = normalizeIngredientsList(recipe.ingredients);
+      
+      const ingredientsHTML = normalizedIngredients.map((ingredient, ingredientIndex) => {
+        const globalIndex = this.ingredients.findIndex(ing => 
+          ing._recipeId === recipe.recipeId && 
+          (ing.text === ingredient.text || ing === ingredient)
+        );
+        const isSelected = this.selectedIngredients.has(this.ingredients[globalIndex]);
+        
+        // Apply scaling to display text
+        let displayText;
+        let showMultiplier = false;
+        
+        if (recipeScale !== 1) {
+          try {
+            if (ingredient.amount && !isNaN(ingredient.amount)) {
+              const scaledAmount = (ingredient.amount * recipeScale).toString();
+              const unit = ingredient.unit || '';
+              const ingredientName = ingredient.ingredient || '';
+              displayText = `${scaledAmount} ${unit} ${ingredientName}`.trim();
+              showMultiplier = false;
+            } else {
+              displayText = ingredient.text;
+              showMultiplier = true;
+            }
+          } catch {
+            displayText = ingredient.text;
+            showMultiplier = true;
+          }
+        } else {
+          displayText = ingredient.text;
+          showMultiplier = false;
+        }
+        
+        return `
+          <div class="form-check mb-2">
+            <input class="form-check-input ingredient-checkbox" 
+                   type="checkbox" 
+                   value="${this.escapeHtml(ingredient.text)}" 
+                   id="ingredient-${recipeIndex}-${ingredientIndex}" 
+                   data-global-index="${globalIndex}"
+                   ${isSelected ? 'checked' : ''}>
+            <label class="form-check-label" for="ingredient-${recipeIndex}-${ingredientIndex}">
+              ${this.escapeHtml(displayText)}
+              ${showMultiplier && recipeScale !== 1 ? `<small class="text-muted ms-2">(×${recipeScale})</small>` : ''}
+            </label>
+          </div>
+        `;
+      }).join('');
+
+      return `
+        <div class="recipe-section mb-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="mb-0">
+              <i class="fas fa-utensils me-2"></i>
+              ${this.escapeHtml(recipe.recipeName)}
+            </h6>
+            <div class="d-flex align-items-center">
+              <small class="text-muted me-2">Scale:</small>
+              <div class="input-group input-group-sm" style="width: 120px;">
+                <button class="btn btn-outline-secondary recipe-scale-decrease" 
+                        type="button" data-recipe-id="${recipe.recipeId}">
+                  <i class="fas fa-minus"></i>
+                </button>
+                <input type="number" 
+                       class="form-control text-center recipe-scale-input" 
+                       data-recipe-id="${recipe.recipeId}"
+                       value="${recipeScale}" 
+                       min="0.25" max="4" step="0.25">
+                <button class="btn btn-outline-secondary recipe-scale-increase" 
+                        type="button" data-recipe-id="${recipe.recipeId}">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="ms-3">
+            ${ingredientsHTML}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    container.innerHTML = recipeSectionsHTML;
+    
+    // Add event listeners
+    this.setupGroupedEventListeners(container);
+  }
+
+  /**
+   * Setup event listeners for grouped recipe controls
+   */
+  setupGroupedEventListeners(container) {
+    // Ingredient checkboxes
+    container.querySelectorAll('.ingredient-checkbox').forEach(checkbox => {
+      checkbox.addEventListener('change', (e) => {
+        const globalIndex = parseInt(e.target.dataset.globalIndex, 10);
+        const ingredient = this.ingredients[globalIndex];
+        if (e.target.checked) {
+          this.selectedIngredients.add(ingredient);
+        } else {
+          this.selectedIngredients.delete(ingredient);
+        }
+        this.updateSelectionCounter();
+      });
+    });
+
+    // Recipe scale inputs
+    container.querySelectorAll('.recipe-scale-input').forEach(input => {
+      input.addEventListener('input', (e) => {
+        const recipeId = e.target.dataset.recipeId;
+        const newScale = parseFloat(e.target.value) || 1;
+        this.recipeScales.set(recipeId, newScale);
+        this.renderGroupedIngredientsList();
+      });
+    });
+
+    // Recipe scale increase/decrease buttons
+    container.querySelectorAll('.recipe-scale-increase').forEach(button => {
+      button.addEventListener('click', (e) => {
+        const recipeId = e.currentTarget.dataset.recipeId;
+        const currentScale = this.recipeScales.get(recipeId) || 1;
+        const newScale = this.getNextScale(currentScale);
+        this.recipeScales.set(recipeId, newScale);
+        this.renderGroupedIngredientsList();
+      });
+    });
+
+    container.querySelectorAll('.recipe-scale-decrease').forEach(button => {
+      button.addEventListener('click', (e) => {
+        const recipeId = e.currentTarget.dataset.recipeId;
+        const currentScale = this.recipeScales.get(recipeId) || 1;
+        const newScale = this.getPreviousScale(currentScale);
+        this.recipeScales.set(recipeId, newScale);
+        this.renderGroupedIngredientsList();
+      });
+    });
+  }
+
+  /**
    * Handle individual ingredient checkbox change
    * @param {HTMLInputElement} checkbox - The checkbox element
    */
   handleIngredientCheckboxChange(checkbox) {
-    const ingredient = checkbox.value;
+    const index = parseInt(checkbox.dataset.index, 10);
+    const ingredient = this.ingredients[index];
     
     if (checkbox.checked) {
       this.selectedIngredients.add(ingredient);
@@ -201,25 +469,60 @@ class IngredientsExportService {
    * Export selected ingredients to shopping list
    */
   async exportSelectedIngredients() {
-    const selected = Array.from(this.selectedIngredients);
+    const selectedIngredientObjects = Array.from(this.selectedIngredients);
     
-    if (selected.length === 0) {
+    if (selectedIngredientObjects.length === 0) {
       alert(t('ingredientsExport.noIngredientsSelected'));
       return;
     }
 
     try {
+      let selectedIngredientTexts;
+      
+      if (this.groupedRecipes && this.recipeScales) {
+        // Grouped mode: apply per-recipe scaling
+        selectedIngredientTexts = selectedIngredientObjects.map(ingredient => {
+          const recipeId = ingredient._recipeId;
+          const scale = this.recipeScales.get(recipeId) || 1;
+          const originalText = ingredient.text || ingredient;
+          
+          if (scale !== 1) {
+            try {
+              if (ingredient.amount && !isNaN(ingredient.amount)) {
+                const scaledAmount = (ingredient.amount * scale).toString();
+                const unit = ingredient.unit || '';
+                const ingredientName = ingredient.ingredient || '';
+                return `${scaledAmount} ${unit} ${ingredientName}`.trim();
+              } else {
+                return originalText; // Can't scale non-numeric ingredients
+              }
+            } catch {
+              return originalText;
+            }
+          }
+          return originalText;
+        });
+      } else {
+        // Single mode: no scaling applied (scale = 1)
+        const scale = 1;
+        
+        selectedIngredientTexts = selectedIngredientObjects.map(ingredient => {
+          const originalText = ingredient.text || ingredient;
+          return scale !== 1 ? scaleIngredient(originalText, scale) : originalText;
+        });
+      }
+      
       // Hide the modal
       this.modal.hide();
       
       // Show success message
-      const count = selected.length;
+      const count = selectedIngredientTexts.length;
       const plural = count === 1 ? '' : 's';
       const message = t('ingredientsExport.exportSuccess', { count, plural });
       this.showSuccessMessage(message);
       
       // Open shortcut with selected ingredients
-      openShortcut(selected);
+      openShortcut(selectedIngredientTexts);
       
     } catch (error) {
       console.error('❌ Export failed:', error);
@@ -269,6 +572,46 @@ class IngredientsExportService {
     toastElement.addEventListener('hidden.bs.toast', () => {
       toastElement.remove();
     });
+  }
+
+  /**
+   * Get the next larger scale value using practical cooking ratios
+   * @param {number} currentValue - Current scale value
+   * @returns {number} Next scale value
+   */
+  getNextScale(currentValue) {
+    // Common cooking scale ratios: 0.25 (quarter), 0.5 (half), 1, 2 (double), 4 (quadruple)
+    const scales = [0.25, 0.5, 1, 2, 4];
+    
+    // Find the next larger scale
+    for (const scale of scales) {
+      if (scale > currentValue) {
+        return scale;
+      }
+    }
+    
+    // If already at max, stay at max
+    return scales[scales.length - 1];
+  }
+
+  /**
+   * Get the next smaller scale value using practical cooking ratios
+   * @param {number} currentValue - Current scale value
+   * @returns {number} Previous scale value
+   */
+  getPreviousScale(currentValue) {
+    // Common cooking scale ratios: 0.25 (quarter), 0.5 (half), 1, 2 (double), 4 (quadruple)
+    const scales = [0.25, 0.5, 1, 2, 4];
+    
+    // Find the next smaller scale
+    for (let i = scales.length - 1; i >= 0; i--) {
+      if (scales[i] < currentValue) {
+        return scales[i];
+      }
+    }
+    
+    // If already at min, stay at min
+    return scales[0];
   }
 
   /**

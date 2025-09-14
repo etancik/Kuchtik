@@ -5,7 +5,7 @@
 import RecipeRepository from './repositories/RecipeRepository.js';
 import gitHubAPIAdapter from './adapters/GitHubAPIAdapter.js';
 import { renderRecipeCard } from './components/RecipeCard.js';
-import { getSelectedRecipeNames, collectIngredientsFromRecipes, searchRecipesWithHighlighting } from './utils/recipeUtils.js';
+import { getSelectedRecipeNames, collectIngredientsGroupedByRecipe, searchRecipesWithHighlighting } from './utils/recipeUtils.js';
 import { recipeUI } from './components/RecipeUI.js';
 import { githubAuth } from './services/githubAuth.js';
 import { ingredientsExportService } from './services/ingredientsExport.js';
@@ -393,15 +393,15 @@ async function handleExportClick() {
       return;
     }
     
-    const ingredients = collectIngredientsFromRecipes(state.recipes, selectedNames);
+    const groupedRecipes = collectIngredientsGroupedByRecipe(state.recipes, selectedNames);
     
-    if (ingredients.length === 0) {
+    if (groupedRecipes.length === 0) {
       alert(t('recipes.noIngredientsToExport'));
       return;
     }
     
-    // Show ingredients modal instead of directly opening shortcuts
-    await ingredientsExportService.showModal(ingredients);
+    // Show ingredients modal with grouped recipes (each recipe has its own scale)
+    await ingredientsExportService.showModalWithGroupedRecipes(groupedRecipes);
   } catch (error) {
     console.error('Export failed:', error);
     alert(t('recipes.exportFailed'));

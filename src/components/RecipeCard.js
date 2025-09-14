@@ -78,13 +78,18 @@ export function createRecipeCard(recipe, options = {}) {
   // Apply highlighting to ingredients for display
   const highlightedIngredients = Array.isArray(recipeIngredients) ? 
     recipeIngredients.map(ingredient => {
+      // Handle both string and object formats for ingredients
+      const ingredientText = typeof ingredient === 'string' ? ingredient : ingredient.text;
+      
       // Find matches that apply to this ingredient
-      const ingredientText = recipeIngredients.join(' ');
+      const allIngredientsText = recipeIngredients.map(ing => 
+        typeof ing === 'string' ? ing : ing.text
+      ).join(' ');
       const relevantMatches = ingredientMatches.filter(match => {
-        const matchText = ingredientText.substring(match.start, match.end);
-        return ingredient.toLowerCase().includes(matchText.toLowerCase());
+        const matchText = allIngredientsText.substring(match.start, match.end);
+        return ingredientText.toLowerCase().includes(matchText.toLowerCase());
       });
-      return highlightText(ingredient, relevantMatches);
+      return highlightText(ingredientText, relevantMatches);
     }) : [];
     
   const ingredients = highlightedIngredients.length > 0 
