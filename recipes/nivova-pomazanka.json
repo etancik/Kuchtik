@@ -1,0 +1,46 @@
+{
+  "name": "Nivova pomazanka",
+  "ingredients": [
+    {
+      "text": "1 Niva",
+      "exportDefault": true
+    },
+    {
+      "text": "1 Ricotta/Tvaroh",
+      "exportDefault": true
+    },
+    {
+      "text": "1 lzice horcice plnotucne",
+      "exportDefault": true
+    },
+    {
+      "text": "1 lzice masla",
+      "exportDefault": true
+    },
+    {
+      "text": "pepr",
+      "exportDefault": true
+    },
+    {
+      "text": "sul",
+      "exportDefault": true
+    },
+    {
+      "text": "1 mensi cibule",
+      "exportDefault": true
+    }
+  ],
+  "instructions": [
+    "Vse smichat"
+  ],
+  "cookingTime": "15 min",
+  "servings": 1,
+  "notes": [
+    "Vyborne se zelenyma hroznama"
+  ],
+  "tags": [
+    "pomazanka"
+  ],
+  "author": "eBarborka",
+  "created": "2025-09-14T15:36:56.477Z"
+}
