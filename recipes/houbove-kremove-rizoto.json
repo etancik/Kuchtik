@@ -1,0 +1,59 @@
+{
+  "name": "Houbove kremove rizoto",
+  "ingredients": [
+    {
+      "text": "2 cervene cibule",
+      "exportDefault": true
+    },
+    {
+      "text": "200g parizskych hub",
+      "exportDefault": true
+    },
+    {
+      "text": "350g kulatozrnne ryze",
+      "exportDefault": true
+    },
+    {
+      "text": "1 glutamatova kostka",
+      "exportDefault": true
+    },
+    {
+      "text": "0.5 sklenice bileho vina",
+      "exportDefault": true
+    },
+    {
+      "text": "200 ml smetany na slehani",
+      "exportDefault": true
+    },
+    {
+      "text": "olivovy olej",
+      "exportDefault": true
+    },
+    {
+      "text": "1 baleni parmazanu",
+      "exportDefault": true
+    }
+  ],
+  "instructions": [
+    "Orestovat nakrajene cibulky a houby na masle",
+    "Stahnout vykon a nechat karamelizovat",
+    "Kdyz je zkaramelizovane, pridat vino a nechat povarit",
+    "Kdyz vetsina vina je vyparena, pridej smetanu a nech zhoustnout a dej z ohne",
+    "V druhe panvi orestuj ryzi na oleji dokud ryze neni pruhledna",
+    "Stahni vykon a pridej vodu a kostku glutamatu",
+    "Prikryj a nech varit 15 min",
+    "Pokud ryze neni porad hotova, tak pridej vodu a dal var",
+    "Jakmile je ryze uvarena, pridej mix cibule/smetany/hub",
+    "Pridej po chvili parmazan"
+  ],
+  "cookingTime": "90 min",
+  "servings": 4,
+  "notes": [
+    "Navrch se da dat karamelizovana slanina z trouby"
+  ],
+  "tags": [
+    "obed"
+  ],
+  "author": "eBarborka",
+  "created": "2025-09-14T15:57:21.543Z"
+}
