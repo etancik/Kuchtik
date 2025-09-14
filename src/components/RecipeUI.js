@@ -138,7 +138,7 @@ class RecipeUI {
    * @param {Object} event - Event data
    */
   handleOperationSuccess(event) {
-    const { operation, recipe } = event;
+    const { operation } = event;
     
     let message;
     switch (operation) {
