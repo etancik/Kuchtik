@@ -36,8 +36,14 @@
     "Těsto by mělo mít konzistenci řídké smetany",
     "První palačinka často nevyjde, to je normální"
   ],
-  "tags": ["dezert", "snídaně", "pečení"],
+  "tags": [
+    "dezert",
+    "snídaně",
+    "pečení"
+  ],
   "metadata": {
+    "id": "palacinky",
+    "sha": "abc123def456",
     "createdDate": "2025-09-12T22:01:00Z",
     "author": "Lukáš Tancer",
     "lastModified": "2025-09-14T13:47:15Z"

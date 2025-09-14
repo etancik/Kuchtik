@@ -58,11 +58,18 @@ export class PublicGitHubAdapter {
 
       const recipe = await response.json();
       
-      // Add basic metadata
-      recipe.id = filename.replace('.json', '');
-      recipe.lastModified = new Date().toISOString(); // We don't have real modification date
+      // Ensure metadata object exists and has id
+      if (!recipe.metadata) {
+        recipe.metadata = {};
+      }
+      if (!recipe.metadata.id) {
+        recipe.metadata.id = filename.replace('.json', '');
+      }
+      if (!recipe.metadata.lastModified) {
+        recipe.metadata.lastModified = new Date().toISOString(); // We don't have real modification date
+      }
       
-      console.log(`✅ Loaded public recipe: ${recipe.name || recipe.id}`);
+      console.log(`✅ Loaded public recipe: ${recipe.name || recipe.metadata.id}`);
       return recipe;
       
     } catch (error) {

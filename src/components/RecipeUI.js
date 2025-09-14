@@ -348,11 +348,12 @@ class RecipeUI {
       
       if (this.isEditing) {
         console.log('🔄 Updating existing recipe...');
-        console.log('📝 Original recipe ID:', this.editingRecipe.id);
+        console.log('📝 Original recipe ID:', this.editingRecipe.metadata?.id || this.editingRecipe.id);
         console.log('📄 Updated data:', formData);
         
         // Update the recipe using the original recipe ID, not the current name
-        await this.repository.update(this.editingRecipe.id, formData);
+        const recipeId = this.editingRecipe.metadata?.id || this.editingRecipe.id;
+        await this.repository.update(recipeId, formData);
         
         // Close modal
         this.modal.hide();
@@ -424,30 +425,29 @@ class RecipeUI {
 
     // Preserve existing metadata when editing
     if (this.isEditing && this.editingRecipe) {
-      // Preserve essential fields for GitHub operations
-      if (this.editingRecipe.id) {
-        recipeData.id = this.editingRecipe.id;
-      }
-      if (this.editingRecipe.sha) {
-        recipeData.sha = this.editingRecipe.sha;
-      }
-      if (this.editingRecipe.lastModified) {
-        recipeData.lastModified = new Date().toISOString();
+      // Ensure metadata object exists
+      if (!recipeData.metadata) {
+        recipeData.metadata = {};
       }
       
-      // Preserve existing metadata
+      // Preserve essential fields from metadata or fallback to root level (backward compatibility)
+      if (this.editingRecipe.metadata?.id || this.editingRecipe.id) {
+        recipeData.metadata.id = this.editingRecipe.metadata?.id || this.editingRecipe.id;
+      }
+      if (this.editingRecipe.metadata?.sha || this.editingRecipe.sha) {
+        recipeData.metadata.sha = this.editingRecipe.metadata?.sha || this.editingRecipe.sha;
+      }
+      
+      // Always update lastModified for edits
+      recipeData.metadata.lastModified = new Date().toISOString();
+      
+      // Preserve existing metadata fields
       if (this.editingRecipe.metadata) {
         recipeData.metadata = {
           ...this.editingRecipe.metadata,
+          ...recipeData.metadata, // Keep any updates we made above
           lastModified: new Date().toISOString()
         };
-      }
-      // Preserve other existing fields that aren't part of the form
-      if (this.editingRecipe.author && !recipeData.metadata) {
-        recipeData.author = this.editingRecipe.author;
-      }
-      if (this.editingRecipe.created && !recipeData.metadata) {
-        recipeData.created = this.editingRecipe.created;
       }
     } else if (!this.isEditing && this.repository.githubAPI.isAuthenticated()) {
       // Add metadata for new recipes only

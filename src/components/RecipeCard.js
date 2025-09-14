@@ -104,7 +104,7 @@ export function createRecipeCard(recipe, options = {}) {
       ? `<div class="mt-3"><h6>${t('recipeForm.notes')}:</h6><ul>${recipeNotes.map((n) => `<li>${n}</li>`).join('')}</ul></div>`
       : '';
 
-  const recipeId = recipe.id || recipeName.replace(/\s+/g, '-').toLowerCase();
+  const recipeId = recipe.metadata?.id || recipeName.replace(/\s+/g, '-').toLowerCase();
   const isAuthenticated = githubAuth.isAuthenticated();
 
   div.innerHTML = `
@@ -155,7 +155,7 @@ export function createRecipeCard(recipe, options = {}) {
                   <i class="fas fa-edit"></i>
                 </button>
                 <button class="btn btn-outline-danger btn-sm delete-recipe-btn" 
-                        data-recipe-id='${recipe.id || recipeName}' 
+                        data-recipe-id='${recipe.metadata?.id || recipeName}' 
                         data-recipe-name='${recipeName}' 
                         title="${t('recipes.deleteRecipe')}"
                         style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">

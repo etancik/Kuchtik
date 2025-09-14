@@ -129,12 +129,15 @@ export class GitHubAPIAdapter {
             const content = decodeBase64(contentData.content);
             const recipe = JSON.parse(content);
             
-            // Add metadata
-            recipe.id = file.name.replace('.json', '');
-            recipe.sha = contentData.sha;
-            recipe.lastModified = new Date().toISOString(); // GitHub doesn't provide this easily
+            // Ensure metadata object exists
+            if (!recipe.metadata) {
+              recipe.metadata = {};
+            }
+            recipe.metadata.id = file.name.replace('.json', '');
+            recipe.metadata.sha = contentData.sha;
+            recipe.metadata.lastModified = new Date().toISOString(); // GitHub doesn't provide this easily
             
-            console.log(`✅ Successfully loaded recipe: ${recipe.name || recipe.id}`);
+            console.log(`✅ Successfully loaded recipe: ${recipe.name || recipe.metadata.id}`);
             return recipe;
             
           } catch (error) {
@@ -190,10 +193,13 @@ export class GitHubAPIAdapter {
       const content = decodeBase64(contentData.content);
       const recipe = JSON.parse(content);
       
-      // Add metadata
-      recipe.id = id;
-      recipe.sha = contentData.sha;
-      recipe.lastModified = new Date().toISOString();
+      // Ensure metadata object exists
+      if (!recipe.metadata) {
+        recipe.metadata = {};
+      }
+      recipe.metadata.id = id;
+      recipe.metadata.sha = contentData.sha;
+      recipe.metadata.lastModified = new Date().toISOString();
       
       console.log(`✅ Successfully loaded recipe: ${recipe.name || id}`);
       return recipe;
@@ -328,7 +334,7 @@ export class GitHubAPIAdapter {
       const requestBody = {
         message: `Update recipe: ${recipe.name}`,
         content: encodedContent,
-        sha: currentRecipe.sha,
+        sha: currentRecipe.metadata?.sha || currentRecipe.sha, // Support both new and old format
         author: author,
         committer: author,
       };
@@ -394,7 +400,7 @@ export class GitHubAPIAdapter {
       
       const requestBody = {
         message: `Delete recipe: ${currentRecipe.name || id}`,
-        sha: currentRecipe.sha,
+        sha: currentRecipe.metadata?.sha || currentRecipe.sha, // Support both new and old format
         author: author,
         committer: author,
       };
@@ -689,13 +695,16 @@ export class GitHubAPIAdapter {
             const content = decodeBase64(blobData.content);
             const recipe = JSON.parse(content);
             
-            // Add metadata
+            // Ensure metadata object exists
+            if (!recipe.metadata) {
+              recipe.metadata = {};
+            }
             const filename = file.path.replace('recipes/', '');
-            recipe.id = filename.replace('.json', '');
-            recipe.sha = file.sha;
-            recipe.lastModified = new Date().toISOString(); // We don't have commit date easily, use current time
+            recipe.metadata.id = filename.replace('.json', '');
+            recipe.metadata.sha = file.sha;
+            recipe.metadata.lastModified = new Date().toISOString(); // We don't have commit date easily, use current time
             
-            console.log(`✅ Loaded recipe: ${recipe.name || recipe.id}`);
+            console.log(`✅ Loaded recipe: ${recipe.name || recipe.metadata.id}`);
             return recipe;
             
           } catch (error) {
