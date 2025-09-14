@@ -525,6 +525,11 @@ class RecipeUI {
         recipeData.metadata.sha = this.editingRecipe.metadata?.sha || this.editingRecipe.sha;
       }
       
+      // Preserve filename if available
+      if (this.editingRecipe.metadata?.filename || this.editingRecipe.filename) {
+        recipeData.metadata.filename = this.editingRecipe.metadata?.filename || this.editingRecipe.filename;
+      }
+      
       // Always update lastModified for edits
       recipeData.metadata.lastModified = new Date().toISOString();
       
@@ -539,10 +544,24 @@ class RecipeUI {
     } else if (!this.isEditing && this.repository.githubAPI.isAuthenticated()) {
       // Add metadata for new recipes only
       const userInfo = this.repository.githubAPI.getCurrentUser();
+      const now = new Date().toISOString();
+      
       recipeData.metadata = {
-        createdDate: new Date().toISOString(),
+        id: null, // Will be set after GitHub API response
+        sha: null, // Will be set after GitHub API response
+        createdDate: now,
+        createdAt: now, // Add both for compatibility
         author: userInfo?.login || 'Anonymous',
-        lastModified: new Date().toISOString()
+        lastModified: now,
+        filename: null // Will be set by the repository when saving
+      };
+    } else if (!this.isEditing) {
+      // Even for non-authenticated users, add basic timestamp for sorting
+      const now = new Date().toISOString();
+      recipeData.metadata = {
+        createdDate: now,
+        createdAt: now,
+        lastModified: now
       };
     }
 
@@ -1135,20 +1154,18 @@ class RecipeUI {
    */
   setupStepDragAndDrop(stepItem) {
     stepItem.addEventListener('dragstart', (e) => {
-      console.log('Drag start:', stepItem);
       this.draggedElement = stepItem;
       stepItem.classList.add('dragging');
       e.dataTransfer.effectAllowed = 'move';
     });
     
     stepItem.addEventListener('dragend', () => {
-      console.log('Drag end');
       stepItem.classList.remove('dragging');
       this.draggedElement = null;
       // Clean up all drop indicators
       const allSteps = document.querySelectorAll('.step-item');
       allSteps.forEach(step => {
-        step.classList.remove('drag-over', 'drop-above', 'drop-below');
+        step.classList.remove('drag-over');
       });
     });
     
@@ -1175,8 +1192,6 @@ class RecipeUI {
       e.preventDefault();
       e.stopPropagation();
       
-      console.log('Drop on:', stepItem, 'dragged:', this.draggedElement);
-      
       stepItem.classList.remove('drag-over');
       
       const container = document.getElementById('instructions-container');
@@ -1184,14 +1199,10 @@ class RecipeUI {
       const mouseY = e.clientY;
       const centerY = rect.top + rect.height / 2;
       
-      console.log('Mouse Y:', mouseY, 'Center Y:', centerY);
-      
       // Insert based on mouse position
       if (mouseY < centerY) {
-        console.log('Inserting before');
         container.insertBefore(this.draggedElement, stepItem);
       } else {
-        console.log('Inserting after');
         const nextSibling = stepItem.nextSibling;
         if (nextSibling) {
           container.insertBefore(this.draggedElement, nextSibling);
@@ -1202,7 +1213,6 @@ class RecipeUI {
       
       // Update step numbers
       this.updateStepNumbers();
-      console.log('Reorder complete');
     });
   }
 

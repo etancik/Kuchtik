@@ -20,6 +20,34 @@ const state = {
 };
 
 /**
+ * Sort recipes by lastModified date (most recently modified first)
+ * @param {Array} recipes - Array of recipe objects to sort
+ * @returns {Array} Sorted array of recipes
+ */
+function sortRecipesByDate(recipes) {
+  return recipes.sort((a, b) => {
+    // Check multiple possible timestamp fields, prioritize lastModified
+    const aDate = a.metadata?.lastModified || a.lastModified || a.metadata?.createdAt || a.metadata?.createdDate || a.createdDate || a.createdAt;
+    const bDate = b.metadata?.lastModified || b.lastModified || b.metadata?.createdAt || b.metadata?.createdDate || b.createdDate || b.createdAt;
+    
+    const aParsed = aDate ? new Date(aDate) : new Date(0);
+    const bParsed = bDate ? new Date(bDate) : new Date(0);
+    
+    // If both have dates, sort by date (newest first)
+    if (aParsed.getTime() !== 0 && bParsed.getTime() !== 0) {
+      return bParsed.getTime() - aParsed.getTime();
+    }
+    
+    // If only one has a date, prefer the one with a date
+    if (aParsed.getTime() !== 0) return -1;
+    if (bParsed.getTime() !== 0) return 1;
+    
+    // If neither has a date, sort alphabetically by name
+    return a.name.localeCompare(b.name);
+  });
+}
+
+/**
  * Initialize the application
  */
 async function initializeApp() {
@@ -77,6 +105,10 @@ async function initializeApp() {
   try {
     console.log('🔄 Loading recipes from repository...');
     state.recipes = await state.repository.getAll();
+    
+    // Sort recipes with most recently modified first
+    sortRecipesByDate(state.recipes);
+    
     state.filteredRecipes = state.recipes.map(recipe => ({ 
       recipe, 
       matches: { name: [], tags: [], ingredients: [] }, 
@@ -219,9 +251,9 @@ function updateButtonStates() {
   const canEdit = githubAuth.isAuthenticated();
   
   // Show/hide create button based on authentication
-  const createBtn = document.querySelector('[onclick="recipeUI.showCreateForm()"]');
+  const createBtn = document.getElementById('createRecipeBtn');
   if (createBtn) {
-    createBtn.style.display = canEdit ? 'inline-block' : 'none';
+    createBtn.style.display = canEdit ? 'inline-flex' : 'none';
   }
   
   // Update authentication button text
@@ -355,6 +387,10 @@ async function refreshRecipesFromCache() {
   try {
     // Get current recipes from repository (may use cache)
     state.recipes = await state.repository.getAll();
+    
+    // Sort recipes with most recently modified first
+    sortRecipesByDate(state.recipes);
+    
     // Re-apply current search if any
     if (state.currentSearchQuery) {
       performSearch(state.currentSearchQuery);
