@@ -46,6 +46,19 @@
     "instructions": "Postup",
     "notes": "Poznámky"
   },
+  "ingredientsExport": {
+    "title": "Export Ingrediencí do Nákupního Seznamu",
+    "description": "Zkontrolujte a vyberte ingredience, které chcete přidat do svého nákupního seznamu. Všechny ingredience jsou vybrané ve výchozím nastavení.",
+    "selectAll": "Vybrat Vše",
+    "deselectAll": "Zrušit Výběr",
+    "selectedCount": "Vybráno:",
+    "of": "z",
+    "ingredients": "ingrediencí",
+    "exportButton": "Exportovat do Nákupního Seznamu",
+    "noIngredientsSelected": "Prosím vyberte alespoň jednu ingredienci k exportu!",
+    "exportSuccess": "{{count}} {{plural}} exportováno do nákupního seznamu!",
+    "exportError": "Nepodařilo se exportovat ingredience do nákupního seznamu!"
+  },
   "recipeForm": {
     "createNewRecipe": "Vytvořit Nový Recept",
     "editRecipeTitle": "Upravit Recept",

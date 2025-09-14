@@ -46,6 +46,19 @@
     "instructions": "Instructions",
     "notes": "Notes"
   },
+  "ingredientsExport": {
+    "title": "Export Ingredients to Shopping List",
+    "description": "Review and select the ingredients you want to add to your shopping list. All ingredients are selected by default.",
+    "selectAll": "Select All",
+    "deselectAll": "Deselect All",
+    "selectedCount": "Selected:",
+    "of": "of",
+    "ingredients": "ingredients",
+    "exportButton": "Export to Shopping List",
+    "noIngredientsSelected": "Please select at least one ingredient to export!",
+    "exportSuccess": "{{count}} ingredient{{plural}} exported to shopping list!",
+    "exportError": "Failed to export ingredients to shopping list!"
+  },
   "recipeForm": {
     "createNewRecipe": "Create New Recipe",
     "editRecipeTitle": "Edit Recipe",
