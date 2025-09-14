@@ -131,7 +131,7 @@ export function createRecipeCard(recipe, options = {}) {
         
         <!-- Expandable Content -->
         <div class="collapse${shouldExpand ? ' show' : ''}" id="recipe-${recipeId}">
-          <div class="recipe-content px-3 pb-3 position-relative">
+          <div class="recipe-content px-3 pb-3 position-relative" ${isAuthenticated ? 'style="padding-bottom: 4rem !important;"' : ''}>
             <!-- Recipe details -->
             <div class="row">
               <div class="col-md-6 mb-3">
@@ -146,7 +146,7 @@ export function createRecipeCard(recipe, options = {}) {
             ${notes}
             ${isAuthenticated ? `
             <!-- Action buttons (bottom-right corner of expanded content, only for authenticated users) -->
-            <div class="position-absolute" style="bottom: 8px; right: 8px;">
+            <div class="position-absolute" style="bottom: 16px; right: 16px;">
               <div class="d-flex gap-1">
                 <button class="btn btn-outline-primary btn-sm edit-recipe-btn" 
                         data-recipe='${JSON.stringify(recipe).replace(/'/g, '&apos;')}' 
