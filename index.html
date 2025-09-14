@@ -22,21 +22,25 @@
       <div class="d-flex gap-2 align-items-center">
         <!-- Language Switcher -->
         <div class="dropdown">
-          <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="languageDropdown" data-bs-toggle="dropdown">
-            <span id="currentLanguageFlag">🇺🇸</span>
+          <button class="btn btn-outline-secondary btn-sm dropdown-toggle d-flex align-items-center" type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            <span id="currentLanguageFlag" class="me-2">🇺🇸</span>
+            <span class="d-none d-md-inline">Lang</span>
           </button>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="#" data-lang="en">🇺🇸 English</a></li>
-            <li><a class="dropdown-item" href="#" data-lang="cs">🇨🇿 Čeština</a></li>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item d-flex align-items-center" href="#" data-lang="en"><span class="me-2">🇺🇸</span>English</a></li>
+            <li><a class="dropdown-item d-flex align-items-center" href="#" data-lang="cs"><span class="me-2">🇨🇿</span>Čeština</a></li>
           </ul>
         </div>
+        
         <!-- Auth and Create buttons -->
         <div class="btn-group" role="group">
-          <button id="authBtn" class="btn btn-outline-primary">
-            <i class="fas fa-sign-in-alt me-2"></i><span data-i18n="navigation.signIn">Sign In</span>
+          <button id="authBtn" class="btn btn-outline-primary btn-sm d-flex align-items-center">
+            <i class="fas fa-sign-in-alt me-1"></i>
+            <span class="d-none d-sm-inline" data-i18n="navigation.signIn">Sign In</span>
           </button>
-          <button id="createRecipeBtn" class="btn btn-primary" style="display: none;">
-            <i class="fas fa-plus me-2"></i><span data-i18n="recipes.createRecipe">Create Recipe</span>
+          <button id="createRecipeBtn" class="btn btn-primary btn-sm d-flex align-items-center" style="display: none;">
+            <i class="fas fa-plus me-1"></i>
+            <span class="d-none d-sm-inline" data-i18n="recipes.createRecipe">Create Recipe</span>
           </button>
         </div>
       </div>

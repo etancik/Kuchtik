@@ -23,7 +23,7 @@
     "title": "Kuchtik",
     "subtitle": "A Family Cookbook",
     "createRecipe": "Create Recipe",
-    "searchPlaceholder": "Search recipes by name, tags, or ingredients...",
+    "searchPlaceholder": "Search by name, tags, or ingredients...",
     "noRecipesTitle": "No Recipes Found",
     "noRecipesMessage": "You don't have any recipes yet. Create your first recipe to get started!",
     "noResultsTitle": "No Results Found",

@@ -22,7 +22,7 @@
   "recipes": {
     "title": "Kuchtík",
     "subtitle": "Rodinná kuchařka",
-    "searchPlaceholder": "Hledat recepty podle názvu, tagů nebo ingrediencí...",
+    "searchPlaceholder": "Hledat podle názvu, tagů nebo ingrediencí...",
     "noRecipesTitle": "Žádné Recepty",
     "noRecipesMessage": "Zatím nemáte žádné recepty. Vytvořte svůj první recept!",
     "noResultsTitle": "Žádné Výsledky",

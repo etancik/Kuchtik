@@ -131,7 +131,9 @@ export function createRecipeCard(recipe, options = {}) {
         
         <!-- Expandable Content -->
         <div class="collapse${shouldExpand ? ' show' : ''}" id="recipe-${recipeId}">
-          <div class="recipe-content px-3 pb-3 position-relative" ${isAuthenticated ? 'style="padding-bottom: 4rem !important;"' : ''}>
+          <div class="recipe-content px-3 pb-3">
+            <div class="card shadow-sm h-100">
+            <div class="card-body"
             <!-- Recipe details -->
             <div class="row">
               <div class="col-md-6 mb-3">
@@ -145,23 +147,21 @@ export function createRecipeCard(recipe, options = {}) {
             </div>
             ${notes}
             ${isAuthenticated ? `
-            <!-- Action buttons (bottom-right corner of expanded content, only for authenticated users) -->
-            <div class="position-absolute" style="bottom: 16px; right: 16px;">
-              <div class="d-flex gap-1">
-                <button class="btn btn-outline-primary btn-sm edit-recipe-btn" 
-                        data-recipe='${JSON.stringify(recipe).replace(/'/g, '&apos;')}' 
-                        title="${t('recipes.editRecipe')}"
-                        style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
-                  <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn btn-outline-danger btn-sm delete-recipe-btn" 
-                        data-recipe-id='${recipe.metadata?.id || recipeName}' 
-                        data-recipe-name='${recipeName}' 
-                        title="${t('recipes.deleteRecipe')}"
-                        style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
-                  <i class="fas fa-trash"></i>
-                </button>
-              </div>
+            <!-- Action buttons at bottom -->
+            <div class="d-flex justify-content-end gap-2 mt-3 pt-3 border-top">
+              <button class="btn btn-outline-primary d-flex align-items-center edit-recipe-btn" 
+                      data-recipe='${JSON.stringify(recipe).replace(/'/g, '&apos;')}' 
+                      title="${t('recipes.editRecipe')}">
+                <i class="fas fa-edit me-2"></i>
+                <span>${t('common.edit')}</span>
+              </button>
+              <button class="btn btn-outline-danger btn-sm d-flex align-items-center delete-recipe-btn" 
+                      style="width: auto; min-width: 40px; max-width: 60px;"
+                      data-recipe-id='${recipe.metadata?.id || recipeName}' 
+                      data-recipe-name='${recipeName}' 
+                      title="${t('recipes.deleteRecipe')}">
+                <i class="fas fa-trash"></i>
+              </button>
             </div>
             ` : ''}
           </div>
