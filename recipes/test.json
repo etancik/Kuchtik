@@ -1,0 +1,23 @@
+{
+  "name": "Test",
+  "ingredients": [
+    {
+      "text": "ddddd",
+      "exportDefault": true
+    }
+  ],
+  "instructions": [
+    "aaaaa",
+    "dddd",
+    "ssss"
+  ],
+  "cookingTime": "",
+  "servings": 4,
+  "notes": [],
+  "tags": [],
+  "metadata": {
+    "createdDate": "2025-09-14T21:52:09.594Z",
+    "author": "etancik",
+    "lastModified": "2025-09-14T21:52:09.594Z"
+  }
+}
