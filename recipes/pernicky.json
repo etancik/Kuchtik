@@ -62,6 +62,9 @@
   "tags": [
     "peceni"
   ],
-  "author": "eBarborka",
-  "created": "2025-09-14T15:33:31.402Z"
+  "metadata": {
+    "createdDate": "2025-09-14T15:33:31.402Z",
+    "author": "eBarborka",
+    "lastModified": "2025-09-14T15:33:31.402Z"
+  }
 }

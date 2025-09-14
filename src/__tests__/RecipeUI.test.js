@@ -240,5 +240,33 @@ describe('RecipeUI Repository Integration Tests', () => {
         expect(uniqueEventNames).toContain(eventName);
       });
     });
+
+    test('should preserve exportDefault values when editing recipe', () => {
+      // Setup a recipe with mixed exportDefault values
+      const originalRecipe = {
+        id: 'test-recipe',
+        name: 'Test Recipe',
+        ingredients: [
+          { text: 'main ingredient', exportDefault: true },
+          { text: 'salt', exportDefault: false },
+          { text: 'pepper', exportDefault: false }
+        ]
+      };
+
+      // Setup editing mode
+      recipeUI.isEditing = true;
+      recipeUI.editingRecipe = originalRecipe;
+
+      // Test the getIngredientExportDefault method directly
+      expect(recipeUI.getIngredientExportDefault(0, 'main ingredient')).toBe(true);
+      expect(recipeUI.getIngredientExportDefault(1, 'salt')).toBe(false);
+      expect(recipeUI.getIngredientExportDefault(2, 'pepper')).toBe(false);
+      
+      // Test with new ingredient (should get default value)
+      expect(recipeUI.getIngredientExportDefault(3, 'new ingredient')).toBe(true);
+      
+      // Test with modified but similar text
+      expect(recipeUI.getIngredientExportDefault(1, 'sea salt')).toBe(false); // Should match 'salt'
+    });
   });
 });

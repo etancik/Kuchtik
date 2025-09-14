@@ -23,6 +23,9 @@
   "tags": [
     "hranolky"
   ],
-  "author": "eBarborka",
-  "created": "2025-09-14T15:39:30.419Z"
+  "metadata": {
+    "createdDate": "2025-09-14T15:39:30.419Z",
+    "author": "eBarborka",
+    "lastModified": "2025-09-14T15:39:30.419Z"
+  }
 }

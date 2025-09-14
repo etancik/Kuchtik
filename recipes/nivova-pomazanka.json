@@ -41,6 +41,9 @@
   "tags": [
     "pomazanka"
   ],
-  "author": "eBarborka",
-  "created": "2025-09-14T15:36:56.477Z"
+  "metadata": {
+    "createdDate": "2025-09-14T15:36:56.477Z",
+    "author": "eBarborka",
+    "lastModified": "2025-09-14T15:36:56.477Z"
+  }
 }

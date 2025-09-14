@@ -54,6 +54,9 @@
   "tags": [
     "obed"
   ],
-  "author": "eBarborka",
-  "created": "2025-09-14T15:57:21.543Z"
+  "metadata": {
+    "createdDate": "2025-09-14T15:57:21.543Z",
+    "author": "eBarborka",
+    "lastModified": "2025-09-14T15:57:21.543Z"
+  }
 }

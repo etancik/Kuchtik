@@ -364,12 +364,16 @@ class RecipeUI {
   collectFormData() {
     const ingredientElements = document.querySelectorAll('.ingredient-input');
     const ingredients = Array.from(ingredientElements)
-      .map(input => input.value.trim())
-      .filter(value => value !== '')
-      .map(text => ({
-        text: text,
-        exportDefault: this.getDefaultExportValue()
-      }));
+      .map((input, index) => {
+        const text = input.value.trim();
+        if (text === '') return null;
+        
+        return {
+          text: text,
+          exportDefault: this.getIngredientExportDefault(index, text)
+        };
+      })
+      .filter(ingredient => ingredient !== null);
 
     const instructionElements = document.querySelectorAll('.instruction-input');
     const instructions = Array.from(instructionElements)
@@ -387,7 +391,7 @@ class RecipeUI {
     const tagsInput = document.getElementById('recipe-tags').value;
     const tags = tagsInput ? tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag !== '') : [];
 
-    // Add metadata for new recipes
+    // Build recipe data - preserve metadata when editing
     let recipeData = {
       name,
       ingredients,
@@ -398,10 +402,30 @@ class RecipeUI {
       tags
     };
 
-    if (!this.isEditing && this.repository.githubAPI.isAuthenticated()) {
+    // Preserve existing metadata when editing
+    if (this.isEditing && this.editingRecipe) {
+      // Preserve existing metadata
+      if (this.editingRecipe.metadata) {
+        recipeData.metadata = {
+          ...this.editingRecipe.metadata,
+          lastModified: new Date().toISOString()
+        };
+      }
+      // Preserve other existing fields that aren't part of the form
+      if (this.editingRecipe.author && !recipeData.metadata) {
+        recipeData.author = this.editingRecipe.author;
+      }
+      if (this.editingRecipe.created && !recipeData.metadata) {
+        recipeData.created = this.editingRecipe.created;
+      }
+    } else if (!this.isEditing && this.repository.githubAPI.isAuthenticated()) {
+      // Add metadata for new recipes only
       const userInfo = this.repository.githubAPI.getCurrentUser();
-      recipeData.author = userInfo?.login || 'Anonymous';
-      recipeData.created = new Date().toISOString();
+      recipeData.metadata = {
+        createdDate: new Date().toISOString(),
+        author: userInfo?.login || 'Anonymous',
+        lastModified: new Date().toISOString()
+      };
     }
 
     return recipeData;
@@ -696,6 +720,40 @@ class RecipeUI {
     // For now, default all ingredients to be exported
     // This could be enhanced in the future with smart detection
     return true;
+  }
+
+  /**
+   * Get the exportDefault value for an ingredient, preserving original values when editing
+   * @param {number} index - The index of the ingredient in the form
+   * @param {string} text - The ingredient text
+   * @returns {boolean} The exportDefault value
+   */
+  getIngredientExportDefault(index, text) {
+    // When editing, try to preserve original exportDefault values
+    if (this.isEditing && this.editingRecipe && this.editingRecipe.ingredients) {
+      // Try to match by index first
+      if (index < this.editingRecipe.ingredients.length) {
+        const originalIngredient = this.editingRecipe.ingredients[index];
+        // If the text matches or is close, preserve the exportDefault
+        if (originalIngredient.text === text || originalIngredient.text.toLowerCase().includes(text.toLowerCase()) || text.toLowerCase().includes(originalIngredient.text.toLowerCase())) {
+          return originalIngredient.exportDefault;
+        }
+      }
+      
+      // Try to find a matching ingredient by text
+      const matchingIngredient = this.editingRecipe.ingredients.find(ing => 
+        ing.text === text || 
+        ing.text.toLowerCase().includes(text.toLowerCase()) || 
+        text.toLowerCase().includes(ing.text.toLowerCase())
+      );
+      
+      if (matchingIngredient) {
+        return matchingIngredient.exportDefault;
+      }
+    }
+    
+    // For new ingredients or when not editing, use default logic
+    return this.getDefaultExportValue();
   }
 
   /**

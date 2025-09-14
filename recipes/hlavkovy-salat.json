@@ -39,6 +39,9 @@
   "tags": [
     "salat"
   ],
-  "author": "eBarborka",
-  "created": "2025-09-14T16:16:48.804Z"
+  "metadata": {
+    "createdDate": "2025-09-14T16:16:48.804Z",
+    "author": "eBarborka",
+    "lastModified": "2025-09-14T16:16:48.804Z"
+  }
 }

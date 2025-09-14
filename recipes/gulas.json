@@ -19,11 +19,11 @@
     },
     {
       "text": "olej na smažení",
-      "exportDefault": true
+      "exportDefault": false
     },
     {
       "text": "sůl a pepř podle chuti",
-      "exportDefault": true
+      "exportDefault": false
     }
   ],
   "instructions": [
@@ -41,5 +41,10 @@
     "hlavní jídlo",
     "česká kuchyně",
     "maso"
-  ]
+  ],
+  "metadata": {
+    "createdDate": "2025-09-12T22:01:00Z",
+    "author": "Lukáš Tancer",
+    "lastModified": "2025-09-14T13:47:15Z"
+  }
 }
