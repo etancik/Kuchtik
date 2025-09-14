@@ -627,6 +627,100 @@ export class GitHubAPIAdapter {
       throw error;
     }
   }
+
+  /**
+   * Batch load all recipe files efficiently using Git Trees API
+   * @returns {Promise<Object[]>} Array of recipe objects
+   */
+  async getAllFiles() {
+    try {
+      console.log('🚀 Batch loading all recipes using Git Trees API...');
+      
+      // First get the latest commit SHA
+      const branchUrl = `repos/${CONFIG.REPO_OWNER}/${CONFIG.REPO_NAME}/branches/main`;
+      const branchResponse = await githubAuth.makeAuthenticatedRequest(branchUrl);
+      
+      if (!branchResponse.ok) {
+        throw new Error(`Failed to get branch info: ${branchResponse.status}`);
+      }
+      
+      const branchData = await branchResponse.json();
+      const commitSha = branchData.commit.sha;
+      
+      // Get the tree with all files recursively
+      const treeUrl = `repos/${CONFIG.REPO_OWNER}/${CONFIG.REPO_NAME}/git/trees/${commitSha}?recursive=1`;
+      const treeResponse = await githubAuth.makeAuthenticatedRequest(treeUrl);
+      
+      if (!treeResponse.ok) {
+        throw new Error(`Failed to get tree: ${treeResponse.status}`);
+      }
+      
+      const treeData = await treeResponse.json();
+      
+      // Filter for recipe JSON files
+      const recipeFiles = treeData.tree.filter(item => 
+        item.type === 'blob' && 
+        item.path.startsWith('recipes/') && 
+        item.path.endsWith('.json')
+      );
+      
+      console.log(`📁 Found ${recipeFiles.length} recipe files to load`);
+      
+      // Batch load all recipe contents using Promise.all for parallel requests
+      const batchSize = 5; // Load 5 recipes at a time to avoid rate limits
+      const recipes = [];
+      
+      for (let i = 0; i < recipeFiles.length; i += batchSize) {
+        const batch = recipeFiles.slice(i, i + batchSize);
+        console.log(`📦 Loading batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(recipeFiles.length/batchSize)} (${batch.length} files)`);
+        
+        const batchPromises = batch.map(async (file) => {
+          try {
+            // Get blob content
+            const blobUrl = `repos/${CONFIG.REPO_OWNER}/${CONFIG.REPO_NAME}/git/blobs/${file.sha}`;
+            const blobResponse = await githubAuth.makeAuthenticatedRequest(blobUrl);
+            
+            if (!blobResponse.ok) {
+              console.warn(`⚠️ Failed to load ${file.path}: ${blobResponse.status}`);
+              return null;
+            }
+            
+            const blobData = await blobResponse.json();
+            const content = decodeBase64(blobData.content);
+            const recipe = JSON.parse(content);
+            
+            // Add metadata
+            const filename = file.path.replace('recipes/', '');
+            recipe.id = filename.replace('.json', '');
+            recipe.sha = file.sha;
+            recipe.lastModified = new Date().toISOString(); // We don't have commit date easily, use current time
+            
+            console.log(`✅ Loaded recipe: ${recipe.name || recipe.id}`);
+            return recipe;
+            
+          } catch (error) {
+            console.warn(`⚠️ Failed to parse recipe ${file.path}:`, error.message);
+            return null;
+          }
+        });
+        
+        const batchResults = await Promise.all(batchPromises);
+        recipes.push(...batchResults.filter(recipe => recipe !== null));
+        
+        // Small delay between batches to be nice to the API
+        if (i + batchSize < recipeFiles.length) {
+          await new Promise(resolve => setTimeout(resolve, 200));
+        }
+      }
+      
+      console.log(`🎉 Successfully loaded ${recipes.length} recipes in batches`);
+      return recipes;
+      
+    } catch (error) {
+      console.error('💥 Failed to batch load recipes:', error);
+      throw error;
+    }
+  }
 }
 
 // Create and export singleton instance

@@ -627,7 +627,7 @@ class RecipeRepository {
   // ============================================================================
 
   /**
-   * Load all recipes from source (GitHub API)
+   * Load all recipes from source (GitHub API) using efficient batch loading
    * @private
    * @returns {Promise<Array>} Array of recipe objects
    */
@@ -636,22 +636,53 @@ class RecipeRepository {
       throw new Error('GitHub API not configured');
     }
 
-    const filenames = await this.githubAPI.getFileList();
-    const recipes = [];
-
-    for (const filename of filenames) {
-      try {
-        const recipe = await this.githubAPI.getFile(filename);
-        if (recipe) {
-          recipes.push(recipe);
-        }
-      } catch (error) {
-        this.log(`⚠️ Failed to load recipe ${filename}:`, error.message);
-        // Continue loading other recipes
+    try {
+      // Use the new batch loading method if available
+      if (typeof this.githubAPI.getAllFiles === 'function') {
+        this.log('🚀 Using batch loading for better performance...');
+        return await this.githubAPI.getAllFiles();
       }
-    }
+      
+      // Fallback to sequential loading for backward compatibility
+      this.log('⚠️ Using fallback sequential loading (slower)');
+      const filenames = await this.githubAPI.getFileList();
+      const recipes = [];
 
-    return recipes;
+      for (const filename of filenames) {
+        try {
+          const recipe = await this.githubAPI.getFile(filename);
+          if (recipe) {
+            recipes.push(recipe);
+          }
+        } catch (error) {
+          this.log(`⚠️ Failed to load recipe ${filename}:`, error.message);
+          // Continue loading other recipes
+        }
+      }
+
+      return recipes;
+      
+    } catch (error) {
+      this.log('❌ Batch loading failed, falling back to sequential loading:', error.message);
+      
+      // Final fallback to sequential loading
+      const filenames = await this.githubAPI.getFileList();
+      const recipes = [];
+
+      for (const filename of filenames) {
+        try {
+          const recipe = await this.githubAPI.getFile(filename);
+          if (recipe) {
+            recipes.push(recipe);
+          }
+        } catch (error) {
+          this.log(`⚠️ Failed to load recipe ${filename}:`, error.message);
+          // Continue loading other recipes
+        }
+      }
+
+      return recipes;
+    }
   }
 
   /**
