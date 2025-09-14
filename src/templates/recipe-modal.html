@@ -39,13 +39,13 @@
               <div class="input-group mb-2">
                 <input type="text" class="form-control ingredient-input" 
                        data-i18n-placeholder="recipeForm.ingredientPlaceholder" required>
-                <button class="btn btn-outline-secondary" type="button" onclick="recipeUI.removeIngredient(this)">
-                  <i class="fas fa-minus"></i>
+                <button class="btn btn-sm remove-btn" type="button" onclick="recipeUI.removeIngredient(this)" title="Remove ingredient">
+                  <i class="fas fa-times"></i>
                 </button>
               </div>
             </div>
-            <button type="button" class="btn btn-sm btn-outline-primary" onclick="recipeUI.addIngredient()">
-              <i class="fas fa-plus me-1"></i><span data-i18n="recipeForm.addIngredient">Add Ingredient</span>
+            <button type="button" class="btn btn-outline-primary" style="width: auto;" onclick="recipeUI.addIngredient()">
+              <i class="fas fa-plus me-2"></i><span data-i18n="recipeForm.addIngredient">Add Ingredient</span>
             </button>
           </div>
 
@@ -53,17 +53,24 @@
           <div class="mb-3">
             <label class="form-label" data-i18n="recipeForm.instructions">Instructions *</label>
             <div id="instructions-container">
-              <div class="input-group mb-2">
-                <span class="input-group-text">1.</span>
-                <textarea class="form-control instruction-input" rows="2" 
-                         data-i18n-placeholder="recipeForm.instructionPlaceholder" required></textarea>
-                <button class="btn btn-outline-secondary" type="button" onclick="recipeUI.removeInstruction(this)">
-                  <i class="fas fa-minus"></i>
-                </button>
+              <div class="step-item" draggable="true">
+                <div class="input-group mb-2">
+                  <span class="input-group-text">1.</span>
+                  <div class="step-drag-handle" title="Hold and drag to reorder">
+                    <i class="fas fa-grip-lines text-muted"></i>
+                  </div>
+                  <textarea class="form-control instruction-input" 
+                            placeholder="Enter cooking step..." 
+                            data-i18n-placeholder="recipeForm.stepPlaceholder" 
+                            rows="2" required></textarea>
+                  <button class="btn remove-btn-small" type="button" onclick="recipeUI.removeInstruction(this)" title="Remove step">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
               </div>
             </div>
-            <button type="button" class="btn btn-sm btn-outline-primary" onclick="recipeUI.addInstruction()">
-              <i class="fas fa-plus me-1"></i><span data-i18n="recipeForm.addStep">Add Step</span>
+            <button type="button" class="btn btn-outline-primary add-btn" onclick="recipeUI.addInstruction()">
+              <i class="fas fa-plus me-2"></i><span data-i18n="recipeForm.addStep">Add Step</span>
             </button>
           </div>
 
@@ -77,22 +84,37 @@
               <div class="input-group mb-2">
                 <input type="text" class="form-control note-input" 
                        data-i18n-placeholder="recipeForm.notePlaceholder">
-                <button class="btn btn-outline-secondary" type="button" onclick="recipeUI.removeNote(this)">
-                  <i class="fas fa-minus"></i>
+                <button class="btn btn-sm remove-btn" type="button" onclick="recipeUI.removeNote(this)" title="Remove note">
+                  <i class="fas fa-times"></i>
                 </button>
               </div>
             </div>
-            <button type="button" class="btn btn-sm btn-outline-primary" onclick="recipeUI.addNote()">
-              <i class="fas fa-plus me-1"></i><span data-i18n="recipeForm.addNote">Add Note</span>
+            <button type="button" class="btn btn-outline-primary add-btn" onclick="recipeUI.addNote()">
+              <i class="fas fa-plus me-2"></i><span data-i18n="recipeForm.addNote">Add Note</span>
             </button>
           </div>
 
           <!-- Tags -->
           <div class="mb-3">
-            <label for="recipe-tags" class="form-label" data-i18n="recipeForm.tagsField">Tags</label>
-            <input type="text" class="form-control" id="recipe-tags" 
-                   data-i18n-placeholder="recipeForm.tagsPlaceholder">
-            <div class="form-text" data-i18n="recipeForm.tagsHelp">Separate multiple tags with commas</div>
+            <label for="recipe-tags-input" class="form-label" data-i18n="recipeForm.tagsField">Tags</label>
+            <div class="tags-container mb-2" id="tags-container">
+              <!-- Tags will be dynamically added here -->
+            </div>
+            <div class="input-group">
+              <input type="text" class="form-control" id="recipe-tags-input" 
+                     data-i18n-placeholder="recipeForm.tagInputPlaceholder" 
+                     placeholder="Type a tag and press Enter"
+                     autocomplete="off"
+                     list="tags-datalist">
+              <datalist id="tags-datalist">
+                <!-- Tag suggestions will be populated here -->
+              </datalist>
+              <button type="button" class="btn btn-outline-primary add-btn" onclick="recipeUI.addTag()">
+                <i class="fas fa-plus"></i>
+              </button>
+            </div>
+            <div class="form-text" data-i18n="recipeForm.tagsHelp">Press Enter or click + to add tags</div>
+            <input type="hidden" id="recipe-tags" name="tags">
           </div>
         </div>
         

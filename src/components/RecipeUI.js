@@ -14,6 +14,7 @@ class RecipeUI {
     this.editingRecipe = null;
     this.modal = null;
     this.repository = repository; // Use provided repository if available
+    this.draggedElement = null; // Track currently dragged element
   }
 
   /**
@@ -41,19 +42,93 @@ class RecipeUI {
       }
 
       // Load and inject the modal template
+      console.log('📄 Loading modal template...');
       const modalHtml = await templateLoader.loadTemplate('src/templates/recipe-modal.html');
+      console.log('📄 Template loaded, length:', modalHtml?.length);
+      
       document.body.insertAdjacentHTML('beforeend', modalHtml);
+      console.log('📄 Template injected into DOM');
       
       // Update translations for the modal
       this.updateModalTranslations();
       
-      // Get modal instance
-      this.modal = new window.bootstrap.Modal(document.getElementById('recipe-modal'));
+      // Get modal instance - wait for Bootstrap to be available
+      let retries = 0;
+      const maxRetries = 10;
+      
+      console.log('🔍 Checking Bootstrap availability...');
+      console.log('window.bootstrap:', window.bootstrap);
+      console.log('window.bootstrap?.Modal:', window.bootstrap?.Modal);
+      
+      while ((!window.bootstrap || !window.bootstrap.Modal) && retries < maxRetries) {
+        console.log(`⏳ Waiting for Bootstrap to load... (attempt ${retries + 1}/${maxRetries})`);
+        console.log('Current state - bootstrap:', !!window.bootstrap, 'Modal:', !!window.bootstrap?.Modal);
+        await new Promise(resolve => setTimeout(resolve, 100));
+        retries++;
+      }
+      
+      if (!window.bootstrap || !window.bootstrap.Modal) {
+        console.error('❌ Bootstrap availability check failed:', {
+          bootstrap: !!window.bootstrap,
+          modal: !!window.bootstrap?.Modal,
+          bootstrapKeys: window.bootstrap ? Object.keys(window.bootstrap) : 'none'
+        });
+        throw new Error('Bootstrap Modal component is not available after waiting');
+      }
+      
+      console.log('✅ Bootstrap Modal component is available');
+      
+      // Check if modal element exists
+      const modalElement = document.getElementById('recipe-modal');
+      console.log('🔍 Looking for modal element...');
+      console.log('Modal element found:', !!modalElement);
+      console.log('Modal element ID:', modalElement?.id);
+      console.log('Modal element classes:', modalElement?.className);
+      
+      if (!modalElement) {
+        console.error('❌ Modal element not found. Available elements with modal in ID:');
+        const allModals = document.querySelectorAll('[id*="modal"]');
+        allModals.forEach(el => console.log(' -', el.id, el.tagName));
+        
+        console.error('❌ Available IDs starting with "recipe":');
+        const recipeElements = document.querySelectorAll('[id^="recipe"]');
+        recipeElements.forEach(el => console.log(' -', el.id, el.tagName));
+        
+        throw new Error('Modal element #recipe-modal not found in DOM');
+      }
+      
+      console.log('✅ Modal element found in DOM');
+      
+      // Try to create modal with explicit configuration to avoid undefined backdrop issue
+      try {
+        this.modal = new window.bootstrap.Modal(modalElement, {
+          backdrop: true,
+          keyboard: true,
+          focus: true
+        });
+        console.log('✅ Modal instance created successfully with explicit config');
+      } catch (error) {
+        console.error('❌ Failed to create modal with explicit config:', error);
+        // Fallback: try without options
+        this.modal = new window.bootstrap.Modal(modalElement);
+        console.log('✅ Modal instance created with default config');
+      }
       
       // Setup form submission handler
       const form = document.getElementById('recipe-form');
       if (form) {
         form.addEventListener('submit', (e) => this.handleFormSubmit(e));
+      }
+
+      // Setup tag input handler
+      const tagInput = document.getElementById('recipe-tags-input');
+      if (tagInput) {
+        tagInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            this.addTag();
+          }
+        });
       }
 
       // Setup edit button handlers
@@ -269,8 +344,14 @@ class RecipeUI {
     // Show modal
     this.modal.show();
     
+    // Initialize drag and drop for steps
+    this.initializeStepDragAndDrop();
+    
     // Update modal translations
     this.updateModalTranslations();
+    
+    // Load tag suggestions
+    this.loadTagSuggestions();
   }
 
   /**
@@ -294,8 +375,14 @@ class RecipeUI {
     // Show modal
     this.modal.show();
     
+    // Initialize drag and drop for steps
+    this.initializeStepDragAndDrop();
+    
     // Update modal translations
     this.updateModalTranslations();
+    
+    // Load tag suggestions
+    this.loadTagSuggestions();
   }
 
   /**
@@ -562,7 +649,10 @@ class RecipeUI {
     document.getElementById('recipe-name').value = '';
     document.getElementById('recipe-servings').value = '4';
     document.getElementById('recipe-time').value = '';
-    document.getElementById('recipe-tags').value = '';
+    
+    // Clear tags
+    this.setTags('');
+    document.getElementById('recipe-tags-input').value = '';
     
         // Clear dynamic lists
     this.resetContainer('ingredients-container', 'ingredient-input', t('recipeForm.ingredientPlaceholder'), 'input');
@@ -578,7 +668,9 @@ class RecipeUI {
     document.getElementById('recipe-name').value = recipe.name || '';
     document.getElementById('recipe-servings').value = recipe.servings || '4';
     document.getElementById('recipe-time').value = recipe.cookingTime || '';
-    document.getElementById('recipe-tags').value = (recipe.tags || []).join(', ');
+    
+    // Populate tags using the new tag UI
+    this.setTags((recipe.tags || []).join(', '));
     
     // Populate ingredients
     this.populateContainer('ingredients-container', recipe.ingredients || [], 'ingredient-input', t('recipeForm.ingredientPlaceholder'), 'input');
@@ -590,34 +682,50 @@ class RecipeUI {
     this.populateContainer('notes-container', recipe.notes || [], 'note-input', t('recipeForm.notePlaceholder'), 'input');
     
     // Setup auto-resize for all instruction textareas
-    setTimeout(() => this.setupAllAutoResize(), 0);
+    setTimeout(() => {
+      this.setupAllAutoResize();
+      // Initialize drag and drop for loaded steps
+      this.initializeStepDragAndDrop();
+    }, 0);
   }
 
   resetContainer(containerId, inputClass, placeholder, inputType) {
     const container = document.getElementById(containerId);
     container.innerHTML = '';
     
-    const div = document.createElement('div');
-    div.className = 'input-group mb-2';
-    
     if (containerId === 'instructions-container') {
+      // Use new step structure for instructions
+      const div = document.createElement('div');
+      div.className = 'step-item';
+      div.draggable = true;
       div.innerHTML = `
-        <span class="input-group-text">1.</span>
-        <${inputType} class="form-control ${inputClass}" ${inputType === 'textarea' ? 'rows="2"' : ''} placeholder="${placeholder}" required></${inputType}>
-        <button class="btn btn-outline-secondary" type="button" onclick="recipeUI.remove${this.getMethodSuffix(containerId)}(this)">
-          <i class="fas fa-minus"></i>
-        </button>
+        <div class="input-group mb-2">
+          <span class="input-group-text">1.</span>
+          <div class="step-drag-handle" title="Hold and drag to reorder">
+            <i class="fas fa-grip-lines text-muted"></i>
+          </div>
+          <textarea class="form-control instruction-input" 
+                    placeholder="${t('recipeForm.instructionPlaceholder')}" 
+                    data-i18n-placeholder="recipeForm.instructionPlaceholder"
+                    rows="2" required></textarea>
+          <button class="btn remove-btn-small" type="button" onclick="recipeUI.removeInstruction(this)" title="Remove step">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
       `;
+      container.appendChild(div);
+      this.setupStepDragAndDrop(div);
     } else {
+      const div = document.createElement('div');
+      div.className = 'input-group mb-2';
       div.innerHTML = `
         <${inputType} class="form-control ${inputClass}" placeholder="${placeholder}" ${containerId === 'ingredients-container' ? 'required' : ''}></${inputType}>
-        <button class="btn btn-outline-secondary" type="button" onclick="recipeUI.remove${this.getMethodSuffix(containerId)}(this)">
-          <i class="fas fa-minus"></i>
+        <button class="btn btn-sm remove-btn" type="button" onclick="recipeUI.remove${this.getMethodSuffix(containerId)}(this)" title="Remove ${containerId === 'ingredients-container' ? 'ingredient' : 'note'}">
+          <i class="fas fa-times"></i>
         </button>
       `;
+      container.appendChild(div);
     }
-    
-    container.appendChild(div);
   }
 
   populateContainer(containerId, data, inputClass, placeholder, inputType) {
@@ -630,18 +738,33 @@ class RecipeUI {
     }
     
     data.forEach((item, index) => {
-      const div = document.createElement('div');
-      div.className = 'input-group mb-2';
-      
       if (containerId === 'instructions-container') {
+        // Use new step structure for instructions
+        const div = document.createElement('div');
+        div.className = 'step-item';
+        div.draggable = true;
         div.innerHTML = `
-          <span class="input-group-text">${index + 1}.</span>
-          <${inputType} class="form-control ${inputClass}" ${inputType === 'textarea' ? 'rows="2"' : ''} required>${item}</${inputType}>
-          <button class="btn btn-outline-secondary" type="button" onclick="recipeUI.remove${this.getMethodSuffix(containerId)}(this)">
-            <i class="fas fa-minus"></i>
-          </button>
+          <div class="input-group mb-2">
+            <span class="input-group-text">${index + 1}.</span>
+            <div class="step-drag-handle" title="Hold and drag to reorder">
+              <i class="fas fa-grip-lines text-muted"></i>
+            </div>
+            <textarea class="form-control instruction-input" 
+                      placeholder="${t('recipeForm.instructionPlaceholder')}" 
+                      data-i18n-placeholder="recipeForm.instructionPlaceholder"
+                      rows="2" required>${item}</textarea>
+            <button class="btn remove-btn-small" type="button" onclick="recipeUI.removeInstruction(this)" title="Remove step">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
         `;
+        container.appendChild(div);
+        this.setupStepDragAndDrop(div);
       } else {
+        // Handle other containers (ingredients, notes) with old structure
+        const div = document.createElement('div');
+        div.className = 'input-group mb-2';
+        
         // Handle ingredient objects vs strings
         const displayValue = (containerId === 'ingredients-container' && typeof item === 'object' && item.text) 
           ? item.text 
@@ -649,13 +772,13 @@ class RecipeUI {
         
         div.innerHTML = `
           <${inputType} class="form-control ${inputClass}" value="${displayValue}" ${containerId === 'ingredients-container' ? 'required' : ''}></${inputType}>
-          <button class="btn btn-outline-secondary" type="button" onclick="recipeUI.remove${this.getMethodSuffix(containerId)}(this)">
-            <i class="fas fa-minus"></i>
+          <button class="btn btn-sm remove-btn" type="button" onclick="recipeUI.remove${this.getMethodSuffix(containerId)}(this)" title="Remove ${this.getMethodSuffix(containerId).toLowerCase()}">
+            <i class="fas fa-times"></i>
           </button>
         `;
+        
+        container.appendChild(div);
       }
-      
-      container.appendChild(div);
     });
   }
 
@@ -675,8 +798,8 @@ class RecipeUI {
     ingredientDiv.className = 'input-group mb-2';
     ingredientDiv.innerHTML = `
       <input type="text" class="form-control ingredient-input" placeholder="${t('recipeForm.ingredientPlaceholder')}" required>
-      <button class="btn btn-outline-secondary" type="button" onclick="recipeUI.removeIngredient(this)">
-        <i class="fas fa-minus"></i>
+      <button class="btn btn-sm remove-btn" type="button" onclick="recipeUI.removeIngredient(this)" title="Remove ingredient">
+        <i class="fas fa-times"></i>
       </button>
     `;
     container.appendChild(ingredientDiv);
@@ -694,31 +817,36 @@ class RecipeUI {
     const container = document.getElementById('instructions-container');
     const stepNumber = container.children.length + 1;
     const instructionDiv = document.createElement('div');
-    instructionDiv.className = 'input-group mb-2';
+    instructionDiv.className = 'step-item';
+    instructionDiv.draggable = true;
     instructionDiv.innerHTML = `
-      <span class="input-group-text">${stepNumber}.</span>
-      <textarea class="form-control instruction-input" rows="2" placeholder="${t('recipeForm.instructionPlaceholder')}" required></textarea>
-      <button class="btn btn-outline-secondary" type="button" onclick="recipeUI.removeInstruction(this)">
-        <i class="fas fa-minus"></i>
-      </button>
+      <div class="input-group mb-2">
+        <span class="input-group-text">${stepNumber}.</span>
+        <div class="step-drag-handle" title="Hold and drag to reorder">
+          <i class="fas fa-grip-lines text-muted"></i>
+        </div>
+        <textarea class="form-control instruction-input" 
+                  placeholder="${t('recipeForm.instructionPlaceholder')}" 
+                  data-i18n-placeholder="recipeForm.instructionPlaceholder"
+                  rows="2" required></textarea>
+        <button class="btn remove-btn-small" type="button" onclick="recipeUI.removeInstruction(this)" title="Remove step">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
     `;
     container.appendChild(instructionDiv);
     const textarea = instructionDiv.querySelector('textarea');
     this.setupAutoResize(textarea);
     textarea.focus();
+    this.setupStepDragAndDrop(instructionDiv);
+    this.updateStepNumbers();
   }
 
   removeInstruction(button) {
     const container = document.getElementById('instructions-container');
     if (container.children.length > 1) {
-      button.parentElement.remove();
-      // Renumber remaining instructions
-      Array.from(container.children).forEach((child, index) => {
-        const numberSpan = child.querySelector('.input-group-text');
-        if (numberSpan) {
-          numberSpan.textContent = `${index + 1}.`;
-        }
-      });
+      button.closest('.step-item').remove();
+      this.updateStepNumbers();
     }
   }
 
@@ -728,8 +856,8 @@ class RecipeUI {
     noteDiv.className = 'input-group mb-2';
     noteDiv.innerHTML = `
       <input type="text" class="form-control note-input" placeholder="${t('recipeForm.notePlaceholder')}">
-      <button class="btn btn-outline-secondary" type="button" onclick="recipeUI.removeNote(this)">
-        <i class="fas fa-minus"></i>
+      <button class="btn btn-sm remove-btn" type="button" onclick="recipeUI.removeNote(this)" title="Remove note">
+        <i class="fas fa-times"></i>
       </button>
     `;
     container.appendChild(noteDiv);
@@ -833,6 +961,276 @@ class RecipeUI {
         element.placeholder = t(key);
       });
     }
+  }
+
+  /**
+   * Add a tag to the tags container
+   */
+  addTag() {
+    const input = document.getElementById('recipe-tags-input');
+    const container = document.getElementById('tags-container');
+    const hiddenInput = document.getElementById('recipe-tags');
+    
+    if (!input || !container || !hiddenInput) return;
+    
+    const tagText = input.value.trim();
+    if (!tagText) return;
+    
+    // Check if tag already exists
+    const existingTags = this.getTags();
+    if (existingTags.includes(tagText.toLowerCase())) {
+      input.value = '';
+      return;
+    }
+    
+    // Create tag element
+    const tagElement = document.createElement('span');
+    tagElement.className = 'tag-item';
+    tagElement.innerHTML = `
+      <span>${tagText}</span>
+      <button type="button" class="tag-remove" onclick="recipeUI.removeTag(this)" title="Remove tag">
+        <i class="fas fa-times"></i>
+      </button>
+    `;
+    
+    container.appendChild(tagElement);
+    
+    // Show container if it has tags
+    this.updateTagsVisibility();
+    
+    // Update hidden input
+    this.updateTagsInput();
+    
+    // Clear input
+    input.value = '';
+  }
+
+  /**
+   * Remove a tag from the tags container
+   */
+  removeTag(button) {
+    const tagElement = button.closest('.tag-item');
+    if (tagElement) {
+      tagElement.remove();
+      this.updateTagsInput();
+      // Update visibility after removing tag
+      this.updateTagsVisibility();
+    }
+  }
+
+  /**
+   * Get current tags as array
+   */
+  getTags() {
+    const container = document.getElementById('tags-container');
+    if (!container) return [];
+    
+    const tags = [];
+    container.querySelectorAll('.tag-item span:first-child').forEach(span => {
+      tags.push(span.textContent.toLowerCase());
+    });
+    return tags;
+  }
+
+  /**
+   * Update hidden tags input with current tags
+   */
+  updateTagsInput() {
+    const container = document.getElementById('tags-container');
+    const hiddenInput = document.getElementById('recipe-tags');
+    if (!container || !hiddenInput) return;
+    
+    const tags = [];
+    container.querySelectorAll('.tag-item span:first-child').forEach(span => {
+      tags.push(span.textContent);
+    });
+    
+    hiddenInput.value = tags.join(', ');
+  }
+
+  /**
+   * Update tags container visibility based on whether it has tags
+   */
+  updateTagsVisibility() {
+    const container = document.getElementById('tags-container');
+    if (!container) return;
+    
+    const hasTags = container.querySelectorAll('.tag-item').length > 0;
+    if (hasTags) {
+      container.classList.add('has-tags');
+    } else {
+      container.classList.remove('has-tags');
+    }
+  }
+
+  /**
+   * Load tag suggestions from existing recipes
+   */
+  async loadTagSuggestions() {
+    try {
+      const recipes = await this.repository.getAll();
+      const allTags = new Set();
+      
+      // Collect all tags from all recipes
+      recipes.forEach(recipe => {
+        if (recipe.tags && Array.isArray(recipe.tags)) {
+          recipe.tags.forEach(tag => {
+            if (tag && typeof tag === 'string') {
+              allTags.add(tag.trim().toLowerCase());
+            }
+          });
+        }
+      });
+      
+      // Update datalist with unique tags
+      const datalist = document.getElementById('tags-datalist');
+      if (datalist) {
+        datalist.innerHTML = '';
+        [...allTags].sort().forEach(tag => {
+          const option = document.createElement('option');
+          option.value = tag;
+          datalist.appendChild(option);
+        });
+      }
+    } catch (error) {
+      console.error('Failed to load tag suggestions:', error);
+    }
+  }
+
+  /**
+   * Set tags from string (comma-separated)
+   */
+  setTags(tagsString) {
+    const container = document.getElementById('tags-container');
+    if (!container) return;
+    
+    // Clear existing tags
+    container.innerHTML = '';
+    
+    if (!tagsString) {
+      this.updateTagsVisibility();
+      return;
+    }
+    
+    // Add each tag
+    const tags = tagsString.split(',').map(tag => tag.trim()).filter(tag => tag);
+    tags.forEach(tag => {
+      const tagElement = document.createElement('span');
+      tagElement.className = 'tag-item';
+      tagElement.innerHTML = `
+        <span>${tag}</span>
+        <button type="button" class="tag-remove" onclick="recipeUI.removeTag(this)" title="Remove tag">
+          <i class="fas fa-times"></i>
+        </button>
+      `;
+      container.appendChild(tagElement);
+    });
+    
+    this.updateTagsInput();
+    this.updateTagsVisibility();
+  }
+
+  /**
+   * Set up drag and drop functionality for a step item
+   */
+  setupStepDragAndDrop(stepItem) {
+    stepItem.addEventListener('dragstart', (e) => {
+      console.log('Drag start:', stepItem);
+      this.draggedElement = stepItem;
+      stepItem.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    
+    stepItem.addEventListener('dragend', () => {
+      console.log('Drag end');
+      stepItem.classList.remove('dragging');
+      this.draggedElement = null;
+      // Clean up all drop indicators
+      const allSteps = document.querySelectorAll('.step-item');
+      allSteps.forEach(step => {
+        step.classList.remove('drag-over', 'drop-above', 'drop-below');
+      });
+    });
+    
+    stepItem.addEventListener('dragover', (e) => {
+      if (!this.draggedElement || this.draggedElement === stepItem) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+    });
+    
+    stepItem.addEventListener('dragenter', (e) => {
+      if (!this.draggedElement || this.draggedElement === stepItem) return;
+      e.preventDefault();
+      stepItem.classList.add('drag-over');
+    });
+    
+    stepItem.addEventListener('dragleave', (e) => {
+      if (!stepItem.contains(e.relatedTarget)) {
+        stepItem.classList.remove('drag-over');
+      }
+    });
+    
+    stepItem.addEventListener('drop', (e) => {
+      if (!this.draggedElement || this.draggedElement === stepItem) return;
+      e.preventDefault();
+      e.stopPropagation();
+      
+      console.log('Drop on:', stepItem, 'dragged:', this.draggedElement);
+      
+      stepItem.classList.remove('drag-over');
+      
+      const container = document.getElementById('instructions-container');
+      const rect = stepItem.getBoundingClientRect();
+      const mouseY = e.clientY;
+      const centerY = rect.top + rect.height / 2;
+      
+      console.log('Mouse Y:', mouseY, 'Center Y:', centerY);
+      
+      // Insert based on mouse position
+      if (mouseY < centerY) {
+        console.log('Inserting before');
+        container.insertBefore(this.draggedElement, stepItem);
+      } else {
+        console.log('Inserting after');
+        const nextSibling = stepItem.nextSibling;
+        if (nextSibling) {
+          container.insertBefore(this.draggedElement, nextSibling);
+        } else {
+          container.appendChild(this.draggedElement);
+        }
+      }
+      
+      // Update step numbers
+      this.updateStepNumbers();
+      console.log('Reorder complete');
+    });
+  }
+
+  /**
+   * Initialize drag and drop for existing steps
+   */
+  initializeStepDragAndDrop() {
+    const container = document.getElementById('instructions-container');
+    if (container) {
+      const steps = container.querySelectorAll('.step-item');
+      steps.forEach(step => this.setupStepDragAndDrop(step));
+    }
+  }
+
+  /**
+   * Update step numbers in the instructions container
+   */
+  updateStepNumbers() {
+    const container = document.getElementById('instructions-container');
+    if (!container) return;
+    
+    const steps = container.querySelectorAll('.step-item');
+    steps.forEach((step, index) => {
+      const numberSpan = step.querySelector('.input-group-text');
+      if (numberSpan) {
+        numberSpan.textContent = `${index + 1}.`;
+      }
+    });
   }
 }
 
