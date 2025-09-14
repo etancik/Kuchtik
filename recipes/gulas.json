@@ -33,7 +33,7 @@
     "Podlij vodou a vař pod pokličkou 1-1,5 hodiny dokud není maso měkké."
   ],
   "cookingTime": "90 min",
-  "servings": 4,
+  "servings": 5,
   "notes": [
     "Můžeš přidat brambory nakrájené na kostky v poslední půlhodině vaření"
   ],
@@ -42,12 +42,11 @@
     "česká kuchyně",
     "maso"
   ],
-  "id": "gulas",
-  "sha": "590524cabab0b0886800edd16bc64023a68010e1",
-  "lastModified": "2025-09-14T19:35:29.135Z",
   "metadata": {
     "createdDate": "2025-09-12T22:01:00Z",
     "author": "Lukáš Tancer",
-    "lastModified": "2025-09-14T19:35:29.135Z"
+    "lastModified": "2025-09-14T19:52:45.881Z",
+    "id": "gulas",
+    "sha": "f7b1224def2a04d4c515e05e66c0a9d8c3ffb066"
   }
 }
