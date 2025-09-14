@@ -1,0 +1,40 @@
+{
+  "name": "Korpus dortu",
+  "ingredients": [
+    {
+      "text": "250g polohruba mouka",
+      "exportDefault": true
+    },
+    {
+      "text": "250g cukr moucka",
+      "exportDefault": true
+    },
+    {
+      "text": "5 vajec",
+      "exportDefault": true
+    },
+    {
+      "text": "citronova kura/vanilkovy cukr",
+      "exportDefault": true
+    }
+  ],
+  "instructions": [
+    "Uslehat bilky",
+    "Uslehat cukr se zloutkama a do toho pridat pri slehani 3-5 lzic horke vody",
+    "Pridat snih pomalu a postupne",
+    "Pridat mouku pomalu a postupne",
+    "Pridat nastrouhanou citronovou kuru/vanilkovy cukr"
+  ],
+  "cookingTime": "60 min",
+  "servings": 1,
+  "notes": [
+    "Vanilkovy krem - maslo, husty pudink ze 1/4l mleka, cukr",
+    "Slehacka s tvarohem"
+  ],
+  "tags": [
+    "peceni",
+    "sladke"
+  ],
+  "author": "eBarborka",
+  "created": "2025-09-14T16:05:17.830Z"
+}
