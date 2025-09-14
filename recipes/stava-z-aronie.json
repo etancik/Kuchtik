@@ -1,7 +1,5 @@
 {
   "name": "Šťáva z arónie",
-  "servings": "1 litr",
-  "cookingTime": "5 dní",
   "ingredients": [
     {
       "text": "500 g arónie",
@@ -9,11 +7,11 @@
     },
     {
       "text": "citrónová kůra nebo citrónka",
-      "exportDefault": false
+      "exportDefault": true
     },
     {
       "text": "cukr podle chuti",
-      "exportDefault": false
+      "exportDefault": true
     }
   ],
   "instructions": [
@@ -24,15 +22,16 @@
     "Přidávat cukr po lžících a přivést k varu",
     "Trochu povařit (5-10 minut) a pak nalít do sterilních lahví"
   ],
+  "cookingTime": "2 dní",
+  "servings": 4,
   "notes": [
     "Skladovat v lednici pouze - vydrží cca 2-3 týdny",
     "Lze přidat šťávu z jablek pro jemnější chuť",
     "Pro delší trvanlivost pasterizovat"
   ],
-  "tags": ["šťáva", "arónie", "nápoj"],
-  "metadata": {
-    "createdDate": "2025-09-13T08:12:26Z",
-    "author": "eBarborka",
-    "lastModified": "2025-09-14T13:47:15Z"
-  }
+  "tags": [
+    "šťáva",
+    "arónie",
+    "nápoj"
+  ]
 }
