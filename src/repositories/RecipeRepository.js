@@ -208,7 +208,9 @@ class RecipeRepository {
       const filename = this.getFilenameFromRecipeName(recipeName);
       const recipe = await this.loadRecipeFromSource(filename);
       if (recipe) {
-        this.setCachedRecipe(recipeName, recipe);
+        // Use normalized cache key for consistent storage
+        const cacheKey = this.normalizeCacheKey(filename);
+        this.setCachedRecipe(cacheKey, recipe);
       }
       
       return recipe;
@@ -232,9 +234,11 @@ class RecipeRepository {
     this.log(`➕ Creating recipe: ${recipeName}`, { optimistic, syncStrategy });
     
     try {
-      // Optimistic update
+      // Optimistic update - use consistent cache key normalization
       if (optimistic) {
-        this.setCachedRecipe(recipeName, recipeData);
+        const filename = generateFilenameFromRecipeName(recipeData.name);
+        const cacheKey = this.normalizeCacheKey(filename);
+        this.setCachedRecipe(cacheKey, recipeData);
         this.emit(RepositoryEvents.RECIPE_CREATED, recipeData);
         this.emit(RepositoryEvents.RECIPES_UPDATED, this.getCachedRecipes());
       }
@@ -284,9 +288,30 @@ class RecipeRepository {
       // Store original data for potential rollback
       const originalData = this.getCachedRecipe(recipeName);
       
-      // Optimistic update
+      // Optimistic update - use filename-based cache key for consistency
       if (optimistic) {
-        this.setCachedRecipe(recipeName, recipeData);
+        // Generate the correct cache key from recipe name
+        const filename = generateFilenameFromRecipeName(recipeData.name);
+        const newCacheKey = this.normalizeCacheKey(filename);
+        
+        // Batch cache operations to prevent intermediate state issues
+        const oldCacheKey = this.normalizeCacheKey(recipeName);
+        
+        // Remove the old cache entry
+        if (this.cache.has(oldCacheKey)) {
+          this.cache.delete(oldCacheKey);
+          this.log(`🗑️ Removed cached recipe: ${oldCacheKey}`);
+        }
+        
+        // Add updated recipe at the front of cache (Maps maintain insertion order)
+        const tempCache = new Map([[newCacheKey, { data: { ...recipeData }, timestamp: Date.now() }]]);
+        for (const [key, value] of this.cache) {
+          tempCache.set(key, value);
+        }
+        this.cache = tempCache;
+        this.log(`💾 Cached recipe at top: ${newCacheKey}`);
+        this.emit(RepositoryEvents.CACHE_UPDATED, { added: newCacheKey });
+        
         this.emit(RepositoryEvents.RECIPE_UPDATED, recipeData);
         this.emit(RepositoryEvents.RECIPES_UPDATED, this.getCachedRecipes());
       }
@@ -308,8 +333,9 @@ class RecipeRepository {
         } catch (syncError) {
           // Revert optimistic update on immediate sync failure
           if (optimistic) {
+            const rollbackCacheKey = this.normalizeCacheKey(recipeName);
             if (originalData) {
-              this.setCachedRecipe(recipeName, originalData);
+              this.setCachedRecipe(rollbackCacheKey, originalData);
             } else {
               this.removeCachedRecipe(recipeName);
             }
@@ -367,7 +393,8 @@ class RecipeRepository {
         } catch (syncError) {
           // Revert optimistic update on immediate sync failure
           if (optimistic && originalData) {
-            this.setCachedRecipe(recipeName, originalData);
+            const rollbackCacheKey = this.normalizeCacheKey(recipeName);
+            this.setCachedRecipe(rollbackCacheKey, originalData);
             this.emit(RepositoryEvents.RECIPES_UPDATED, this.getCachedRecipes());
           }
           throw syncError;
@@ -462,9 +489,13 @@ class RecipeRepository {
    * @param {string} recipeName - Name of recipe to remove from cache
    */
   clearCacheEntry(recipeName) {
-    if (this.cache.has(recipeName)) {
-      this.cache.delete(recipeName);
-      this.log(`🗑️ Removed ${recipeName} from cache`);
+    // Convert recipe name to normalized cache key
+    const filename = generateFilenameFromRecipeName(recipeName);
+    const cacheKey = this.normalizeCacheKey(filename);
+    
+    if (this.cache.has(cacheKey)) {
+      this.cache.delete(cacheKey);
+      this.log(`🗑️ Removed ${cacheKey} from cache`);
       this.emit(RepositoryEvents.CACHE_UPDATED, { removed: recipeName });
     }
   }
@@ -476,7 +507,7 @@ class RecipeRepository {
   getCacheMetadata() {
     const now = Date.now();
     const entries = Array.from(this.cache.entries()).map(([name, entry]) => ({
-      name,
+      name: name.replace(/\.json$/, ''), // Strip .json extension for display
       age: now - entry.timestamp,
       expired: now - entry.timestamp > this.config.cacheTimeout
     }));
@@ -763,39 +794,31 @@ class RecipeRepository {
    * @returns {Object|null} Cached recipe or null
    */
   getCachedRecipe(recipeName) {
-    // Try both the recipe name and potential filename formats
-    const possibleKeys = [
-      recipeName,
-      `${recipeName}.json`,
-      recipeName.replace('.json', '')
-    ];
-
-    for (const key of possibleKeys) {
-      const cacheEntry = this.cache.get(key);
-      if (cacheEntry) {
-        // Check if still valid
-        const now = Date.now();
-        if (now - cacheEntry.timestamp <= this.config.cacheTimeout) {
-          return cacheEntry.data;
-        } else {
-          // Remove expired entry
-          this.cache.delete(key);
-          this.log(`🗑️ Removed expired cache entry: ${key}`);
-        }
+    const cacheKey = this.normalizeCacheKey(recipeName);
+    const cacheEntry = this.cache.get(cacheKey);
+    
+    if (cacheEntry) {
+      // Check if still valid
+      const now = Date.now();
+      if (now - cacheEntry.timestamp <= this.config.cacheTimeout) {
+        return cacheEntry.data;
+      } else {
+        // Remove expired entry
+        this.cache.delete(cacheKey);
+        this.log(`🗑️ Removed expired cache entry: ${cacheKey}`);
       }
     }
-
+    
     return null;
   }
 
   /**
    * Set cached recipe
    * @private
-   * @param {string} recipeName - Recipe name or filename
+   * @param {string} cacheKey - Cache key (should be filename without .json)
    * @param {Object} data - Recipe data
    */
-  setCachedRecipe(recipeName, data) {
-    const cacheKey = recipeName.endsWith('.json') ? recipeName : recipeName;
+  setCachedRecipe(cacheKey, data) {
     const cacheEntry = {
       data: { ...data }, // Store a copy to prevent mutations
       timestamp: Date.now()
@@ -806,30 +829,36 @@ class RecipeRepository {
     this.emit(RepositoryEvents.CACHE_UPDATED, { added: cacheKey });
   }
 
+
+
+  /**
+   * Normalize recipe name to cache key
+   * @private
+   * @param {string} recipeName - Recipe name or filename
+   * @returns {string} Normalized cache key
+   */
+  normalizeCacheKey(recipeName) {
+    // If it's already a filename, just remove .json extension
+    if (recipeName.endsWith('.json')) {
+      return recipeName.replace('.json', '');
+    }
+    
+    // If it's a recipe name, generate the filename first, then normalize
+    const filename = generateFilenameFromRecipeName(recipeName);
+    return filename.replace('.json', '');
+  }
+
   /**
    * Remove cached recipe
    * @private
    * @param {string} recipeName - Recipe name or filename
    */
   removeCachedRecipe(recipeName) {
-    // Try both the recipe name and potential filename formats
-    const possibleKeys = [
-      recipeName,
-      `${recipeName}.json`,
-      recipeName.replace('.json', '')
-    ];
-
-    let removed = false;
-    for (const key of possibleKeys) {
-      if (this.cache.has(key)) {
-        this.cache.delete(key);
-        this.log(`🗑️ Removed cached recipe: ${key}`);
-        removed = true;
-        break;
-      }
-    }
-
-    if (removed) {
+    const cacheKey = this.normalizeCacheKey(recipeName);
+    
+    if (this.cache.has(cacheKey)) {
+      this.cache.delete(cacheKey);
+      this.log(`🗑️ Removed cached recipe: ${cacheKey}`);
       this.emit(RepositoryEvents.CACHE_UPDATED, { removed: recipeName });
     }
   }
@@ -844,7 +873,10 @@ class RecipeRepository {
     
     for (const recipe of recipes) {
       if (recipe && recipe.name) {
-        this.setCachedRecipe(recipe.name, recipe);
+        // Use consistent cache key normalization
+        const filename = generateFilenameFromRecipeName(recipe.name);
+        const cacheKey = this.normalizeCacheKey(filename);
+        this.setCachedRecipe(cacheKey, recipe);
         addedCount++;
       }
     }

@@ -9,11 +9,11 @@ import { t } from '../i18n/i18n.js';
 import gitHubAPIAdapter from '../adapters/GitHubAPIAdapter.js';
 
 class RecipeUI {
-  constructor() {
+  constructor(repository = null) {
     this.isEditing = false;
     this.editingRecipe = null;
     this.modal = null;
-    this.repository = null;
+    this.repository = repository; // Use provided repository if available
   }
 
   /**
@@ -22,20 +22,23 @@ class RecipeUI {
   async initialize() {
     console.log('🚀 Initializing RecipeUI with RecipeRepository...');
     try {
-      // Initialize repository with GitHub adapter
-      this.repository = new RecipeRepository({
-        syncStrategy: 'immediate',
-        cacheExpiry: 5 * 60 * 1000, // 5 minutes
-        enableOptimisticUpdates: true,
-        maxRetries: 3,
-        retryDelay: 1000
-      });
+      // Only initialize repository if it doesn't already exist
+      if (!this.repository) {
+        // Initialize repository with GitHub adapter
+        this.repository = new RecipeRepository({
+          syncStrategy: 'immediate',
+          cacheExpiry: 5 * 60 * 1000, // 5 minutes
+          enableOptimisticUpdates: true,
+          maxRetries: 3,
+          retryDelay: 1000
+        });
 
-      // Set the GitHub API adapter
-      this.repository.setGitHubAPI(gitHubAPIAdapter);
+        // Set the GitHub API adapter
+        this.repository.setGitHubAPI(gitHubAPIAdapter);
 
-      // Set up event listeners for repository events
-      this.setupRepositoryEventHandlers();
+        // Set up event listeners for repository events
+        this.setupRepositoryEventHandlers();
+      }
 
       // Load and inject the modal template
       const modalHtml = await templateLoader.loadTemplate('src/templates/recipe-modal.html');
@@ -91,16 +94,19 @@ class RecipeUI {
       this.handleRollback(event);
     });
 
+    // Add debounce timeout to prevent concurrent refresh calls
+    this.refreshTimeout = null;
+
     // Listen for cache updates
     this.repository.on('cacheUpdated', (event) => {
       console.log('🔄 Cache updated:', event);
-      this.handleCacheUpdate(event);
+      this.debouncedRefresh();
     });
 
     // Listen for recipes updates (when the full recipe list changes)
     this.repository.on('recipesUpdated', (recipes) => {
       console.log('📝 Recipes updated, refreshing display with', recipes.length, 'recipes');
-      this.refreshRecipesDisplay();
+      this.debouncedRefresh();
     });
 
     // Listen for sync status changes
@@ -202,6 +208,22 @@ class RecipeUI {
   }
 
   /**
+   * Debounced refresh to prevent concurrent refresh calls
+   */
+  debouncedRefresh() {
+    // Clear existing timeout
+    if (this.refreshTimeout) {
+      globalThis.clearTimeout(this.refreshTimeout);
+    }
+    
+    // Set new timeout
+    this.refreshTimeout = globalThis.setTimeout(() => {
+      this.refreshRecipesDisplay();
+      this.refreshTimeout = null;
+    }, 10); // Small delay to batch multiple rapid events
+  }
+
+  /**
    * Handle sync status changes
    * @param {Object} event - Event data
    */
@@ -215,16 +237,14 @@ class RecipeUI {
    * Setup edit and delete button event handlers
    */
   setupEditHandlers() {
-    document.addEventListener('click', (e) => {
-      if (e.target.closest('.edit-recipe-btn')) {
-        const button = e.target.closest('.edit-recipe-btn');
+    // Handle edit button clicks
+    document.addEventListener('click', (event) => {
+      if (event.target.matches('.edit-recipe-btn') || event.target.closest('.edit-recipe-btn')) {
+        const button = event.target.matches('.edit-recipe-btn') ? event.target : event.target.closest('.edit-recipe-btn');
         const recipeData = JSON.parse(button.getAttribute('data-recipe'));
+        
         this.showEditForm(recipeData);
-      } else if (e.target.closest('.delete-recipe-btn')) {
-        const button = e.target.closest('.delete-recipe-btn');
-        const recipeId = button.getAttribute('data-recipe-id');
-        const recipeName = button.getAttribute('data-recipe-name');
-        this.showDeleteConfirmation(recipeId, recipeName);
+        event.stopPropagation(); // Prevent card collapse toggle
       }
     });
   }
@@ -404,6 +424,17 @@ class RecipeUI {
 
     // Preserve existing metadata when editing
     if (this.isEditing && this.editingRecipe) {
+      // Preserve essential fields for GitHub operations
+      if (this.editingRecipe.id) {
+        recipeData.id = this.editingRecipe.id;
+      }
+      if (this.editingRecipe.sha) {
+        recipeData.sha = this.editingRecipe.sha;
+      }
+      if (this.editingRecipe.lastModified) {
+        recipeData.lastModified = new Date().toISOString();
+      }
+      
       // Preserve existing metadata
       if (this.editingRecipe.metadata) {
         recipeData.metadata = {
@@ -805,6 +836,9 @@ class RecipeUI {
   }
 }
 
-// Create and export singleton instance
+// Create and export singleton instance (will be initialized with repository from main.js)
 export const recipeUI = new RecipeUI();
 export default recipeUI;
+
+// Export the class for testing
+export { RecipeUI };

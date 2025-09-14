@@ -176,8 +176,8 @@ describe('RecipeUI Repository Integration Tests', () => {
     });
 
     test('should listen for recipesUpdated events and refresh display', () => {
-      // Mock refreshRecipesDisplay method
-      recipeUI.refreshRecipesDisplay = jest.fn();
+      // Mock debouncedRefresh method (which is now called instead of refreshRecipesDisplay)
+      recipeUI.debouncedRefresh = jest.fn();
       
       // Find the recipesUpdated event listener call
       const recipesUpdatedCall = mockRepository.on.mock.calls.find(call => call[0] === 'recipesUpdated');
@@ -193,13 +193,13 @@ describe('RecipeUI Repository Integration Tests', () => {
       // Call the event handler
       recipesUpdatedCall[1](mockRecipes);
       
-      // Verify refreshRecipesDisplay was called
-      expect(recipeUI.refreshRecipesDisplay).toHaveBeenCalled();
+      // Verify debouncedRefresh was called (instead of refreshRecipesDisplay)
+      expect(recipeUI.debouncedRefresh).toHaveBeenCalled();
     });
 
     test('should listen for cacheUpdated events and refresh display', () => {
-      // Mock handleCacheUpdate method
-      recipeUI.handleCacheUpdate = jest.fn();
+      // Mock debouncedRefresh method (which is now called instead of handleCacheUpdate)
+      recipeUI.debouncedRefresh = jest.fn();
       
       // Find the cacheUpdated event listener call
       const cacheUpdatedCall = mockRepository.on.mock.calls.find(call => call[0] === 'cacheUpdated');
@@ -212,8 +212,8 @@ describe('RecipeUI Repository Integration Tests', () => {
       // Call the event handler
       cacheUpdatedCall[1](mockEvent);
       
-      // Verify handleCacheUpdate was called
-      expect(recipeUI.handleCacheUpdate).toHaveBeenCalledWith(mockEvent);
+      // Verify debouncedRefresh was called
+      expect(recipeUI.debouncedRefresh).toHaveBeenCalled();
     });
 
     test('should setup all required repository event listeners', () => {

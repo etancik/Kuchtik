@@ -230,7 +230,7 @@ describe('RecipeRepository', () => {
 
   describe('getAll()', () => {
     test('should get all recipes from GitHub API', async () => {
-      mockGitHubAPI.addMockFile('recipe1.json', sampleRecipe);
+      mockGitHubAPI.addMockFile('test-recipe.json', sampleRecipe);
       mockGitHubAPI.addMockFile('recipe2.json', sampleRecipe2);
 
       const recipes = await repository.getAll();
@@ -242,7 +242,7 @@ describe('RecipeRepository', () => {
     });
 
     test('should return cached recipes when available', async () => {
-      mockGitHubAPI.addMockFile('recipe1.json', sampleRecipe);
+      mockGitHubAPI.addMockFile('test-recipe.json', sampleRecipe);
       
       // First call - loads from API
       const recipes1 = await repository.getAll();
@@ -256,14 +256,14 @@ describe('RecipeRepository', () => {
     });
 
     test('should force refresh when forceRefresh is true', async () => {
-      mockGitHubAPI.addMockFile('recipe1.json', sampleRecipe);
+      mockGitHubAPI.addMockFile('test-recipe.json', sampleRecipe);
       
       // First call
       await repository.getAll();
       
       // Update mock data
       const updatedRecipe = { ...sampleRecipe, description: 'Updated description' };
-      mockGitHubAPI.files.set('recipe1.json', updatedRecipe);
+      mockGitHubAPI.files.set('test-recipe.json', updatedRecipe);
       
       // Force refresh should get updated data
       const recipes = await repository.getAll({ forceRefresh: true });
@@ -271,7 +271,7 @@ describe('RecipeRepository', () => {
     });
 
     test('should include metadata when requested', async () => {
-      mockGitHubAPI.addMockFile('recipe1.json', sampleRecipe);
+      mockGitHubAPI.addMockFile('test-recipe.json', sampleRecipe);
       
       const result = await repository.getAll({ includeMetadata: true });
       
@@ -355,7 +355,7 @@ describe('RecipeRepository', () => {
       expect(eventCallbacks[RepositoryEvents.RECIPE_CREATED]).toHaveBeenCalledWith(sampleRecipe);
       
       // Should be in cache immediately
-      const cachedRecipe = await repository.getByName(sampleRecipe.name);
+      const cachedRecipe = await repository.getByName('test-recipe.json');
       expect(cachedRecipe).toEqual(sampleRecipe);
     });
 
@@ -562,7 +562,7 @@ describe('RecipeRepository', () => {
     });
 
     test('should clear specific cache entry', async () => {
-      mockGitHubAPI.addMockFile('recipe1.json', sampleRecipe);
+      mockGitHubAPI.addMockFile('test-recipe.json', sampleRecipe);
       mockGitHubAPI.addMockFile('recipe2.json', sampleRecipe2);
       
       await repository.getAll();
@@ -577,9 +577,9 @@ describe('RecipeRepository', () => {
     });
 
     test('should provide cache metadata', async () => {
-      mockGitHubAPI.addMockFile('recipe1.json', sampleRecipe);
+      mockGitHubAPI.addMockFile('test-recipe.json', sampleRecipe);
       
-      await repository.getByName('recipe1.json');
+      await repository.getByName('test-recipe.json');
       
       const metadata = repository.getCacheMetadata();
       
@@ -588,7 +588,7 @@ describe('RecipeRepository', () => {
       expect(metadata.expiredEntries).toBe(0);
       expect(metadata.cacheTimeout).toBe(1000);
       expect(metadata.entries).toHaveLength(1);
-      expect(metadata.entries[0].name).toBe('recipe1.json');
+      expect(metadata.entries[0].name).toBe('test-recipe'); // Filename-based cache key
     });
 
     test('should identify expired cache entries', async () => {
@@ -716,7 +716,7 @@ describe('RecipeRepository', () => {
       
       // Try to update with optimistic updates
       const updatedData = { ...sampleRecipe, servings: 10 };
-      await expect(repository.update(sampleRecipe.name, updatedData, {
+      await expect(repository.update('test-recipe.json', updatedData, {
         syncStrategy: SyncStrategy.IMMEDIATE,
         optimistic: true
       })).rejects.toThrow();
@@ -726,13 +726,250 @@ describe('RecipeRepository', () => {
       
       // Data should be consistent (not updated due to failure)
       // For optimistic updates with rollback, the recipe should be back to original state
-      const recipe = await repository.getByName(sampleRecipe.name);
+      const recipe = await repository.getByName('test-recipe.json');
       if (recipe) {
         expect(recipe.servings).toBe(sampleRecipe.servings);
       } else {
         // If recipe was removed due to rollback, that's also acceptable behavior
         expect(recipe).toBeNull();
       }
+    });
+  });
+
+  // TDD: Tests for cache management after create/update operations
+  describe('Cache Management After Operations', () => {
+    beforeEach(async () => {
+      // Setup initial recipes in the mock API
+      const recipe1 = {
+        name: 'Recipe 1',
+        ingredients: [{ text: 'ingredient 1', exportDefault: true }],
+        instructions: ['step 1']
+      };
+      
+      const recipe2 = {
+        name: 'Recipe 2', 
+        ingredients: [{ text: 'ingredient 2', exportDefault: true }],
+        instructions: ['step 2']
+      };
+
+      const recipe3 = {
+        name: 'Recipe 3',
+        ingredients: [{ text: 'ingredient 3', exportDefault: true }],
+        instructions: ['step 3']
+      };
+
+      await mockGitHubAPI.createFile('recipe-1.json', recipe1);
+      await mockGitHubAPI.createFile('recipe-2.json', recipe2);
+      await mockGitHubAPI.createFile('recipe-3.json', recipe3);
+      
+      // Load all recipes into cache initially
+      await repository.getAll();
+    });
+
+    test('should maintain full recipe list in cache after creating new recipe', async () => {
+      // Verify we start with 3 recipes
+      const initialRecipes = await repository.getAll();
+      expect(initialRecipes).toHaveLength(3);
+      
+      // Create a new recipe
+      const newRecipe = {
+        name: 'New Recipe',
+        ingredients: [{ text: 'new ingredient', exportDefault: true }],
+        instructions: ['new step']
+      };
+      
+      await repository.create(newRecipe);
+      
+      // After creating, we should still have all recipes (3 + 1 = 4)
+      const recipesAfterCreate = await repository.getAll();
+      expect(recipesAfterCreate).toHaveLength(4);
+      
+      // Verify all original recipes are still there
+      const recipeNames = recipesAfterCreate.map(r => r.name);
+      expect(recipeNames).toContain('Recipe 1');
+      expect(recipeNames).toContain('Recipe 2');
+      expect(recipeNames).toContain('Recipe 3');
+      expect(recipeNames).toContain('New Recipe');
+    });
+
+    test('should maintain full recipe list in cache after updating recipe', async () => {
+      // Verify we start with 3 recipes
+      const initialRecipes = await repository.getAll();
+      expect(initialRecipes).toHaveLength(3);
+      
+      // Update an existing recipe
+      const updatedRecipe = {
+        name: 'Recipe 1',
+        ingredients: [{ text: 'updated ingredient', exportDefault: true }],
+        instructions: ['updated step'],
+        servings: 6
+      };
+      
+      await repository.update('recipe-1.json', updatedRecipe);
+      
+      // After updating, we should still have all 3 recipes
+      const recipesAfterUpdate = await repository.getAll();
+      expect(recipesAfterUpdate).toHaveLength(3);
+      
+      // Verify all recipes are still there
+      const recipeNames = recipesAfterUpdate.map(r => r.name);
+      expect(recipeNames).toContain('Recipe 1');
+      expect(recipeNames).toContain('Recipe 2'); 
+      expect(recipeNames).toContain('Recipe 3');
+      
+      // Verify the update took effect
+      const updatedRecipeFromCache = recipesAfterUpdate.find(r => r.name === 'Recipe 1');
+      expect(updatedRecipeFromCache.servings).toBe(6);
+    });
+
+    test('should preserve cache when getAll() is called after operations', async () => {
+      // Initial load
+      let recipes = await repository.getAll();
+      expect(recipes).toHaveLength(3);
+      
+      // Create a new recipe
+      await repository.create({
+        name: 'Cache Test Recipe',
+        ingredients: [{ text: 'cache ingredient', exportDefault: true }],
+        instructions: ['cache step']
+      });
+      
+      // Multiple calls to getAll() should return consistent results
+      recipes = await repository.getAll();
+      expect(recipes).toHaveLength(4);
+      
+      recipes = await repository.getAll();
+      expect(recipes).toHaveLength(4);
+      
+      recipes = await repository.getAll();
+      expect(recipes).toHaveLength(4);
+      
+      // All calls should return the same recipes
+      const recipeNames = recipes.map(r => r.name);
+      expect(recipeNames).toContain('Recipe 1');
+      expect(recipeNames).toContain('Recipe 2');
+      expect(recipeNames).toContain('Recipe 3');
+      expect(recipeNames).toContain('Cache Test Recipe');
+    });
+  });
+
+  describe('Event System Integration', () => {
+    let eventsReceived;
+    
+    beforeEach(async () => {
+      eventsReceived = [];
+      
+      // Set up event listeners to track all repository events
+      repository.on('cacheUpdated', (data) => {
+        eventsReceived.push({ event: 'cacheUpdated', data });
+      });
+      
+      repository.on('recipesUpdated', (data) => {
+        eventsReceived.push({ event: 'recipesUpdated', data });
+      });
+      
+      repository.on('recipeUpdated', (data) => {
+        eventsReceived.push({ event: 'recipeUpdated', data });
+      });
+      
+      repository.on('recipeCreated', (data) => {
+        eventsReceived.push({ event: 'recipeCreated', data });
+      });
+      
+      repository.on('recipeDeleted', (data) => {
+        eventsReceived.push({ event: 'recipeDeleted', data });
+      });
+    });
+
+    test('should emit correct events during recipe update operations', async () => {
+      // Setup initial recipe
+      const originalRecipe = {
+        name: 'Test Recipe',
+        ingredients: [{ text: 'original ingredient', exportDefault: true }],
+        instructions: ['original step']
+      };
+      
+      await mockGitHubAPI.createFile('test-recipe.json', originalRecipe);
+      
+      // Load the recipe to populate cache
+      await repository.getAll();
+      
+      // Clear events from initial load
+      eventsReceived.length = 0;
+      
+      // Update the recipe
+      const updatedRecipe = {
+        name: 'Test Recipe',
+        ingredients: [{ text: 'updated ingredient', exportDefault: true }],
+        instructions: ['updated step'],
+        servings: 4
+      };
+      
+      await repository.update('test-recipe.json', updatedRecipe);
+      
+      // Verify correct events were emitted
+      const eventNames = eventsReceived.map(e => e.event);
+      
+      expect(eventNames).toContain('cacheUpdated');
+      expect(eventNames).toContain('recipesUpdated');
+      expect(eventNames).toContain('recipeUpdated');
+      
+      // Verify recipeUpdated event contains correct data
+      const recipeUpdatedEvent = eventsReceived.find(e => e.event === 'recipeUpdated');
+      expect(recipeUpdatedEvent).toBeDefined();
+      expect(recipeUpdatedEvent.data.name).toBe('Test Recipe');
+      expect(recipeUpdatedEvent.data.servings).toBe(4);
+    });
+
+    test('should emit correct events during recipe creation operations', async () => {
+      const newRecipe = {
+        name: 'New Recipe',
+        ingredients: [{ text: 'new ingredient', exportDefault: true }],
+        instructions: ['new step']
+      };
+      
+      await repository.create(newRecipe);
+      
+      // Verify correct events were emitted
+      const eventNames = eventsReceived.map(e => e.event);
+      
+      expect(eventNames).toContain('cacheUpdated');
+      expect(eventNames).toContain('recipesUpdated'); 
+      expect(eventNames).toContain('recipeCreated');
+      
+      // Verify recipeCreated event contains correct data
+      const recipeCreatedEvent = eventsReceived.find(e => e.event === 'recipeCreated');
+      expect(recipeCreatedEvent).toBeDefined();
+      expect(recipeCreatedEvent.data.name).toBe('New Recipe');
+    });
+
+    test('should emit recipesUpdated with complete recipe list after updates', async () => {
+      // Setup initial recipes
+      const recipe1 = { name: 'Recipe 1', ingredients: [{ text: 'ingredient 1', exportDefault: true }], instructions: ['step 1'] };
+      const recipe2 = { name: 'Recipe 2', ingredients: [{ text: 'ingredient 2', exportDefault: true }], instructions: ['step 2'] };
+      
+      await mockGitHubAPI.createFile('recipe-1.json', recipe1);
+      await mockGitHubAPI.createFile('recipe-2.json', recipe2);
+      
+      // Load initial recipes
+      await repository.getAll();
+      eventsReceived.length = 0; // Clear events from loading
+      
+      // Update one recipe
+      const updatedRecipe = { ...recipe1, servings: 6 };
+      await repository.update('recipe-1.json', updatedRecipe);
+      
+      // Find the recipesUpdated event
+      const recipesUpdatedEvents = eventsReceived.filter(e => e.event === 'recipesUpdated');
+      expect(recipesUpdatedEvents.length).toBeGreaterThan(0);
+      
+      // Verify the recipesUpdated event contains the complete list
+      const latestRecipesUpdatedEvent = recipesUpdatedEvents[recipesUpdatedEvents.length - 1];
+      expect(latestRecipesUpdatedEvent.data).toHaveLength(2); // Should still have both recipes
+      
+      const recipeNames = latestRecipesUpdatedEvent.data.map(r => r.name);
+      expect(recipeNames).toContain('Recipe 1');
+      expect(recipeNames).toContain('Recipe 2');
     });
   });
 });

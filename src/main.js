@@ -90,6 +90,8 @@ async function initializeApp() {
 
   // Initialize Recipe UI
   try {
+    // Share the repository instance with RecipeUI
+    recipeUI.repository = state.repository;
     await recipeUI.initialize();
     console.log('✅ RecipeUI initialized');
   } catch (error) {
@@ -133,8 +135,14 @@ async function initializeApp() {
  */
 function setupRepositoryEventHandlers() {
   // Listen for cache updates to refresh the display
-  state.repository.on('cacheUpdate', () => {
+  state.repository.on('cacheUpdated', () => {
     console.log('🔄 Repository cache updated, refreshing display...');
+    refreshRecipesFromCache();
+  });
+
+  // Listen for recipes updates to refresh the display
+  state.repository.on('recipesUpdated', () => {
+    console.log('🔄 Repository recipes updated, refreshing display...');
     refreshRecipesFromCache();
   });
 
