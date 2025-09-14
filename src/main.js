@@ -5,7 +5,7 @@
 import RecipeRepository from './repositories/RecipeRepository.js';
 import gitHubAPIAdapter from './adapters/GitHubAPIAdapter.js';
 import { renderRecipeCard } from './components/RecipeCard.js';
-import { getSelectedRecipeNames, collectIngredientsFromRecipes } from './utils/recipeUtils.js';
+import { getSelectedRecipeNames, collectIngredientsFromRecipes, searchRecipesWithHighlighting } from './utils/recipeUtils.js';
 import { openShortcut } from './utils/shortcutsUtils.js';
 import { recipeUI } from './components/RecipeUI.js';
 import { githubAuth } from './services/githubAuth.js';
@@ -13,9 +13,11 @@ import { i18n, t } from './i18n/i18n.js';
 
 // Application state
 const state = {
-  recipes: [],
-  recipeListElement: null,
   repository: null,
+  recipes: [],
+  filteredRecipes: [], // Store filtered results
+  currentSearchQuery: '',
+  recipeListElement: null
 };
 
 /**
@@ -62,8 +64,9 @@ async function initializeApp() {
   // Get DOM elements
   state.recipeListElement = document.getElementById('recipeList');
   const exportBtn = document.getElementById('exportBtn');
+  const searchInput = document.getElementById('searchInput');
   
-  if (!state.recipeListElement || !exportBtn) {
+  if (!state.recipeListElement || !exportBtn || !searchInput) {
     console.error('Required DOM elements not found');
     return;
   }
@@ -72,7 +75,12 @@ async function initializeApp() {
   try {
     console.log('🔄 Loading recipes from repository...');
     state.recipes = await state.repository.getAll();
-    renderRecipes(state.recipes);
+    state.filteredRecipes = state.recipes.map(recipe => ({ 
+      recipe, 
+      matches: { name: [], tags: [], ingredients: [] }, 
+      shouldExpand: false 
+    })); // Initialize filtered recipes with no highlighting
+    renderRecipes(state.filteredRecipes);
     console.log(`✅ Loaded and rendered ${state.recipes.length} recipes`);
   } catch (error) {
     console.error('❌ Failed to load recipes:', error);
@@ -90,6 +98,18 @@ async function initializeApp() {
 
   // Setup export button
   exportBtn.addEventListener('click', handleExportClick);
+  
+  // Setup search functionality
+  let searchTimeout;
+  searchInput.addEventListener('input', (e) => {
+    // Debounce search to avoid excessive filtering
+    if (searchTimeout) {
+      window.clearTimeout(searchTimeout);
+    }
+    searchTimeout = window.setTimeout(() => {
+      performSearch(e.target.value.trim());
+    }, 300);
+  });
   
   // Setup recipe selection change handler
   setupRecipeSelectionHandler(exportBtn);
@@ -244,7 +264,17 @@ async function refreshRecipesFromCache() {
   try {
     // Get current recipes from repository (may use cache)
     state.recipes = await state.repository.getAll();
-    renderRecipes(state.recipes);
+    // Re-apply current search if any
+    if (state.currentSearchQuery) {
+      performSearch(state.currentSearchQuery);
+    } else {
+      state.filteredRecipes = state.recipes.map(recipe => ({ 
+        recipe, 
+        matches: { name: [], tags: [], ingredients: [] }, 
+        shouldExpand: false 
+      }));
+      renderRecipes(state.filteredRecipes);
+    }
   } catch (error) {
     console.error('❌ Failed to refresh recipes from cache:', error);
   }
@@ -272,7 +302,7 @@ function showLoadingError(error) {
 
 /**
  * Render all recipes to the DOM
- * @param {Object[]} recipes - Array of recipe objects
+ * @param {Object[]|Object[]} recipes - Array of recipe objects or search results with highlighting
  */
 function renderRecipes(recipes) {
   if (!state.recipeListElement) return;
@@ -281,15 +311,19 @@ function renderRecipes(recipes) {
   state.recipeListElement.innerHTML = '';
   
   if (recipes.length === 0) {
-    // Show empty state
+    // Show appropriate empty state message
+    const isSearching = state.currentSearchQuery && state.currentSearchQuery.trim() !== '';
+    const title = isSearching ? t('recipes.noResultsTitle') : t('recipes.noRecipesTitle');
+    const message = isSearching ? t('recipes.noResultsMessage') : t('recipes.noRecipesMessage');
+    
     state.recipeListElement.innerHTML = `
       <div class="col-12">
         <div class="alert alert-info text-center" role="alert">
-          <h4><i class="fas fa-utensils me-2"></i>${t('recipes.noRecipesTitle')}</h4>
-          <p>${t('recipes.noRecipesMessage')}</p>
-          ${githubAuth.isAuthenticated() ? 
+          <h4><i class="fas fa-${isSearching ? 'search' : 'utensils'} me-2"></i>${title}</h4>
+          <p>${message}</p>
+          ${!isSearching && githubAuth.isAuthenticated() ? 
             `<button class="btn btn-primary" onclick="recipeUI.showCreateForm()"><i class="fas fa-plus me-2"></i>${t('recipes.createRecipe')}</button>` : 
-            `<p><i class="fas fa-info-circle me-2"></i>${t('recipes.signInToManage')}</p>`
+            !isSearching ? `<p><i class="fas fa-info-circle me-2"></i>${t('recipes.signInToManage')}</p>` : ''
           }
         </div>
       </div>
@@ -297,8 +331,15 @@ function renderRecipes(recipes) {
     return;
   }
   
-  recipes.forEach(recipe => {
-    renderRecipeCard(recipe, state.recipeListElement);
+  recipes.forEach(item => {
+    // Handle both old format (just recipe objects) and new format (search results with highlighting)
+    const recipe = item.recipe || item;
+    const options = item.matches || item.shouldExpand ? {
+      matches: item.matches || { name: [], tags: [], ingredients: [] },
+      shouldExpand: item.shouldExpand || false
+    } : {};
+    
+    renderRecipeCard(recipe, state.recipeListElement, options);
   });
   
   // Update export button visibility after rendering
@@ -316,6 +357,29 @@ window.recipeUI = recipeUI;
 
 // Make repository available globally if needed
 window.recipeRepository = state.repository;
+
+/**
+ * Perform search and update the display
+ * @param {string} query - Search query
+ */
+function performSearch(query) {
+  state.currentSearchQuery = query;
+  
+  if (!query) {
+    // No search query - show all recipes
+    state.filteredRecipes = state.recipes.map(recipe => ({ 
+      recipe, 
+      matches: { name: [], tags: [], ingredients: [] }, 
+      shouldExpand: false 
+    }));
+  } else {
+    // Perform search with highlighting
+    state.filteredRecipes = searchRecipesWithHighlighting(state.recipes, query, 0.1);
+  }
+  
+  // Re-render with filtered results and highlighting
+  renderRecipes(state.filteredRecipes);
+}
 
 /**
  * Handle export button click

@@ -4,6 +4,7 @@
  */
 
 import { t } from '../i18n/i18n.js';
+import { highlightText } from '../utils/recipeUtils.js';
 
 /**
  * Simple recipe validation for English format
@@ -24,9 +25,12 @@ function validateEnglishRecipe(recipe) {
 /**
  * Create a recipe card DOM element with collapsible functionality
  * @param {Object} recipe - Recipe data object
+ * @param {Object} options - Options including highlighting data and expansion state
+ * @param {Object} options.matches - Match data for highlighting {name: [], tags: [], ingredients: []}
+ * @param {boolean} options.shouldExpand - Whether to expand the card initially
  * @returns {HTMLElement} Recipe card element
  */
-export function createRecipeCard(recipe) {
+export function createRecipeCard(recipe, options = {}) {
   // Validate English format
   if (!validateEnglishRecipe(recipe)) {
     console.error('Invalid recipe data - expected English format:', recipe);
@@ -42,6 +46,17 @@ export function createRecipeCard(recipe) {
   const recipeIngredients = recipe.ingredients || [];
   const recipeSteps = recipe.instructions || [];
   const recipeNotes = recipe.notes || [];
+  
+  // Extract highlighting options
+  const { matches = {}, shouldExpand = false } = options;
+  const { name: nameMatches = [], tags: tagMatches = [], ingredients: ingredientMatches = [] } = matches;
+  
+  // Apply highlighting to recipe name
+  const highlightedName = highlightText(recipeName, nameMatches);
+  
+  // Apply highlighting to tags - use the joined tags string for proper highlighting
+  const tagsString = Array.isArray(recipeTags) ? recipeTags.join(', ') : recipeTags;
+  const highlightedTags = highlightText(tagsString, tagMatches);
 
   // Format time and servings info
   const cookingTime = recipe.cookingTime || '';
@@ -57,10 +72,23 @@ export function createRecipeCard(recipe) {
   const subtitleText =
     subtitleParts.length > 0 ? subtitleParts.join(' • ') : '';
 
-  // Handle fields safely
-  const tags = Array.isArray(recipeTags) ? recipeTags.join(', ') : '';
-  const ingredients = Array.isArray(recipeIngredients)
-    ? recipeIngredients.map((i) => `<li>${i}</li>`).join('')
+  // Handle fields safely with highlighting
+  const tags = highlightedTags || recipeTags.join(', ');
+  
+  // Apply highlighting to ingredients for display
+  const highlightedIngredients = Array.isArray(recipeIngredients) ? 
+    recipeIngredients.map(ingredient => {
+      // Find matches that apply to this ingredient
+      const ingredientText = recipeIngredients.join(' ');
+      const relevantMatches = ingredientMatches.filter(match => {
+        const matchText = ingredientText.substring(match.start, match.end);
+        return ingredient.toLowerCase().includes(matchText.toLowerCase());
+      });
+      return highlightText(ingredient, relevantMatches);
+    }) : [];
+    
+  const ingredients = highlightedIngredients.length > 0 
+    ? highlightedIngredients.map((i) => `<li>${i}</li>`).join('')
     : '';
   const steps = Array.isArray(recipeSteps)
     ? recipeSteps.map((k) => `<li>${k}</li>`).join('')
@@ -81,21 +109,21 @@ export function createRecipeCard(recipe) {
             <div class="checkbox-container">
               <input type="checkbox" class="selectRecipe" id="checkbox-${recipeId}">
             </div>
-            <div class="flex-grow-1 recipe-title-area" data-bs-toggle="collapse" data-bs-target="#recipe-${recipeId}" role="button" aria-expanded="false">
-              <h6 class="mb-1 recipe-title">${recipeName}</h6>
+            <div class="flex-grow-1 recipe-title-area" data-bs-toggle="collapse" data-bs-target="#recipe-${recipeId}" role="button" aria-expanded="${shouldExpand}">
+              <h6 class="mb-1 recipe-title">${highlightedName}</h6>
               <div class="text-muted small recipe-subtitle">
                 ${tags ? `${t('recipes.tags')}: ${tags}` : ''}
                 ${tags && subtitleText ? ' • ' : ''}${subtitleText}
               </div>
             </div>
-            <div class="expand-toggle" data-bs-toggle="collapse" data-bs-target="#recipe-${recipeId}" role="button" aria-expanded="false">
+            <div class="expand-toggle" data-bs-toggle="collapse" data-bs-target="#recipe-${recipeId}" role="button" aria-expanded="${shouldExpand}">
               <i class="fas fa-chevron-down expand-icon"></i>
             </div>
           </div>
         </div>
         
         <!-- Expandable Content -->
-        <div class="collapse" id="recipe-${recipeId}">
+        <div class="collapse${shouldExpand ? ' show' : ''}" id="recipe-${recipeId}">
           <div class="recipe-content px-3 pb-3">
             <!-- Action buttons (shown when expanded) -->
             <div class="d-flex justify-content-end gap-2 mb-3">
@@ -186,10 +214,11 @@ export function createRecipeCard(recipe) {
  * Render recipe card to container
  * @param {Object} recipe - Recipe data object
  * @param {HTMLElement} container - Container element to append to
+ * @param {Object} options - Options including highlighting data and expansion state
  * @returns {HTMLElement|null} Created recipe card element
  */
-export function renderRecipeCard(recipe, container) {
-  const card = createRecipeCard(recipe);
+export function renderRecipeCard(recipe, container, options = {}) {
+  const card = createRecipeCard(recipe, options);
 
   if (card && container) {
     container.appendChild(card);

@@ -295,3 +295,33 @@ button {
     margin-bottom: 1rem;
   }
 }
+
+/* Search highlighting styles */
+.search-highlight {
+  background-color: #fff3cd;
+  color: #856404;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-weight: 500;
+  border: 1px solid #ffeaa7;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .search-highlight {
+    background-color: #000;
+    color: #fff;
+    border: 2px solid #fff;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .search-highlight {
+    background-color: #ffc107;
+    color: #212529;
+    border: 1px solid #ffca2c;
+  }
+}
