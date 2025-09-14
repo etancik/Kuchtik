@@ -1,9 +1,18 @@
 {
   "name": "Marmelada z rybizu",
   "ingredients": [
-    "500 ml ciste stavy",
-    "250-300g cukru",
-    "lzice citronove stavy"
+    {
+      "text": "500 ml ciste stavy",
+      "exportDefault": true
+    },
+    {
+      "text": "250-300g cukru",
+      "exportDefault": false
+    },
+    {
+      "text": "lzice citronove stavy",
+      "exportDefault": false
+    }
   ],
   "instructions": [
     "povarit s trochou vody a vymackat rybiz",

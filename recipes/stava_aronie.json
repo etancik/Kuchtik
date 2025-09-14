@@ -3,9 +3,18 @@
   "servings": "1 litr",
   "cookingTime": "5 dní",
   "ingredients": [
-    "500 g arónie",
-    "citrónová kůra nebo citrónka",
-    "cukr podle chuti"
+    {
+      "text": "500 g arónie",
+      "exportDefault": true
+    },
+    {
+      "text": "citrónová kůra nebo citrónka",
+      "exportDefault": false
+    },
+    {
+      "text": "cukr podle chuti",
+      "exportDefault": false
+    }
   ],
   "instructions": [
     "Zmrazit arónii na několik hodin nebo přes noc",

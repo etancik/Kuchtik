@@ -3,10 +3,22 @@
   "servings": 4,
   "cookingTime": "20 min",
   "ingredients": [
-    "250 g hladké mouky",
-    "500 ml mléka",
-    "2 vejce",
-    "špetka soli"
+    {
+      "text": "250 g hladké mouky",
+      "exportDefault": true
+    },
+    {
+      "text": "500 ml mléka",
+      "exportDefault": true
+    },
+    {
+      "text": "2 vejce",
+      "exportDefault": true
+    },
+    {
+      "text": "špetka soli",
+      "exportDefault": false
+    }
   ],
   "instructions": [
     "Smíchej všechny ingredience.",

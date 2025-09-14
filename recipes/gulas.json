@@ -1,13 +1,34 @@
 {
   "name": "Guláš",
   "ingredients": [
-    "500 g hovězí kližky",
-    "2 cibule",
-    "2 stroužky česneku",
-    "1 lžíce sladké papriky",
-    "olej",
-    "sůl",
-    "pepř"
+    {
+      "text": "500 g hovězí kližky",
+      "exportDefault": true
+    },
+    {
+      "text": "2 cibule",
+      "exportDefault": true
+    },
+    {
+      "text": "2 stroužky česneku",
+      "exportDefault": true
+    },
+    {
+      "text": "1 lžíce sladké papriky",
+      "exportDefault": true
+    },
+    {
+      "text": "olej",
+      "exportDefault": false
+    },
+    {
+      "text": "sůl",
+      "exportDefault": false
+    },
+    {
+      "text": "pepř",
+      "exportDefault": false
+    }
   ],
   "instructions": [
     "Nakrájej maso na kostky.",

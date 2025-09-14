@@ -1,9 +1,18 @@
 {
   "name": "Sirup z rybizu",
   "ingredients": [
-    "650 g Cerveny rybiz",
-    "300g Cukr",
-    "1 lzice kyseliny citronove"
+    {
+      "text": "650 g Cerveny rybiz",
+      "exportDefault": true
+    },
+    {
+      "text": "300g Cukr",
+      "exportDefault": false
+    },
+    {
+      "text": "1 lzice kyseliny citronove",
+      "exportDefault": false
+    }
   ],
   "instructions": [
     "Zalit trochou vody a zahrat",
