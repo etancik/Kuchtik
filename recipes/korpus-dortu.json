@@ -2,11 +2,11 @@
   "name": "Korpus dortu",
   "ingredients": [
     {
-      "text": "250g polohruba mouka",
+      "text": "250 g polohrubé mouky",
       "exportDefault": true
     },
     {
-      "text": "250g cukr moucka",
+      "text": "250 g moučkového cukru",
       "exportDefault": true
     },
     {
@@ -14,31 +14,36 @@
       "exportDefault": true
     },
     {
-      "text": "citronova kura/vanilkovy cukr",
+      "text": "citronová kůra nebo vanilkový cukr",
       "exportDefault": true
     }
   ],
   "instructions": [
-    "Uslehat bilky",
-    "Uslehat cukr se zloutkama a do toho pridat pri slehani 3-5 lzic horke vody",
-    "Pridat snih pomalu a postupne",
-    "Pridat mouku pomalu a postupne",
-    "Pridat nastrouhanou citronovou kuru/vanilkovy cukr"
+    "Oddělíme bílky od žloutků.",
+    "Žloutky ušleháme s cukrem do pěny, při šlehání postupně přidáváme 3-5 lžic horké vody.",
+    "Bílky ušleháme na tuhý sníh.",
+    "Do žloutkové směsi opatrně vmícháme sníh po částech.",
+    "Postupně přidáváme mouku a jemně vmícháváme.",
+    "Nakonec přidáme nastrouhanou citronovou kůru nebo vanilkový cukr.",
+    "Vylijeme na plech vyložený pečicím papírem a pečeme na 180°C asi 25-30 minut."
   ],
   "cookingTime": "60 min",
-  "servings": 1,
+  "servings": 12,
   "notes": [
-    "Vanilkovy krem - maslo, husty pudink ze 1/4l mleka, cukr",
-    "Slehacka s tvarohem"
+    "Vanilkový krém: máslo, hustý pudink z 1/4 l mléka, cukr",
+    "Další možnost: šlehačka s tvarohem",
+    "Korpus necháme po upečení úplně vychladnout před plněním"
   ],
   "tags": [
-    "peceni",
-    "sladke"
+    "pečení",
+    "dort",
+    "piškot",
+    "korpus"
   ],
   "metadata": {
     "createdDate": "2025-09-14T16:05:17.830Z",
     "author": "eBarborka",
-    "lastModified": "2025-09-14T16:05:17.830Z",
+    "lastModified": "2025-09-15T23:45:00Z",
     "id": "korpus-dortu",
     "sha": "a181c958d05148eae0bc1bf406ad2cbe70caddb6"
   }

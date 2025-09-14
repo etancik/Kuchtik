@@ -1,50 +1,59 @@
 {
-  "name": "Nivova pomazanka",
+  "name": "Nivová pomazánka",
   "ingredients": [
     {
-      "text": "1 Niva",
+      "text": "1 balení nivy (120 g)",
       "exportDefault": true
     },
     {
-      "text": "1 Ricotta/Tvaroh",
+      "text": "1 balení ricotty nebo tvarohu (250 g)",
       "exportDefault": true
     },
     {
-      "text": "1 lzice horcice plnotucne",
+      "text": "1 lžíce plnotučné hořčice",
       "exportDefault": true
     },
     {
-      "text": "1 lzice masla",
+      "text": "1 lžíce másla",
       "exportDefault": true
     },
     {
-      "text": "pepr",
+      "text": "pepř podle chuti",
       "exportDefault": true
     },
     {
-      "text": "sul",
+      "text": "sůl podle chuti",
       "exportDefault": true
     },
     {
-      "text": "1 mensi cibule",
+      "text": "1 menší cibule",
       "exportDefault": true
     }
   ],
   "instructions": [
-    "Vse smichat"
+    "Nivu rozdrťíme vidličkou na menší kousky.",
+    "Cibuli najemno nakrájíme nebo nastrouháme.",
+    "Všechny ingredience smícháme dohromady do hladké pomazánky.",
+    "Ochutíme solí a pepřem podle chuti.",
+    "Necháme chvíli odpočinout v lednici, aby se chutě propojily."
   ],
   "cookingTime": "15 min",
-  "servings": 1,
+  "servings": 4,
   "notes": [
-    "Vyborne se zelenyma hroznama"
+    "Výborně chutná se zelenými hrozny",
+    "Hodí se na toasty nebo čerstvý chléb",
+    "Vydrží v lednici 2-3 dny"
   ],
   "tags": [
-    "pomazanka"
+    "pomazánka",
+    "niva",
+    "studená kuchyně",
+    "rychlé"
   ],
   "metadata": {
     "createdDate": "2025-09-14T15:36:56.477Z",
     "author": "eBarborka",
-    "lastModified": "2025-09-14T15:36:56.477Z",
+    "lastModified": "2025-09-15T23:50:00Z",
     "id": "nivova-pomazanka",
     "sha": "e812477659c0dca08f59a5675c9a1e4c450e24eb"
   }

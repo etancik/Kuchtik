@@ -1,49 +1,54 @@
 {
-  "name": "Kokosove kulicky",
+  "name": "Kokosové kuličky",
   "ingredients": [
     {
-      "text": "1 Salko",
+      "text": "1 balení Salka",
       "exportDefault": true
     },
     {
-      "text": "100g Maslo",
+      "text": "100 g másla",
       "exportDefault": true
     },
     {
-      "text": "Vanilkovy cukr",
+      "text": "1 balíček vanilkového cukru",
       "exportDefault": true
     },
     {
-      "text": "1 baleni Kokosu",
+      "text": "1 balení strouhaného kokosu",
       "exportDefault": true
     },
     {
-      "text": "Rum",
+      "text": "2 lžíce rumu",
       "exportDefault": true
     },
     {
-      "text": "0.5 baleni madli",
+      "text": "0,5 balení loupaných mandlí",
       "exportDefault": true
     }
   ],
   "instructions": [
-    "Smichat pul baleni kokosu se zbytkem",
-    "Oloupat mandle nebo koupit loupane",
-    "Udelat kulicky s mandli uprostred",
-    "Obalit v kokosu",
-    "Dat do lednice"
+    "Smícháme Salko, máslo, vanilkový cukr, rum a polovinu strouhaného kokosu do hladké hmoty.",
+    "Necháme chvíli odpočinout v lednici, aby se hmota zpevnila.",
+    "Tvoříme malé kuličky, do každé vložíme loupanou mandli.",
+    "Hotové kuličky obalíme ve zbývajícím strouhaném kokosu.",
+    "Skladujeme v lednici."
   ],
-  "cookingTime": "60 min",
+  "cookingTime": "30 min",
   "servings": 20,
-  "notes": [],
+  "notes": [
+    "Hmotu můžeme ochutit citronovou kůrou",
+    "Místo mandlí lze použít oříšky nebo rozinky"
+  ],
   "tags": [
-    "peceni",
-    "sladke"
+    "moučník",
+    "sladké",
+    "kokos",
+    "bez pečení"
   ],
   "metadata": {
     "createdDate": "2025-09-14T15:43:44.961Z",
     "author": "eBarborka",
-    "lastModified": "2025-09-14T15:43:44.961Z",
+    "lastModified": "2025-09-15T23:35:00Z",
     "id": "kokosove-kulicky",
     "sha": "980f5a427b7c25c660a07c1af4284cca9dd40946"
   }

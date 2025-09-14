@@ -1,0 +1,79 @@
+{
+  "name": "Rebarborový koláč",
+  "ingredients": [
+    {
+      "text": "2 hrnky polohrubé mouky",
+      "exportDefault": true
+    },
+    {
+      "text": "1/2 hrnku cukru krupice",
+      "exportDefault": true
+    },
+    {
+      "text": "2 vejce",
+      "exportDefault": true
+    },
+    {
+      "text": "1/2 hrnku oleje",
+      "exportDefault": true
+    },
+    {
+      "text": "1 kypřící prášek do pečiva",
+      "exportDefault": true
+    },
+    {
+      "text": "300 ml bílého jogurtu",
+      "exportDefault": true
+    },
+    {
+      "text": "rebarbora podle chuti",
+      "exportDefault": true
+    },
+    {
+      "text": "100 g hrubé mouky (na drobenku)",
+      "exportDefault": true
+    },
+    {
+      "text": "70 g cukru krupice (na drobenku)",
+      "exportDefault": true
+    },
+    {
+      "text": "70 g másla (na drobenku)",
+      "exportDefault": true
+    },
+    {
+      "text": "máslo na vymazání plechu",
+      "exportDefault": false
+    },
+    {
+      "text": "hrubá mouka na vysypání plechu",
+      "exportDefault": false
+    }
+  ],
+  "instructions": [
+    "Rebarboru oloupeme a nakrájíme na menší kousky. Posypeme cukrem, promneme a necháme stát přibližně 20 minut. Zavadne a trochu změkne.",
+    "Mezitím utřeme celá vejce s cukrem a postupně přidáme olej, jogurt a mouku smíchanou s kypřícím práškem.",
+    "Těsto vylijeme na máslem vymazaný a hrubou moukou vysypaný plech (35x25 cm), nebo na plech vyložený pečicím papírem.",
+    "Na plechu těsto poklademe rebarborou a posypeme drobenkou, kterou připravíme promnutím mouky, cukru a tuhého másla.",
+    "Pečeme na 160 °C asi 30 minut."
+  ],
+  "cookingTime": "55 min",
+  "servings": 8,
+  "notes": [
+    "Plech o velikosti 35x25 cm",
+    "Rebarboru necháme stát s cukrem 20 minut před použitím",
+    "Drobenku připravujeme z tuhého másla"
+  ],
+  "tags": [
+    "moučník",
+    "koláč",
+    "rebarbora",
+    "drobenka",
+    "hrníčkový recept"
+  ],
+  "metadata": {
+    "createdDate": "2025-09-15T23:30:00Z",
+    "author": "Lukáš Tancer",
+    "lastModified": "2025-09-15T23:30:00Z"
+  }
+}

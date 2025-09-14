@@ -1,12 +1,12 @@
 {
-  "name": "Pernicky",
+  "name": "Perníčky",
   "ingredients": [
     {
-      "text": "500 g hladka mouka",
+      "text": "500 g hladké mouky",
       "exportDefault": true
     },
     {
-      "text": "200 g mouckovy cukr",
+      "text": "200 g moučkového cukru",
       "exportDefault": true
     },
     {
@@ -14,58 +14,67 @@
       "exportDefault": true
     },
     {
-      "text": "80 g masla",
+      "text": "80 g másla",
       "exportDefault": true
     },
     {
-      "text": "2 ks vejce",
+      "text": "2 vejce",
       "exportDefault": true
     },
     {
-      "text": "2 ks nove koreni",
+      "text": "2 nové koření",
       "exportDefault": true
     },
     {
-      "text": "3 ks hrebicku",
+      "text": "3 hřebíčky",
       "exportDefault": true
     },
     {
-      "text": "1 kyticka badyan",
+      "text": "1 kvítek badyánu",
       "exportDefault": true
     },
     {
-      "text": "1 spetka skorice",
+      "text": "špetka skořice",
       "exportDefault": true
     },
     {
-      "text": "1 spetka fenyklu",
+      "text": "špetka fenyklu",
       "exportDefault": true
     },
     {
-      "text": "1 spetka anyzu",
+      "text": "špetka anýzu",
       "exportDefault": true
     },
     {
-      "text": "1 lzicka sody",
+      "text": "1 lžička jedlé sody",
       "exportDefault": true
     }
   ],
   "instructions": [
-    "Smichat a rozvalet na placcku cca 0.5-1 cm tlustou a vykrajovat pernicky",
-    "Peceme asi 7 min na 200"
+    "Všechny koření najemno rozdrtíme nebo rozmělníme v mlýnku.",
+    "Med zahřejeme s máslem, až se máslo rozpustí. Necháme vychladnout.",
+    "Přidáme vejce, moučkový cukr, koření a jedlou sodu. Vše důkladně promícháme.",
+    "Postupně přidáváme mouku a zpracujeme v hladké těsto.",
+    "Těsto rozválíme na plat tlustý asi 0,5-1 cm a vykrajujeme perníčky.",
+    "Pečeme asi 7-10 minut na 200°C."
   ],
   "cookingTime": "90 min",
-  "servings": 1,
+  "servings": 30,
   "notes": [
-    "Koreni se da nahradit mixem pro pernickove koreni"
+    "Koření se dá nahradit hotovým mixem na perníčkové koření",
+    "Těsto lze nechat odpočinout přes noc v lednici",
+    "Upečené perníčky můžeme zdobit polevou"
   ],
   "tags": [
-    "peceni"
+    "pečení",
+    "sladké",
+    "vánoce",
+    "perník"
   ],
   "metadata": {
     "createdDate": "2025-09-14T15:33:31.402Z",
     "author": "eBarborka",
-    "lastModified": "2025-09-14T15:33:31.402Z",
+    "lastModified": "2025-09-15T23:40:00Z",
     "id": "pernicky",
     "sha": "016e7b8f086e70de0772aabbe480efae45efd7fd"
   }
