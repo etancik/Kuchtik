@@ -1,0 +1,23 @@
+{
+  "name": "Marmelada z rybizu",
+  "ingredients": [
+    "500 ml ciste stavy",
+    "250-300g cukru",
+    "lzice citronove stavy"
+  ],
+  "instructions": [
+    "povarit s trochou vody a vymackat rybiz",
+    "dat varit s cukrem a citronem",
+    "varit dokud se nezacnou delat cesticky"
+  ],
+  "cookingTime": "120 minut",
+  "servings": 1,
+  "notes": [
+    "Marmelada je hotova, kdyz v lednici na lzicce ztuhne a netece"
+  ],
+  "tags": [
+    "marmelada"
+  ],
+  "author": "eBarborka",
+  "created": "2025-09-14T11:15:05.885Z"
+}
