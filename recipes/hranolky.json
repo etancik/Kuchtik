@@ -1,0 +1,28 @@
+{
+  "name": "Hranolky",
+  "ingredients": [
+    {
+      "text": "5 brambor",
+      "exportDefault": true
+    },
+    {
+      "text": "1 lzice cukru",
+      "exportDefault": true
+    }
+  ],
+  "instructions": [
+    "Nakrajet brambory na hranolky",
+    "Namocit v cukrove vode na 3 min",
+    "Pect 15 min na 190 stupnu",
+    "Zamrazit",
+    "Potom osmazit"
+  ],
+  "cookingTime": "3 hodiny",
+  "servings": 2,
+  "notes": [],
+  "tags": [
+    "hranolky"
+  ],
+  "author": "eBarborka",
+  "created": "2025-09-14T15:39:30.419Z"
+}
