@@ -5,6 +5,7 @@
 
 import { t } from '../i18n/i18n.js';
 import { highlightText } from '../utils/recipeUtils.js';
+import { githubAuth } from '../services/githubAuth.js';
 
 /**
  * Simple recipe validation for English format
@@ -104,9 +105,10 @@ export function createRecipeCard(recipe, options = {}) {
       : '';
 
   const recipeId = recipe.id || recipeName.replace(/\s+/g, '-').toLowerCase();
+  const isAuthenticated = githubAuth.isAuthenticated();
 
   div.innerHTML = `
-    <div class="card recipe-card">
+    <div class="card recipe-card position-relative">
       <div class="card-body p-0">
         <!-- Collapsed Header (always visible) -->
         <div class="recipe-header">
@@ -129,22 +131,7 @@ export function createRecipeCard(recipe, options = {}) {
         
         <!-- Expandable Content -->
         <div class="collapse${shouldExpand ? ' show' : ''}" id="recipe-${recipeId}">
-          <div class="recipe-content px-3 pb-3">
-            <!-- Action buttons (shown when expanded) -->
-            <div class="d-flex justify-content-end gap-2 mb-3">
-              <button class="btn btn-outline-primary btn-sm edit-recipe-btn" 
-                      data-recipe='${JSON.stringify(recipe).replace(/'/g, '&apos;')}' 
-                      title="${t('recipes.editRecipe')}">
-                <i class="fas fa-edit me-1"></i>${t('common.edit')}
-              </button>
-              <button class="btn btn-outline-danger btn-sm delete-recipe-btn" 
-                      data-recipe-id='${recipe.id || recipeName}' 
-                      data-recipe-name='${recipeName}' 
-                      title="${t('recipes.deleteRecipe')}">
-                <i class="fas fa-trash me-1"></i>${t('common.delete')}
-              </button>
-            </div>
-            
+          <div class="recipe-content px-3 pb-3 position-relative">
             <!-- Recipe details -->
             <div class="row">
               <div class="col-md-6 mb-3">
@@ -157,6 +144,26 @@ export function createRecipeCard(recipe, options = {}) {
               </div>
             </div>
             ${notes}
+            ${isAuthenticated ? `
+            <!-- Action buttons (bottom-right corner of expanded content, only for authenticated users) -->
+            <div class="position-absolute" style="bottom: 8px; right: 8px;">
+              <div class="d-flex gap-1">
+                <button class="btn btn-outline-primary btn-sm edit-recipe-btn" 
+                        data-recipe='${JSON.stringify(recipe).replace(/'/g, '&apos;')}' 
+                        title="${t('recipes.editRecipe')}"
+                        style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-outline-danger btn-sm delete-recipe-btn" 
+                        data-recipe-id='${recipe.id || recipeName}' 
+                        data-recipe-name='${recipeName}' 
+                        title="${t('recipes.deleteRecipe')}"
+                        style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+            ` : ''}
           </div>
         </div>
       </div>
@@ -211,6 +218,41 @@ export function createRecipeCard(recipe, options = {}) {
   checkboxContainer.addEventListener('mouseup', (event) => {
     event.stopPropagation();
   });
+
+  // Set up event listeners for edit and delete buttons (only if authenticated)
+  if (isAuthenticated) {
+    const editBtn = div.querySelector('.edit-recipe-btn');
+    const deleteBtn = div.querySelector('.delete-recipe-btn');
+    
+    if (editBtn) {
+      editBtn.addEventListener('click', (event) => {
+        event.stopPropagation(); // Prevent card collapse toggle
+        const recipeData = JSON.parse(editBtn.getAttribute('data-recipe'));
+        
+        // Import and use RecipeUI dynamically
+        import('./RecipeUI.js').then(({ recipeUI }) => {
+          recipeUI.showEditForm(recipeData);
+        }).catch(error => {
+          console.error('Failed to load RecipeUI:', error);
+        });
+      });
+    }
+    
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', (event) => {
+        event.stopPropagation(); // Prevent card collapse toggle
+        const recipeId = deleteBtn.getAttribute('data-recipe-id');
+        const recipeName = deleteBtn.getAttribute('data-recipe-name');
+        
+        // Import and use RecipeUI dynamically
+        import('./RecipeUI.js').then(({ recipeUI }) => {
+          recipeUI.showDeleteConfirmation(recipeId, recipeName);
+        }).catch(error => {
+          console.error('Failed to load RecipeUI:', error);
+        });
+      });
+    }
+  }
 
   return div;
 }
