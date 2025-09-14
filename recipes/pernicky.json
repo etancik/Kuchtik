@@ -1,0 +1,67 @@
+{
+  "name": "Pernicky",
+  "ingredients": [
+    {
+      "text": "500 g hladka mouka",
+      "exportDefault": true
+    },
+    {
+      "text": "200 g mouckovy cukr",
+      "exportDefault": true
+    },
+    {
+      "text": "170 g medu",
+      "exportDefault": true
+    },
+    {
+      "text": "80 g masla",
+      "exportDefault": true
+    },
+    {
+      "text": "2 ks vejce",
+      "exportDefault": true
+    },
+    {
+      "text": "2 ks nove koreni",
+      "exportDefault": true
+    },
+    {
+      "text": "3 ks hrebicku",
+      "exportDefault": true
+    },
+    {
+      "text": "1 kyticka badyan",
+      "exportDefault": true
+    },
+    {
+      "text": "1 spetka skorice",
+      "exportDefault": true
+    },
+    {
+      "text": "1 spetka fenyklu",
+      "exportDefault": true
+    },
+    {
+      "text": "1 spetka anyzu",
+      "exportDefault": true
+    },
+    {
+      "text": "1 lzicka sody",
+      "exportDefault": true
+    }
+  ],
+  "instructions": [
+    "Smichat a rozvalet na placcku cca 0.5-1 cm tlustou a vykrajovat pernicky",
+    "Peceme asi 7 min na 200"
+  ],
+  "cookingTime": "90 min",
+  "servings": 1,
+  "notes": [
+    "Koreni se da nahradit mixem pro pernickove koreni"
+  ],
+  "tags": [
+    "peceni"
+  ],
+  "author": "eBarborka",
+  "created": "2025-09-14T15:33:31.402Z"
+}
