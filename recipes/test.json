@@ -7,8 +7,8 @@
     }
   ],
   "instructions": [
-    "dddd",
     "aaaaa",
+    "dddd",
     "ssss"
   ],
   "cookingTime": "",
@@ -18,8 +18,8 @@
   "metadata": {
     "createdDate": "2025-09-14T21:52:09.594Z",
     "author": "etancik",
-    "lastModified": "2025-09-14T21:58:46.403Z",
+    "lastModified": "2025-09-14T22:09:28.383Z",
     "id": "test",
-    "sha": "0da1e1b07c3723910eb1cd07dc6415286a15acaf"
+    "sha": "10f3ea83b14e14b96bf6d56bb448d684a01d5c40"
   }
 }
