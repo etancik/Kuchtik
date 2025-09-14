@@ -1,0 +1,45 @@
+{
+  "name": "Kokosove kulicky",
+  "ingredients": [
+    {
+      "text": "1 Salko",
+      "exportDefault": true
+    },
+    {
+      "text": "100g Maslo",
+      "exportDefault": true
+    },
+    {
+      "text": "Vanilkovy cukr",
+      "exportDefault": true
+    },
+    {
+      "text": "1 baleni Kokosu",
+      "exportDefault": true
+    },
+    {
+      "text": "Rum",
+      "exportDefault": true
+    },
+    {
+      "text": "0.5 baleni madli",
+      "exportDefault": true
+    }
+  ],
+  "instructions": [
+    "Smichat pul baleni kokosu se zbytkem",
+    "Oloupat mandle nebo koupit loupane",
+    "Udelat kulicky s mandli uprostred",
+    "Obalit v kokosu",
+    "Dat do lednice"
+  ],
+  "cookingTime": "60 min",
+  "servings": 20,
+  "notes": [],
+  "tags": [
+    "peceni",
+    "sladke"
+  ],
+  "author": "eBarborka",
+  "created": "2025-09-14T15:43:44.961Z"
+}
