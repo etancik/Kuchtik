@@ -19,11 +19,11 @@
     },
     {
       "text": "olej na smažení",
-      "exportDefault": false
+      "exportDefault": true
     },
     {
       "text": "sůl a pepř podle chuti",
-      "exportDefault": false
+      "exportDefault": true
     }
   ],
   "instructions": [
@@ -33,7 +33,7 @@
     "Podlij vodou a vař pod pokličkou 1-1,5 hodiny dokud není maso měkké."
   ],
   "cookingTime": "90 min",
-  "servings": 4,
+  "servings": 5,
   "notes": [
     "Můžeš přidat brambory nakrájené na kostky v poslední půlhodině vaření"
   ],
@@ -41,10 +41,5 @@
     "hlavní jídlo",
     "česká kuchyně",
     "maso"
-  ],
-  "metadata": {
-    "createdDate": "2025-09-12T22:01:00Z",
-    "author": "Lukáš Tancer",
-    "lastModified": "2025-09-14T13:47:15Z"
-  }
+  ]
 }
