@@ -1,0 +1,38 @@
+{
+  "name": "Zapecene brambory",
+  "ingredients": [
+    {
+      "text": "5 brambor",
+      "exportDefault": true
+    },
+    {
+      "text": "1 smetana zakysana",
+      "exportDefault": true
+    },
+    {
+      "text": "1 vejce",
+      "exportDefault": true
+    },
+    {
+      "text": "1 baleni sunky/salamu",
+      "exportDefault": true
+    }
+  ],
+  "instructions": [
+    "Nakrajet brambory na platky",
+    "Smichat se zakysanou smetanou a vajickem",
+    "Davat jedno patri brambor a jedno patri sunky",
+    "Zapect"
+  ],
+  "cookingTime": "60 min",
+  "servings": 2,
+  "notes": [
+    "Vyborne s rajcatovym salatem (rajce, voda, cukr, cibulka)"
+  ],
+  "tags": [
+    "rychle",
+    "hlavni jidlo"
+  ],
+  "author": "eBarborka",
+  "created": "2025-09-14T16:10:19.892Z"
+}
