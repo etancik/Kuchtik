@@ -69,11 +69,14 @@
     "koláč",
     "rebarbora",
     "drobenka",
-    "hrníčkový recept"
+    "hrníčkový recept",
+    "dezert"
   ],
   "metadata": {
     "createdDate": "2025-09-15T23:30:00Z",
     "author": "Lukáš Tancer",
-    "lastModified": "2025-09-15T23:30:00Z"
+    "lastModified": "2025-09-14T22:37:19.119Z",
+    "id": "rebarborovy-kolac",
+    "sha": "b52306ea15b40b38b027f9c3df5d5ba9ea20916e"
   }
 }
