@@ -1,6 +1,26 @@
 /**
- * Utility functions for recipe data processing and manipulation
+ * Utility functions for recipe data manipulation
  */
+
+/**
+ * Get array of selected recipe names from checked checkboxes
+ * @returns {string[]} Array of selected recipe names
+ */
+export function getSelectedRecipeNames() {
+  const checkedBoxes = document.querySelectorAll('.selectRecipe:checked');
+  const recipeNames = [];
+  
+  checkedBoxes.forEach(checkbox => {
+    // Find the recipe title within the same card
+    const cardTitle = checkbox.closest('.card').querySelector('.recipe-title');
+    if (cardTitle) {
+      const recipeName = extractRecipeName(cardTitle.textContent);
+      recipeNames.push(recipeName);
+    }
+  });
+  
+  return recipeNames;
+}
 
 /**
  * Extract recipe name from card title text
@@ -38,23 +58,6 @@ export function collectIngredientsFromRecipes(recipes, selectedRecipeNames) {
   });
   
   return ingredients;
-}
-
-/**
- * Get selected recipe names from DOM checkboxes
- * @returns {string[]} Array of selected recipe names
- */
-export function getSelectedRecipeNames() {
-  const checkedBoxes = document.querySelectorAll('.selectRecipe:checked');
-  const recipeNames = [];
-  
-  checkedBoxes.forEach(checkbox => {
-    const cardTitle = checkbox.closest('h5').textContent;
-    const recipeName = extractRecipeName(cardTitle);
-    recipeNames.push(recipeName);
-  });
-  
-  return recipeNames;
 }
 
 /**
