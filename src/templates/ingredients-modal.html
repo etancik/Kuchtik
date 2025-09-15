@@ -5,7 +5,7 @@
       <div class="modal-header">
         <h5 class="modal-title" id="ingredientsModalTitle">
           <i class="fas fa-shopping-cart me-2"></i>
-          <span data-i18n="ingredientsExport.title">Export Ingredients to Shopping List</span>
+          <span data-i18n="ingredientsExport.exportTitle">Export Ingredients</span>
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
@@ -47,14 +47,16 @@
         </div>
       </div>
       
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-          <i class="fas fa-times me-2"></i>
-          <span data-i18n="common.cancel">Cancel</span>
+      <div class="modal-footer d-flex justify-content-center gap-2 flex-nowrap">
+        <button type="button" class="btn btn-primary flex-fill" id="exportSelectedIngredients" style="max-width: 200px;">
+          <i class="fas fa-share-square me-1"></i>
+          <span data-i18n="ingredientsExport.exportToShortcuts" class="d-none d-sm-inline">Export to Shortcuts</span>
+          <span class="d-sm-none">Export</span>
         </button>
-        <button type="button" class="btn btn-primary" id="exportSelectedIngredients">
-          <i class="fas fa-download me-2"></i>
-          <span data-i18n="ingredientsExport.exportButton">Export to Shopping List</span>
+        <button type="button" class="btn btn-outline-primary flex-fill" id="copyToClipboard" style="max-width: 200px;">
+          <i class="fas fa-copy me-1"></i>
+          <span data-i18n="ingredientsExport.copyToClipboard" class="d-none d-sm-inline">Copy to Clipboard</span>
+          <span class="d-sm-none">Copy</span>
         </button>
       </div>
     </div>

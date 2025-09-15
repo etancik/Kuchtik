@@ -48,6 +48,7 @@
   },
   "ingredientsExport": {
     "title": "Export Ingrediencí do Nákupního Seznamu",
+    "exportTitle": "Export Ingrediencí",
     "description": "Zkontrolujte a vyberte ingredience, které chcete přidat do svého nákupního seznamu. Všechny ingredience jsou vybrané ve výchozím nastavení.",
     "selectAll": "Vybrat Vše",
     "deselectAll": "Zrušit Výběr",
@@ -57,9 +58,13 @@
     "of": "z",
     "ingredients": "ingrediencí",
     "exportButton": "Exportovat do Nákupního Seznamu",
+    "exportToShortcuts": "Exportovat do Shortcuts",
+    "copyToClipboard": "Kopírovat do Schránky",
     "noIngredientsSelected": "Prosím vyberte alespoň jednu ingredienci k exportu!",
     "exportSuccess": "{{count}} {{plural}} exportováno do nákupního seznamu!",
-    "exportError": "Nepodařilo se exportovat ingredience do nákupního seznamu!"
+    "copySuccess": "{{count}} ingrediencí zkopírováno do schránky!",
+    "exportError": "Nepodařilo se exportovat ingredience do nákupního seznamu!",
+    "copyError": "Nepodařilo se zkopírovat ingredience do schránky!"
   },
   "recipeForm": {
     "createNewRecipe": "Vytvořit Nový Recept",

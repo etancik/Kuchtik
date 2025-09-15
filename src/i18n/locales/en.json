@@ -48,6 +48,7 @@
   },
   "ingredientsExport": {
     "title": "Export Ingredients to Shopping List",
+    "exportTitle": "Export Ingredients",
     "description": "Review and select the ingredients you want to add to your shopping list. All ingredients are selected by default.",
     "selectAll": "Select All",
     "deselectAll": "Deselect All",
@@ -57,9 +58,13 @@
     "of": "of",
     "ingredients": "ingredients",
     "exportButton": "Export to Shopping List",
+    "exportToShortcuts": "Export to Shortcuts",
+    "copyToClipboard": "Copy to Clipboard",
     "noIngredientsSelected": "Please select at least one ingredient to export!",
     "exportSuccess": "{{count}} ingredient{{plural}} exported to shopping list!",
-    "exportError": "Failed to export ingredients to shopping list!"
+    "copySuccess": "{{count}} ingredients copied to clipboard!",
+    "exportError": "Failed to export ingredients to shopping list!",
+    "copyError": "Failed to copy ingredients to clipboard!"
   },
   "recipeForm": {
     "createNewRecipe": "Create New Recipe",

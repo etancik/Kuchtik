@@ -52,25 +52,42 @@ class IngredientsExportService {
     const selectAllBtn = document.getElementById('selectAllIngredients');
     const deselectAllBtn = document.getElementById('deselectAllIngredients');
     const exportBtn = document.getElementById('exportSelectedIngredients');
+    const copyBtn = document.getElementById('copyToClipboard');
     
     // Select all ingredients
-    selectAllBtn.addEventListener('click', () => {
-      this.selectAllIngredients();
-    });
+    if (selectAllBtn) {
+      selectAllBtn.addEventListener('click', () => {
+        this.selectAllIngredients();
+      });
+    }
     
     // Deselect all ingredients
-    deselectAllBtn.addEventListener('click', () => {
-      this.deselectAllIngredients();
-    });
+    if (deselectAllBtn) {
+      deselectAllBtn.addEventListener('click', () => {
+        this.deselectAllIngredients();
+      });
+    }
     
-    // Export selected ingredients
-    exportBtn.addEventListener('click', () => {
-      this.exportSelectedIngredients();
-    });
+    // Export selected ingredients to Shortcuts
+    if (exportBtn) {
+      exportBtn.addEventListener('click', () => {
+        this.exportSelectedIngredients();
+      });
+    }
+
+    // Copy selected ingredients to clipboard (may not exist in tests)
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        this.copySelectedIngredientsToClipboard();
+      });
+    }
+    
     // Update translations when modal is shown
-    modal.addEventListener('shown.bs.modal', () => {
-      this.updateModalTranslations();
-    });
+    if (modal) {
+      modal.addEventListener('shown.bs.modal', () => {
+        this.updateModalTranslations();
+      });
+    }
   }
 
   /**
@@ -453,15 +470,20 @@ class IngredientsExportService {
     const selectedCountElement = document.getElementById('selectedIngredientsCount');
     const totalCountElement = document.getElementById('totalIngredientsCount');
     const exportBtn = document.getElementById('exportSelectedIngredients');
+    const copyBtn = document.getElementById('copyToClipboard');
     
     if (selectedCountElement && totalCountElement) {
       selectedCountElement.textContent = this.selectedIngredients.size;
       totalCountElement.textContent = this.ingredients.length;
     }
     
-    // Enable/disable export button based on selection
+    // Enable/disable both buttons based on selection
+    const hasSelection = this.selectedIngredients.size > 0;
     if (exportBtn) {
-      exportBtn.disabled = this.selectedIngredients.size === 0;
+      exportBtn.disabled = !hasSelection;
+    }
+    if (copyBtn) {
+      copyBtn.disabled = !hasSelection;
     }
   }
 
@@ -572,6 +594,67 @@ class IngredientsExportService {
     toastElement.addEventListener('hidden.bs.toast', () => {
       toastElement.remove();
     });
+  }
+
+  /**
+   * Copy selected ingredients to clipboard
+   */
+  async copySelectedIngredientsToClipboard() {
+    const selectedIngredientObjects = Array.from(this.selectedIngredients);
+    
+    if (selectedIngredientObjects.length === 0) {
+      alert(t('ingredientsExport.noIngredientsSelected'));
+      return;
+    }
+
+    try {
+      let selectedIngredientTexts;
+      
+      if (this.groupedRecipes && this.recipeScales) {
+        // Grouped mode: apply per-recipe scaling
+        selectedIngredientTexts = selectedIngredientObjects.map(ingredient => {
+          const recipeId = ingredient._recipeId;
+          const scale = this.recipeScales.get(recipeId) || 1;
+          const originalText = ingredient.text || ingredient;
+          
+          if (scale !== 1) {
+            try {
+              if (ingredient.amount && !isNaN(ingredient.amount)) {
+                const scaledAmount = (ingredient.amount * scale).toString();
+                const unit = ingredient.unit || '';
+                const ingredientName = ingredient.ingredient || '';
+                return `${scaledAmount} ${unit} ${ingredientName}`.trim();
+              } else {
+                return originalText; // Can't scale non-numeric ingredients
+              }
+            } catch {
+              return originalText;
+            }
+          }
+          return originalText;
+        });
+      } else {
+        // Single mode: no scaling applied
+        selectedIngredientTexts = selectedIngredientObjects.map(ingredient => {
+          return ingredient.text || ingredient;
+        });
+      }
+      
+      // Join ingredients with newlines for clipboard
+      const clipboardText = selectedIngredientTexts.join('\n');
+      
+      // Copy to clipboard
+      await navigator.clipboard.writeText(clipboardText);
+      
+      // Show success message
+      const count = selectedIngredientTexts.length;
+      const message = t('ingredientsExport.copySuccess', { count });
+      this.showSuccessMessage(message);
+      
+    } catch (error) {
+      console.error('❌ Copy to clipboard failed:', error);
+      alert(t('ingredientsExport.copyError'));
+    }
   }
 
   /**
