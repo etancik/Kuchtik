@@ -1,0 +1,55 @@
+{
+  "name": "Rybi karbenatky",
+  "ingredients": [
+    {
+      "text": "600 g halibute nebo jine file",
+      "exportDefault": true
+    },
+    {
+      "text": "1 cesnek",
+      "exportDefault": true
+    },
+    {
+      "text": "1 vejce",
+      "exportDefault": true
+    },
+    {
+      "text": "strouhanka",
+      "exportDefault": true
+    },
+    {
+      "text": "provensalske bylinky",
+      "exportDefault": true
+    },
+    {
+      "text": "sul",
+      "exportDefault": true
+    },
+    {
+      "text": "pepr",
+      "exportDefault": true
+    }
+  ],
+  "instructions": [
+    "Dat vse do mixeru s trochou strouhanky",
+    "Udelat koule a obalit ve zbytku strouhanky a osmazit",
+    "Nebo orestovat / upect v troube"
+  ],
+  "cookingTime": "60 min",
+  "servings": 4,
+  "notes": [],
+  "tags": [
+    "moučník",
+    "pečení",
+    "vegetariánské"
+  ],
+  "metadata": {
+    "id": null,
+    "sha": null,
+    "createdDate": "2025-09-15T07:54:01.014Z",
+    "createdAt": "2025-09-15T07:54:01.014Z",
+    "author": "eBarborka",
+    "lastModified": "2025-09-15T07:54:01.014Z",
+    "filename": null
+  }
+}
