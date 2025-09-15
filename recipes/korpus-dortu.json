@@ -16,16 +16,24 @@
     {
       "text": "citronová kůra nebo vanilkový cukr",
       "exportDefault": true
+    },
+    {
+      "text": "0.5 prasku na peceni",
+      "exportDefault": true
+    },
+    {
+      "text": "spetka soli",
+      "exportDefault": true
     }
   ],
   "instructions": [
     "Oddělíme bílky od žloutků.",
-    "Žloutky ušleháme s cukrem do pěny, při šlehání postupně přidáváme 3-5 lžic horké vody.",
     "Bílky ušleháme na tuhý sníh.",
+    "Žloutky ušleháme s cukrem do pěny, při šlehání postupně přidáváme 3-5 lžic horké vody.",
     "Do žloutkové směsi opatrně vmícháme sníh po částech.",
-    "Postupně přidáváme mouku a jemně vmícháváme.",
+    "Postupně přidáváme mouku se soli a praskem a jemně vmícháváme.",
     "Nakonec přidáme nastrouhanou citronovou kůru nebo vanilkový cukr.",
-    "Vylijeme na plech vyložený pečicím papírem a pečeme na 180°C asi 25-30 minut."
+    "Vylijeme do formy a pečeme na 180°C asi 25-30 minut."
   ],
   "cookingTime": "60 min",
   "servings": 12,
@@ -43,7 +51,7 @@
   "metadata": {
     "createdDate": "2025-09-14T16:05:17.830Z",
     "author": "eBarborka",
-    "lastModified": "2025-09-15T07:41:25.640Z",
+    "lastModified": "2025-09-15T07:44:41.982Z",
     "id": "korpus-dortu",
     "sha": "1fb822ed21099365b9e4bc13459e9a8dceacb346"
   }
