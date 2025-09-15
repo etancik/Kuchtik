@@ -1,0 +1,57 @@
+{
+  "name": "Mrkvovy dort",
+  "ingredients": [
+    {
+      "text": "4 mrkve",
+      "exportDefault": true
+    },
+    {
+      "text": "1 maly hrnek oleje",
+      "exportDefault": true
+    },
+    {
+      "text": "2 male hrnky cukru",
+      "exportDefault": true
+    },
+    {
+      "text": "4 vejce",
+      "exportDefault": true
+    },
+    {
+      "text": "0.5 prasek do peciva",
+      "exportDefault": true
+    },
+    {
+      "text": "2 hrnky mouky",
+      "exportDefault": true
+    }
+  ],
+  "instructions": [
+    "Oloupej mrkev a nastrouhej",
+    "Vyslehej bilky",
+    "Vyslehej zloutky s cukrem a mrkvi",
+    "Smichej prasek do peciva s moukou",
+    "Zamichej bilky do zloutkoveho mixu",
+    "Zamichej mouku s praskem do mixu",
+    "Pect na 180 stupnu cca 35 min"
+  ],
+  "cookingTime": "60 min",
+  "servings": 6,
+  "notes": [
+    "Nejlepe chutna polite cokoladou"
+  ],
+  "tags": [
+    "dezert",
+    "vejce",
+    "mrkev"
+  ],
+  "metadata": {
+    "id": null,
+    "sha": null,
+    "createdDate": "2025-09-15T07:38:06.937Z",
+    "createdAt": "2025-09-15T07:38:06.937Z",
+    "author": "eBarborka",
+    "lastModified": "2025-09-15T07:38:06.937Z",
+    "filename": null
+  }
+}
