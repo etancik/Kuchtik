@@ -42,7 +42,7 @@
     "tags": "Tags",
     "servings": "Servings",
     "cookingTime": "Cooking Time",
-    "ingredients": "Ingredients", 
+    "ingredients": "Ingredients",
     "instructions": "Instructions",
     "notes": "Notes"
   },
@@ -88,7 +88,8 @@
     "tagsField": "Tags",
     "tagsPlaceholder": "e.g., vegetarian, quick, main course",
     "tagInputPlaceholder": "Type a tag and press Enter",
-    "tagsHelp": "Separate multiple tags with commas",
+    "tagsHelp": "Press Enter or click + to add tags",
+    "ingredientsHelp": "Check ingredients you need for shopping, uncheck when you regularly have them at home.",
     "createRecipeBtn": "Create Recipe",
     "updateRecipeBtn": "Update Recipe",
     "processing": "Processing..."

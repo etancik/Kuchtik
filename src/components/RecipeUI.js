@@ -471,14 +471,19 @@ class RecipeUI {
    */
   collectFormData() {
     const ingredientElements = document.querySelectorAll('.ingredient-input');
+    const ingredientCheckboxes = document.querySelectorAll('.ingredient-added-checkbox');
+    
     const ingredients = Array.from(ingredientElements)
       .map((input, index) => {
         const text = input.value.trim();
         if (text === '') return null;
         
+        const checkbox = ingredientCheckboxes[index];
+        const exportDefault = checkbox ? checkbox.checked : true;
+        
         return {
           text: text,
-          exportDefault: this.getIngredientExportDefault(index, text)
+          exportDefault: exportDefault
         };
       })
       .filter(ingredient => ingredient !== null);
@@ -734,6 +739,22 @@ class RecipeUI {
       `;
       container.appendChild(div);
       this.setupStepDragAndDrop(div);
+    } else if (containerId === 'ingredients-container') {
+      // Use new ingredient structure with checkbox
+      const div = document.createElement('div');
+      div.className = 'ingredient-edit-item mb-2';
+      div.innerHTML = `
+        <div class="input-group">
+          <div class="input-group-text">
+            <input type="checkbox" class="form-check-input ingredient-added-checkbox" title="Uncheck when used" checked>
+          </div>
+          <input class="form-control ${inputClass}" placeholder="${placeholder}" required>
+          <button class="btn btn-sm remove-btn" type="button" onclick="recipeUI.removeIngredient(this)" title="Remove ingredient">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      `;
+      container.appendChild(div);
     } else {
       const div = document.createElement('div');
       div.className = 'input-group mb-2';
@@ -779,6 +800,28 @@ class RecipeUI {
         `;
         container.appendChild(div);
         this.setupStepDragAndDrop(div);
+      } else if (containerId === 'ingredients-container') {
+        // Handle ingredients with new checkbox structure
+        const div = document.createElement('div');
+        div.className = 'ingredient-edit-item mb-2';
+        
+        // Handle ingredient objects vs strings
+        const displayValue = (typeof item === 'object' && item.text) ? item.text : item;
+        const exportDefault = (typeof item === 'object' && item.exportDefault !== undefined) ? item.exportDefault : true; // Default to true (checked)
+        
+        div.innerHTML = `
+          <div class="input-group">
+            <div class="input-group-text">
+              <input type="checkbox" class="form-check-input ingredient-added-checkbox" title="Uncheck when used" ${exportDefault ? 'checked' : ''}>
+            </div>
+            <input class="form-control ${inputClass}" value="${displayValue}" required>
+            <button class="btn btn-sm remove-btn" type="button" onclick="recipeUI.removeIngredient(this)" title="Remove ingredient">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        `;
+        
+        container.appendChild(div);
       } else {
         // Handle other containers (ingredients, notes) with old structure
         const div = document.createElement('div');
@@ -814,15 +857,20 @@ class RecipeUI {
   addIngredient() {
     const container = document.getElementById('ingredients-container');
     const ingredientDiv = document.createElement('div');
-    ingredientDiv.className = 'input-group mb-2';
+    ingredientDiv.className = 'ingredient-edit-item mb-2';
     ingredientDiv.innerHTML = `
-      <input type="text" class="form-control ingredient-input" placeholder="${t('recipeForm.ingredientPlaceholder')}" required>
-      <button class="btn btn-sm remove-btn" type="button" onclick="recipeUI.removeIngredient(this)" title="Remove ingredient">
-        <i class="fas fa-times"></i>
-      </button>
+      <div class="input-group">
+        <div class="input-group-text">
+          <input type="checkbox" class="form-check-input ingredient-added-checkbox" title="Uncheck when used" checked>
+        </div>
+        <input type="text" class="form-control ingredient-input" placeholder="${t('recipeForm.ingredientPlaceholder')}" required>
+        <button class="btn btn-sm remove-btn" type="button" onclick="recipeUI.removeIngredient(this)" title="Remove ingredient">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
     `;
     container.appendChild(ingredientDiv);
-    ingredientDiv.querySelector('input').focus();
+    ingredientDiv.querySelector('input[type="text"]').focus();
   }
 
   removeIngredient(button) {

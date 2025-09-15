@@ -48,6 +48,9 @@ export function createRecipeCard(recipe, options = {}) {
   const recipeSteps = recipe.instructions || [];
   const recipeNotes = recipe.notes || [];
   
+  // Generate recipe ID early for use in ingredient IDs
+  const recipeId = recipe.metadata?.id || recipeName.replace(/\s+/g, '-').toLowerCase();
+  
   // Extract highlighting options
   const { matches = {}, shouldExpand = false } = options;
   const { name: nameMatches = [], tags: tagMatches = [], ingredients: ingredientMatches = [] } = matches;
@@ -94,7 +97,11 @@ export function createRecipeCard(recipe, options = {}) {
     }) : [];
     
   const ingredients = highlightedIngredients.length > 0 
-    ? highlightedIngredients.map((i) => `<li>${i}</li>`).join('')
+    ? highlightedIngredients.map((ingredient) => {
+        return `<li class="ingredient-item">
+          <span class="ingredient-text">${ingredient}</span>
+        </li>`;
+      }).join('')
     : '';
   const steps = Array.isArray(recipeSteps)
     ? recipeSteps.map((k) => `<li>${k}</li>`).join('')
@@ -104,7 +111,6 @@ export function createRecipeCard(recipe, options = {}) {
       ? `<div class="mt-3"><h6>${t('recipeForm.notes')}:</h6><ul>${recipeNotes.map((n) => `<li>${n}</li>`).join('')}</ul></div>`
       : '';
 
-  const recipeId = recipe.metadata?.id || recipeName.replace(/\s+/g, '-').toLowerCase();
   const isAuthenticated = githubAuth.isAuthenticated();
 
   div.innerHTML = `

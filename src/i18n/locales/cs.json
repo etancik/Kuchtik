@@ -88,7 +88,8 @@
     "tagsField": "Štítky",
     "tagsPlaceholder": "např. vegetariánské, rychlé, hlavní chod",
     "tagInputPlaceholder": "Napište štítek a stiskněte Enter",
-    "tagsHelp": "Více štítků oddělte čárkami",
+    "tagsHelp": "Stiskněte Enter nebo klikněte na + pro přidání štítků",
+    "ingredientsHelp": "Zaškrtněte ingredience, které potřebujete nakoupit, odškrtněte když je běžně máte.",
     "createRecipeBtn": "Vytvořit Recept",
     "updateRecipeBtn": "Aktualizovat Recept",
     "processing": "Zpracovávám..."
@@ -126,7 +127,7 @@
   },
   "plurals": {
     "recipe": "recept",
-    "recipes2to4": "recepty", 
+    "recipes2to4": "recepty",
     "recipes5plus": "receptů"
   }
 }

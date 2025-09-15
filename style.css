@@ -49,6 +49,65 @@ button {
   max-width: none;
 }
 
+/* Ingredient edit items with checkboxes */
+.ingredient-edit-item .input-group-text {
+  min-width: 45px;
+  border-right: 0;
+  background-color: #e8f4fd;
+  border-color: #6bb6ff;
+}
+
+.ingredient-edit-item .ingredient-input {
+  border-left: 0;
+  border-right: 0;
+}
+
+.ingredient-edit-item .remove-btn {
+  border-left: 0;
+}
+
+.ingredient-added-checkbox {
+  transform: scale(1.1);
+  margin: 0;
+}
+
+/* Default state: checked = ingredient ready for shopping (normal appearance) */
+.ingredient-edit-item:has(.ingredient-added-checkbox:checked) .input-group-text {
+  background-color: #e8f4fd;
+  border-color: #6bb6ff;
+}
+
+.ingredient-edit-item:has(.ingredient-added-checkbox:checked) .ingredient-input {
+  background-color: white;
+  border-color: #6bb6ff;
+  text-decoration: none;
+  opacity: 1;
+  color: #212529;
+}
+
+.ingredient-edit-item:has(.ingredient-added-checkbox:checked) .remove-btn {
+  border-color: #6bb6ff;
+}
+
+/* Unchecked state: ingredient has been used/completed */
+.ingredient-edit-item:has(.ingredient-added-checkbox:not(:checked)) .input-group-text {
+  background-color: #f9fbf9;
+  border-color: #9ca3a3;
+}
+
+.ingredient-edit-item:has(.ingredient-added-checkbox:not(:checked)) .ingredient-input {
+  background-color: #fdfefe;
+  border-color: #9ca3a3;
+  text-decoration: none;
+  opacity: 1;
+  color: #4a5568;
+  font-style: italic;
+}
+
+.ingredient-edit-item:has(.ingredient-added-checkbox:not(:checked)) .remove-btn {
+  border-color: #9ca3a3;
+}
+
 /* Style remove buttons as destructive operations */
 .input-group .btn-outline-secondary {
   color: #dc3545;

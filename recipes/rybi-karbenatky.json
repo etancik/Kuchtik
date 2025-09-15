@@ -3,38 +3,31 @@
   "ingredients": [
     {
       "text": "600 g halibute nebo jine file",
-      "added": true,
       "exportDefault": true
     },
     {
       "text": "1 cesnek",
-      "added": true,
       "exportDefault": true
     },
     {
       "text": "1 vejce",
-      "added": true,
       "exportDefault": true
     },
     {
       "text": "strouhanka",
-      "added": true,
       "exportDefault": true
     },
     {
       "text": "provensalske bylinky",
-      "added": false,
       "exportDefault": true
     },
     {
       "text": "sul",
-      "added": false,
-      "exportDefault": true
+      "exportDefault": false
     },
     {
       "text": "pepr",
-      "added": false,
-      "exportDefault": true
+      "exportDefault": false
     }
   ],
   "instructions": [
