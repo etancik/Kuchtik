@@ -19,7 +19,7 @@
     },
     {
       "text": "provensalske bylinky",
-      "exportDefault": true
+      "exportDefault": false
     },
     {
       "text": "sul",
@@ -45,11 +45,11 @@
   ],
   "metadata": {
     "id": "rybi-karbenatky",
-    "sha": "66b93a9584d13c0cca480694306a5f6ef2caeaa6",
+    "sha": "86625e78bd970b31348b050d7225a1da7e9eda53",
     "createdDate": "2025-09-15T07:54:01.014Z",
     "createdAt": "2025-09-15T07:54:01.014Z",
     "author": "eBarborka",
-    "lastModified": "2025-09-15T15:25:16.490Z",
+    "lastModified": "2025-09-15T15:50:45.933Z",
     "filename": null
   }
 }
