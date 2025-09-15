@@ -7,7 +7,7 @@
     },
     {
       "text": "3 lzice masla",
-      "exportDefault": true
+      "exportDefault": false
     },
     {
       "text": "1 vejce",
@@ -15,11 +15,11 @@
     },
     {
       "text": "1 lzicka soli",
-      "exportDefault": true
+      "exportDefault": false
     },
     {
       "text": "hruba mouka/skrobova mouka/hladka mouka",
-      "exportDefault": true
+      "exportDefault": false
     }
   ],
   "instructions": [
@@ -37,12 +37,12 @@
     "brambory"
   ],
   "metadata": {
-    "id": null,
-    "sha": null,
+    "id": "bramborove-knedliky",
+    "sha": "073f339d386e944e6e815ea68b0e30ce0104ff84",
     "createdDate": "2025-09-15T07:59:25.726Z",
     "createdAt": "2025-09-15T07:59:25.726Z",
     "author": "eBarborka",
-    "lastModified": "2025-09-15T07:59:25.726Z",
+    "lastModified": "2025-09-15T15:55:12.299Z",
     "filename": null
   }
 }
