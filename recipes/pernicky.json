@@ -35,7 +35,7 @@
     },
     {
       "text": "špetka skořice",
-      "exportDefault": true
+      "exportDefault": false
     },
     {
       "text": "špetka fenyklu",
@@ -68,15 +68,15 @@
   "tags": [
     "moučník",
     "pečení",
-    "vánoce", 
+    "vánoce",
     "perník",
     "vegetariánské"
   ],
   "metadata": {
     "createdDate": "2025-09-14T15:33:31.402Z",
     "author": "eBarborka",
-    "lastModified": "2025-09-15T23:40:00Z",
+    "lastModified": "2025-09-15T15:52:06.598Z",
     "id": "pernicky",
-    "sha": "016e7b8f086e70de0772aabbe480efae45efd7fd"
+    "sha": "8676b7e981afe92f3e70a5c61da7e806cc88d9c6"
   }
 }
