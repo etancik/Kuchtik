@@ -139,3 +139,9 @@ repo.on('recipesUpdated', (recipes) => {
 **Browser Support:** Modern browsers with ES2022 support
 **Dependencies:** Jest, ESLint, Prettier (dev only)
 **Deployment:** Static files, no build process required
+
+## License
+
+This project is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License - see the [LICENSE](LICENSE) file for details.
+
+This license allows you to use, copy, modify, and distribute this software freely for non-commercial purposes, provided that you give appropriate credit. **Commercial use, selling, or reselling is strictly prohibited.**
