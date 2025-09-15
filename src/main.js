@@ -84,7 +84,7 @@ async function initializeApp() {
     setupRepositoryEventHandlers();
     
     // Update UI button states
-    updateButtonStates();
+    updateAuthStatus();
     
     console.log('✅ RecipeRepository initialized');
   } catch (error) {
@@ -93,6 +93,13 @@ async function initializeApp() {
 
   // Get DOM elements
   state.recipeListElement = document.getElementById('recipeList');
+  
+  // Ensure create button starts hidden
+  const createButton = document.getElementById('createRecipeBtn');
+  if (createButton) {
+    createButton.style.setProperty('display', 'none', 'important');
+    console.log('🔧 DEBUG: Initially hiding create button with !important');
+  }
   const exportBtn = document.getElementById('exportBtn');
   const searchInput = document.getElementById('searchInput');
   
@@ -169,7 +176,7 @@ async function initializeApp() {
         if (token) {
           // Re-setup repository with authenticated adapter
           await setupRepositoryAdapter();
-          updateButtonStates();
+          updateAuthStatus();
           console.log('✅ Authentication successful, switched to authenticated mode');
         } else {
           console.log('❌ Authentication failed');
@@ -179,13 +186,10 @@ async function initializeApp() {
         githubAuth.signOut();
         // Re-setup repository with public adapter
         await setupRepositoryAdapter();
-        updateButtonStates();
+        updateAuthStatus();
         console.log('👋 Signed out, switched to public mode');
       }
     });
-    
-    // Update authentication button
-    updateAuthButton();
   }
   
   // Update auth status
@@ -242,36 +246,6 @@ function setupRepositoryEventHandlers() {
 
 /**
  * Update UI button states based on current authentication status
-}
-
-/**
- * Update UI button states based on current authentication status
- */
-function updateButtonStates() {
-  const canEdit = githubAuth.isAuthenticated();
-  
-  // Show/hide create button based on authentication
-  const createBtn = document.getElementById('createRecipeBtn');
-  if (createBtn) {
-    createBtn.style.display = canEdit ? 'inline-flex' : 'none';
-  }
-  
-  // Update authentication button text
-  updateAuthButton();
-}
-
-/**
- * Update authentication button text based on current state
- */
-function updateAuthButton() {
-  const authBtn = document.getElementById('authBtn');
-  if (authBtn) {
-    if (githubAuth.isAuthenticated()) {
-      authBtn.innerHTML = '<i class="fas fa-sign-out-alt me-1"></i>' + t('signOut');
-    } else {
-      authBtn.innerHTML = '<i class="fab fa-github me-1"></i>' + t('signIn');
-    }
-  }
 }
 
 /**
@@ -542,6 +516,10 @@ function updateAuthStatus() {
   const authBtn = document.getElementById('authBtn');
   const createBtn = document.getElementById('createRecipeBtn');
   
+  console.log('🔧 DEBUG: updateAuthStatus called');
+  console.log('🔧 DEBUG: isAuthenticated:', githubAuth.isAuthenticated());
+  console.log('🔧 DEBUG: createBtn exists:', !!createBtn);
+  
   if (!authBtn) return;
   
   if (githubAuth.isAuthenticated()) {
@@ -552,7 +530,8 @@ function updateAuthStatus() {
     authBtn.classList.add('btn-outline-success');
     
     if (createBtn) {
-      createBtn.style.display = 'inline-block';
+      createBtn.style.setProperty('display', 'inline-flex', 'important'); // Match updateButtonStates display style
+      console.log('🔧 DEBUG: Showing create button for authenticated user');
     }
     
     // Add sign out functionality
@@ -569,7 +548,10 @@ function updateAuthStatus() {
     authBtn.classList.add('btn-outline-primary');
     
     if (createBtn) {
-      createBtn.style.display = 'none';
+      createBtn.style.setProperty('display', 'none', 'important'); // Hide for unauthenticated users
+      console.log('🔧 DEBUG: Hiding create button for unauthenticated user');
+      console.log('🔧 DEBUG: createBtn.style.display after setting:', createBtn.style.display);
+      console.log('🔧 DEBUG: createBtn computed style:', window.getComputedStyle(createBtn).display);
     }
     
     // Add sign in functionality
