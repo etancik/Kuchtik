@@ -1,0 +1,68 @@
+{
+  "name": "Jablecny tvarohovy kolac",
+  "ingredients": [
+    {
+      "text": "4 jablka",
+      "exportDefault": true
+    },
+    {
+      "text": "1 bily jogurt",
+      "exportDefault": true
+    },
+    {
+      "text": "2 hrnky hladke mouky",
+      "exportDefault": true
+    },
+    {
+      "text": "1 hrnek cukru",
+      "exportDefault": true
+    },
+    {
+      "text": "0.5 hrnku rostlinneho oleje",
+      "exportDefault": true
+    },
+    {
+      "text": "skorice",
+      "exportDefault": true
+    },
+    {
+      "text": "1 citron",
+      "exportDefault": true
+    },
+    {
+      "text": "sul",
+      "exportDefault": true
+    },
+    {
+      "text": "0.5 prasku do peciva",
+      "exportDefault": true
+    }
+  ],
+  "instructions": [
+    "Oloupej a nakrajej pulku jablek na kosticky a pulku na mesicky",
+    "Smichej se skorici a stavou z citronu",
+    "Vyslehej vejce s cukrem",
+    "Pridej jogurt a olej",
+    "Pridej mouku smichanou se soli a praskem do peciva",
+    "Pridej jablka nakrajene na kosticky",
+    "Dej testo do formy a nahoru dej jablka nakrajena na mesicky"
+  ],
+  "cookingTime": "",
+  "servings": 4,
+  "notes": [
+    "https://theclevermeal.com/easy-healthy-apple-cake-recipe/"
+  ],
+  "tags": [
+    "moučník",
+    "jablka"
+  ],
+  "metadata": {
+    "id": null,
+    "sha": null,
+    "createdDate": "2025-09-15T08:25:53.689Z",
+    "createdAt": "2025-09-15T08:25:53.689Z",
+    "author": "eBarborka",
+    "lastModified": "2025-09-15T08:25:53.689Z",
+    "filename": null
+  }
+}
