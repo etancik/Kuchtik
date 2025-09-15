@@ -1,0 +1,59 @@
+{
+  "name": "Jablecny kolac s drobenkou",
+  "ingredients": [
+    {
+      "text": "1 vejce",
+      "exportDefault": true
+    },
+    {
+      "text": "100 g masla",
+      "exportDefault": true
+    },
+    {
+      "text": "150 g cukru",
+      "exportDefault": true
+    },
+    {
+      "text": "300 g hladke mouky",
+      "exportDefault": true
+    },
+    {
+      "text": "1 prasek do peciva",
+      "exportDefault": true
+    },
+    {
+      "text": "4 jablka",
+      "exportDefault": true
+    },
+    {
+      "text": "drobenka (maslo, cukr, polohruba mouka 1:1:2)",
+      "exportDefault": true
+    }
+  ],
+  "instructions": [
+    "Smichame mouku, prasek do peciva, vejce, cukr, zmekle maslo",
+    "Dortovou formu vymažeme máslem, vysypeme strouhankou a naplníme testem. Dobře přitlačíme a vytvoříme i zvýšený okraj.",
+    "Jablka oloupeme, rozčtvrtíme a odstraníme jadřince. Rozkrájíme je na plátky a rozložíme na korpus. Posypeme rozinkami.",
+    "Navrch nasypeme drobenku a poprášíme ji moučkovým cukrem.",
+    "Pečeme při teplotě 180–200 °C po dobu asi 40 minut."
+  ],
+  "cookingTime": "90 min",
+  "servings": 1,
+  "notes": [
+    "Testo se da rozdelit na pul a pouzit pulka jako drobenka nahoru",
+    "https://www.toprecepty.cz/recept/3580-drobenkovy-kolac-s-jablky/"
+  ],
+  "tags": [
+    "moučník",
+    "jablka"
+  ],
+  "metadata": {
+    "id": null,
+    "sha": null,
+    "createdDate": "2025-09-15T08:15:41.098Z",
+    "createdAt": "2025-09-15T08:15:41.098Z",
+    "author": "eBarborka",
+    "lastModified": "2025-09-15T08:15:41.098Z",
+    "filename": null
+  }
+}
