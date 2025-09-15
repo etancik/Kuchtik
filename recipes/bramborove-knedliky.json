@@ -1,0 +1,48 @@
+{
+  "name": "Bramborove knedliky",
+  "ingredients": [
+    {
+      "text": "1 kg brambor",
+      "exportDefault": true
+    },
+    {
+      "text": "3 lzice masla",
+      "exportDefault": true
+    },
+    {
+      "text": "1 vejce",
+      "exportDefault": true
+    },
+    {
+      "text": "1 lzicka soli",
+      "exportDefault": true
+    },
+    {
+      "text": "hruba mouka/skrobova mouka/hladka mouka",
+      "exportDefault": true
+    }
+  ],
+  "instructions": [
+    "Oloupat a nastrouhat brambory",
+    "Smichat vse dohromady",
+    "Konsistence by mela byt vlacna, dle potreby pridavame mouku",
+    "Udelame valec a varime 20min v osolene vode"
+  ],
+  "cookingTime": "60 min",
+  "servings": 6,
+  "notes": [
+    "Krajime niti"
+  ],
+  "tags": [
+    "brambory"
+  ],
+  "metadata": {
+    "id": null,
+    "sha": null,
+    "createdDate": "2025-09-15T07:59:25.726Z",
+    "createdAt": "2025-09-15T07:59:25.726Z",
+    "author": "eBarborka",
+    "lastModified": "2025-09-15T07:59:25.726Z",
+    "filename": null
+  }
+}
