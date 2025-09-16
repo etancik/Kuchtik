@@ -2,39 +2,39 @@
   "name": "Hlavkový salát",
   "ingredients": [
     {
-      "text": "1 salat",
+      "text": "1 salát",
       "exportDefault": true
     },
     {
-      "text": "3 lzice mouckoveho cukru",
+      "text": "3 lžíce moučkového cukru",
       "exportDefault": true
     },
     {
-      "text": "2.5 lzice octa",
+      "text": "2.5 lžíce octa",
       "exportDefault": true
     },
     {
-      "text": "0.5 lzicky soli",
-      "exportDefault": true
+      "text": "0.5 lžičky soli",
+      "exportDefault": false
     },
     {
-      "text": "0.5 spetka mleteho cerneho pepre",
-      "exportDefault": true
+      "text": "0.5 špetka mletého černého pepře",
+      "exportDefault": false
     },
     {
-      "text": "200 ml ledove vody",
+      "text": "200 ml ledové vody",
       "exportDefault": true
     }
   ],
   "instructions": [
-    "Salat natrhat",
-    "Zalivku smichat a pridat k salatu"
+    "Salát natrhat na menší kousky.",
+    "Zálivku smíchat a přidat k salátu."
   ],
   "cookingTime": "15 min",
   "servings": 2,
   "notes": [
-    "Prvni zalivku ochutnej, nez ji nalijes na salat",
-    "Radeji mene pepre, s casem je salat palivejsi"
+    "Prvně zálivku ochutnej, než ji naliješ na salát.",
+    "Raději méně pepře, s časem je salát pálivější."
   ],
   "tags": [
     "salát",
