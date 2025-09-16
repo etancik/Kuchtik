@@ -1,16 +1,16 @@
 {
-  "name": "Jablecny tvarohovy kolac",
+  "name": "Jablečný tvarohový koláč",
   "ingredients": [
     {
-      "text": "4 jablka",
+      "text": "4 jablka (větší)",
       "exportDefault": true
     },
     {
-      "text": "1 bily jogurt",
+      "text": "1 bílý jogurt (150 g)",
       "exportDefault": true
     },
     {
-      "text": "2 hrnky hladke mouky",
+      "text": "2 hrnky hladké mouky",
       "exportDefault": true
     },
     {
@@ -18,36 +18,41 @@
       "exportDefault": true
     },
     {
-      "text": "0.5 hrnku rostlinneho oleje",
+      "text": "0.5 hrnku rostlinného oleje",
       "exportDefault": true
     },
     {
-      "text": "skorice",
+      "text": "2 vejce",
       "exportDefault": true
     },
     {
-      "text": "1 citron",
+      "text": "skořice (na ochucení)",
       "exportDefault": true
     },
     {
-      "text": "sul",
+      "text": "1 citron (šťáva)",
+      "exportDefault": false
+    },
+    {
+      "text": "špetka soli",
       "exportDefault": true
     },
     {
-      "text": "0.5 prasku do peciva",
+      "text": "0.5 prášku do pečiva",
       "exportDefault": true
     }
   ],
   "instructions": [
-    "Oloupej a nakrajej pulku jablek na kosticky a pulku na mesicky",
-    "Smichej se skorici a stavou z citronu",
-    "Vyslehej vejce s cukrem",
-    "Pridej jogurt a olej",
-    "Pridej mouku smichanou se soli a praskem do peciva",
-    "Pridej jablka nakrajene na kosticky",
-    "Dej testo do formy a nahoru dej jablka nakrajena na mesicky"
+    "Oloupej a nakrájej půlku jablek na kostičky a půlku na měsíčky",
+    "Smíchej jablka se skořicí a šťávou z citronu",
+    "Vyšlehej vejce s cukrem",
+    "Přidej jogurt a olej",
+    "Přidej mouku smíchanou se solí a práškem do pečiva",
+    "Přidej jablka nakrájená na kostičky",
+    "Dej těsto do formy a navrch dej jablka nakrájená na měsíčky",
+    "Peč při 180°C asi 40-50 minut do zlatova"
   ],
-  "cookingTime": "",
+  "cookingTime": "60 min",
   "servings": 4,
   "notes": [
     "https://theclevermeal.com/easy-healthy-apple-cake-recipe/"

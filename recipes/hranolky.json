@@ -2,20 +2,24 @@
   "name": "Hranolky",
   "ingredients": [
     {
-      "text": "5 brambor",
+      "text": "5 brambor (větších)",
       "exportDefault": true
     },
     {
-      "text": "1 lzice cukru",
+      "text": "1 lžíce cukru",
+      "exportDefault": true
+    },
+    {
+      "text": "olej na smažení",
       "exportDefault": true
     }
   ],
   "instructions": [
-    "Nakrajet brambory na hranolky",
-    "Namocit v cukrove vode na 3 min",
-    "Pect 15 min na 190 stupnu",
-    "Zamrazit",
-    "Potom osmazit"
+    "Nakrájet brambory na hranolky (asi 1 cm tlusté)",
+    "Namočit v cukrové vodě na 3 minuty",
+    "Péct 15 minut na 190 stupňů",
+    "Zamrazit na několik hodin",
+    "Poté osmažit v horkém oleji do zlatova"
   ],
   "cookingTime": "3 hodiny",
   "servings": 2,

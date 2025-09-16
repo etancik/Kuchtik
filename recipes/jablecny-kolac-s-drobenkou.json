@@ -1,12 +1,12 @@
 {
-  "name": "Jablecny kolac s drobenkou",
+  "name": "Jablečný koláč s drobenkou",
   "ingredients": [
     {
       "text": "1 vejce",
       "exportDefault": true
     },
     {
-      "text": "100 g masla",
+      "text": "100 g másla",
       "exportDefault": true
     },
     {
@@ -14,33 +14,37 @@
       "exportDefault": true
     },
     {
-      "text": "300 g hladke mouky",
+      "text": "300 g hladké mouky",
       "exportDefault": true
     },
     {
-      "text": "1 prasek do peciva",
+      "text": "1 prášek do pečiva",
       "exportDefault": true
     },
     {
       "text": "4 jablka",
-      "exportDefault": true
+      "exportDefault": false
     },
     {
-      "text": "drobenka (maslo, cukr, polohruba mouka 1:1:2)",
+      "text": "drobenka (máslo, cukr, polohrubá mouka 1:1:2)",
+      "exportDefault": false
+    },
+    {
+      "text": "skořice (na ochucení)",
       "exportDefault": true
     }
   ],
   "instructions": [
-    "Smichame mouku, prasek do peciva, vejce, cukr, zmekle maslo",
-    "Dortovou formu vymažeme máslem, vysypeme strouhankou a naplníme testem. Dobře přitlačíme a vytvoříme i zvýšený okraj.",
-    "Jablka oloupeme, rozčtvrtíme a odstraníme jadřince. Rozkrájíme je na plátky a rozložíme na korpus. Posypeme rozinkami.",
+    "Smícháme mouku, prášek do pečiva, vejce, cukr a změklé máslo",
+    "Dortovou formu vymažeme máslem, vysypeme strouhankou a naplníme těstem. Dobře přitlačíme a vytvoříme i zvýšený okraj.",
+    "Jablka oloupeme, rozčtvrtíme a odstraníme jádřince. Rozkrájíme je na plátky a rozložíme na korpus. Posypeme skořicí.",
     "Navrch nasypeme drobenku a poprášíme ji moučkovým cukrem.",
     "Pečeme při teplotě 180–200 °C po dobu asi 40 minut."
   ],
   "cookingTime": "90 min",
   "servings": 1,
   "notes": [
-    "Testo se da rozdelit na pul a pouzit pulka jako drobenka nahoru",
+    "Těsto se dá rozdělit na půl a použít půlka jako drobenka nahoru",
     "https://www.toprecepty.cz/recept/3580-drobenkovy-kolac-s-jablky/"
   ],
   "tags": [

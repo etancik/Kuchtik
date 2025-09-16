@@ -1,12 +1,12 @@
 {
-  "name": "Bramborove knedliky",
+  "name": "Bramborové knedlíky",
   "ingredients": [
     {
       "text": "1 kg brambor",
       "exportDefault": true
     },
     {
-      "text": "3 lzice masla",
+      "text": "3 lžíce másla",
       "exportDefault": false
     },
     {
@@ -14,27 +14,30 @@
       "exportDefault": true
     },
     {
-      "text": "1 lzicka soli",
+      "text": "1 lžička soli",
       "exportDefault": false
     },
     {
-      "text": "hruba mouka/skrobova mouka/hladka mouka",
+      "text": "hrubá mouka/škrobová mouka/hladká mouka",
       "exportDefault": false
     }
   ],
   "instructions": [
-    "Oloupat a nastrouhat brambory",
-    "Smichat vse dohromady",
-    "Konsistence by mela byt vlacna, dle potreby pridavame mouku",
-    "Udelame valec a varime 20min v osolene vode"
+    "Oloupat a nastrouhat brambory na hrubém struhadle.",
+    "Smíchat vše dohromady.",
+    "Konzistence by měla být vláčná, dle potřeby přidáváme mouku.",
+    "Uděláme válec a vaříme 20 min v osolené vodě."
   ],
   "cookingTime": "60 min",
   "servings": 6,
   "notes": [
-    "Krajime niti"
+    "Krájíme nití."
   ],
   "tags": [
-    "brambory"
+    "brambory",
+    "přílohy",
+    "česká kuchyně",
+    "vegetariánské"
   ],
   "metadata": {
     "id": "bramborove-knedliky",

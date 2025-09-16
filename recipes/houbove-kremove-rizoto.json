@@ -2,35 +2,35 @@
   "name": "Houbové krémové rizoto",
   "ingredients": [
     {
-      "text": "2 cervene cibule",
+      "text": "2 červené cibule",
       "exportDefault": true
     },
     {
-      "text": "200g parizskych hub",
+      "text": "200 g pařížských hub",
       "exportDefault": true
     },
     {
-      "text": "350g kulatozrnne ryze",
+      "text": "350 g kulatozrnné rýže",
       "exportDefault": true
     },
     {
-      "text": "1 glutamatova kostka",
+      "text": "1 glutamátová kostka",
       "exportDefault": true
     },
     {
-      "text": "0.5 sklenice bileho vina",
+      "text": "0.5 sklenice bílého vína",
       "exportDefault": true
     },
     {
-      "text": "200 ml smetany na slehani",
+      "text": "200 ml smetany na šlehání",
       "exportDefault": true
     },
     {
-      "text": "olivovy olej",
+      "text": "olivový olej",
       "exportDefault": true
     },
     {
-      "text": "1 baleni parmazanu",
+      "text": "1 balení parmezánu",
       "exportDefault": true
     }
   ],
@@ -49,7 +49,7 @@
   "cookingTime": "90 min",
   "servings": 4,
   "notes": [
-    "Navrch se da dat karamelizovana slanina z trouby"
+    "Navrch se dá dát karamelizovaná slanina z trouby"
   ],
   "tags": [
     "hlavní jídlo",
