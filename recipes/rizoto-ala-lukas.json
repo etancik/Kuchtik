@@ -1,0 +1,55 @@
+{
+  "name": "Rizoto ala Lukas",
+  "ingredients": [
+    {
+      "text": "2 odmerky ryze",
+      "exportDefault": false
+    },
+    {
+      "text": "1 sklenice veproveho masa",
+      "exportDefault": true
+    },
+    {
+      "text": "1 baleni zeleniny",
+      "exportDefault": true
+    },
+    {
+      "text": "sul",
+      "exportDefault": false
+    },
+    {
+      "text": "pepr",
+      "exportDefault": false
+    },
+    {
+      "text": "kysela okurka",
+      "exportDefault": false
+    },
+    {
+      "text": "1 baleni strouhaneho syru",
+      "exportDefault": true
+    }
+  ],
+  "instructions": [
+    "Dej varit ryzi do ryzovaru (vody 1.5x)",
+    "Nakrajej maso na male kousicky",
+    "Az bude ryze uvarene, dej ji do voku a pridej maso a zeleninu a orestuj",
+    "Dochut a serviruj se syrem a okurkou"
+  ],
+  "cookingTime": "60 min",
+  "servings": 6,
+  "notes": [],
+  "tags": [
+    "hlavní jídlo",
+    "smažené"
+  ],
+  "metadata": {
+    "id": null,
+    "sha": null,
+    "createdDate": "2025-09-18T07:48:42.216Z",
+    "createdAt": "2025-09-18T07:48:42.216Z",
+    "author": "eBarborka",
+    "lastModified": "2025-09-18T07:48:42.216Z",
+    "filename": null
+  }
+}
