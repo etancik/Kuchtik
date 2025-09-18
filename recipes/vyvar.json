@@ -1,0 +1,56 @@
+{
+  "name": "Vyvar",
+  "ingredients": [
+    {
+      "text": "maso (kure, veprove zebra, hovezi?)",
+      "exportDefault": true
+    },
+    {
+      "text": "2 cibule",
+      "exportDefault": true
+    },
+    {
+      "text": "1 mrazena zelenina",
+      "exportDefault": true
+    },
+    {
+      "text": "nudle",
+      "exportDefault": true
+    },
+    {
+      "text": "sul",
+      "exportDefault": false
+    },
+    {
+      "text": "pepr",
+      "exportDefault": false
+    }
+  ],
+  "instructions": [
+    "Dej do hrnce maso s cibuli a zalij vodou",
+    "Var cca 3 h",
+    "Az je uvareno, slij vyvar a zalij maso studenou vodou",
+    "Ober maso",
+    "Pridej do vyvaru dohromady se zeleninou a povar",
+    "Pridej nudle a var dle navodu",
+    "Dochut"
+  ],
+  "cookingTime": "4 h",
+  "servings": 6,
+  "notes": [
+    "Muzeme pridat masove kulicky"
+  ],
+  "tags": [
+    "hlavní jídlo",
+    "česká kuchyně"
+  ],
+  "metadata": {
+    "id": null,
+    "sha": null,
+    "createdDate": "2025-09-18T07:35:45.110Z",
+    "createdAt": "2025-09-18T07:35:45.110Z",
+    "author": "eBarborka",
+    "lastModified": "2025-09-18T07:35:45.110Z",
+    "filename": null
+  }
+}
