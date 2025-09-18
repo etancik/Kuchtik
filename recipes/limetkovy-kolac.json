@@ -1,0 +1,60 @@
+{
+  "name": "Limetkovy kolac",
+  "ingredients": [
+    {
+      "text": "1 baleni susenek",
+      "exportDefault": true
+    },
+    {
+      "text": "1 plechovka kondenzovaneho mleka",
+      "exportDefault": true
+    },
+    {
+      "text": "2 limetky",
+      "exportDefault": true
+    },
+    {
+      "text": "4 vejce",
+      "exportDefault": true
+    },
+    {
+      "text": "cukr",
+      "exportDefault": false
+    },
+    {
+      "text": "1 smetana na slehani",
+      "exportDefault": true
+    },
+    {
+      "text": "2 lzice masla",
+      "exportDefault": true
+    }
+  ],
+  "instructions": [
+    "Dej susenky do mixeru a rozmixuj",
+    "Pridej maslo a udelej kurcicku v kolacove forme",
+    "Dej pect na 10 min na 180 stupnu",
+    "Nastrouhej si limetkovou kuru a vymackej limetkovou stavu",
+    "Vyslehej bilky, pridej trochu cukru a pridej limetkovou kuru",
+    "Vyslehej si zloutky se smetanou a kondenzovanym mlekem a trochou stavy z limetek",
+    "Nalij zloutky do formy a dej pect na 5 min",
+    "Pridej nahoru bilky a udelej hezke kopecky vydlickou a posyp dalsi kurou",
+    "Pec dalsich 10 min",
+    "Dej kolac do lednice (alespon 20 min)"
+  ],
+  "cookingTime": "90 min",
+  "servings": 1,
+  "notes": [],
+  "tags": [
+    "moučník"
+  ],
+  "metadata": {
+    "id": null,
+    "sha": null,
+    "createdDate": "2025-09-18T08:36:04.416Z",
+    "createdAt": "2025-09-18T08:36:04.416Z",
+    "author": "eBarborka",
+    "lastModified": "2025-09-18T08:36:04.416Z",
+    "filename": null
+  }
+}
