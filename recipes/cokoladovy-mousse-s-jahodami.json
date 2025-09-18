@@ -1,0 +1,55 @@
+{
+  "name": "Cokoladovy mousse s jahodami",
+  "ingredients": [
+    {
+      "text": "170 g cokolady na vareni",
+      "exportDefault": true
+    },
+    {
+      "text": "120 ml smetany na vareni",
+      "exportDefault": true
+    },
+    {
+      "text": "285 g recky jogurt",
+      "exportDefault": true
+    },
+    {
+      "text": "8 jahod",
+      "exportDefault": true
+    },
+    {
+      "text": "sul",
+      "exportDefault": false
+    },
+    {
+      "text": "vanilka",
+      "exportDefault": false
+    }
+  ],
+  "instructions": [
+    "Ohrej smetanu na cca 82 stupnu, nevar",
+    "Dej z plotny a pridej cokoladu",
+    "Pridej vanilku a sul a nech stat cca 3 min",
+    "Rozmichej metlickou vse dohromady",
+    "Pridej recky jogurt",
+    "Serviruj s jahodami, kdy jedno patro cokolady a jedno patro jahod"
+  ],
+  "cookingTime": "30 min",
+  "servings": 2,
+  "notes": [
+    "Misto smetany lze pouzit mleko"
+  ],
+  "tags": [
+    "moučník",
+    "jahody"
+  ],
+  "metadata": {
+    "id": null,
+    "sha": null,
+    "createdDate": "2025-09-18T08:15:45.356Z",
+    "createdAt": "2025-09-18T08:15:45.356Z",
+    "author": "eBarborka",
+    "lastModified": "2025-09-18T08:15:45.356Z",
+    "filename": null
+  }
+}
