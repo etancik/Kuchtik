@@ -1,0 +1,47 @@
+{
+  "name": "Kureci stehynka s ryzi",
+  "ingredients": [
+    {
+      "text": "2 stehynka",
+      "exportDefault": true
+    },
+    {
+      "text": "1 odmerka ryze",
+      "exportDefault": false
+    },
+    {
+      "text": "15 g masla",
+      "exportDefault": true
+    },
+    {
+      "text": "grilovaci koreni",
+      "exportDefault": false
+    }
+  ],
+  "instructions": [
+    "Dej varit ryzi do ryzovaru (vody 1.5x)",
+    "Dej predehrat troubu na 160 stupnu",
+    "Dej stehynka do sklenene nadoby a posyp korenim",
+    "Nahoru dej platek masla a podlij troskou vody",
+    "Dej do trouby na 40 min a pravidelne podlivej",
+    "Po 40 min zvys teplotu na 180 stupnu a pec jeste 20 min"
+  ],
+  "cookingTime": "90 min",
+  "servings": 2,
+  "notes": [
+    "Podavej s kyselou okurkou nebo okurkovym salatem"
+  ],
+  "tags": [
+    "hlavní jídlo",
+    "kuře"
+  ],
+  "metadata": {
+    "id": null,
+    "sha": null,
+    "createdDate": "2025-09-18T07:52:50.440Z",
+    "createdAt": "2025-09-18T07:52:50.440Z",
+    "author": "eBarborka",
+    "lastModified": "2025-09-18T07:52:50.440Z",
+    "filename": null
+  }
+}
