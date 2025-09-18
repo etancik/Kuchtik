@@ -1,0 +1,92 @@
+{
+  "name": "Dynova polevka",
+  "ingredients": [
+    {
+      "text": "1 dyne",
+      "exportDefault": true
+    },
+    {
+      "text": "1 cibule",
+      "exportDefault": true
+    },
+    {
+      "text": "4 strouzky cesneku",
+      "exportDefault": true
+    },
+    {
+      "text": "olivovy olej",
+      "exportDefault": false
+    },
+    {
+      "text": "glutamatova kostka",
+      "exportDefault": false
+    },
+    {
+      "text": "zazvor",
+      "exportDefault": false
+    },
+    {
+      "text": "kmin",
+      "exportDefault": false
+    },
+    {
+      "text": "koriandr",
+      "exportDefault": false
+    },
+    {
+      "text": "sladka paprika",
+      "exportDefault": false
+    },
+    {
+      "text": "pepr",
+      "exportDefault": false
+    },
+    {
+      "text": "sul",
+      "exportDefault": false
+    },
+    {
+      "text": "1 plechovka kokosoveho mleka",
+      "exportDefault": true
+    },
+    {
+      "text": "1 lzice zakysane smetany",
+      "exportDefault": true
+    },
+    {
+      "text": "olivovy olej",
+      "exportDefault": false
+    },
+    {
+      "text": "dynova seminka",
+      "exportDefault": false
+    }
+  ],
+  "instructions": [
+    "Nakrajej dyni na mensi ctvrtky",
+    "Dej varit 1l vody v rychlovarce",
+    "Dej dyni do hrnce, pridej cibuli, cesnek a vse koreni krome zazvoru",
+    "Zalij vodou z rychlovarky (pripadne si zalij kostku separatne nebo zalij vyvarem)",
+    "Var pod poklickou zhruba 2 hodiny nebo do zmeknuti",
+    "Pridej kokosove mleko a jeste trochu povar",
+    "Na zaver pridej zazvor"
+  ],
+  "cookingTime": "3 h",
+  "servings": 4,
+  "notes": [
+    "Serviruj se zakysanou smetanou a dynovymi seminky a olivovym olejem"
+  ],
+  "tags": [
+    "hlavní jídlo",
+    "kuře"
+  ],
+  "metadata": {
+    "id": null,
+    "sha": null,
+    "createdDate": "2025-09-18T08:11:16.441Z",
+    "createdAt": "2025-09-18T08:11:16.441Z",
+    "author": "eBarborka",
+    "lastModified": "2025-09-18T08:11:16.441Z",
+    "filename": null
+  }
+}
