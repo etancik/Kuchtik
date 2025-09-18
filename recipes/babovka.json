@@ -1,0 +1,62 @@
+{
+  "name": "Babovka",
+  "ingredients": [
+    {
+      "text": "1 hrnek cukru",
+      "exportDefault": true
+    },
+    {
+      "text": "0.5 hrnku oleje",
+      "exportDefault": true
+    },
+    {
+      "text": "2 vejce",
+      "exportDefault": true
+    },
+    {
+      "text": "2 hrnky polohrube mouky",
+      "exportDefault": true
+    },
+    {
+      "text": "1 hrnek mleka",
+      "exportDefault": true
+    },
+    {
+      "text": "1 prasek do peciva",
+      "exportDefault": false
+    },
+    {
+      "text": "1 vanilkovy cukr",
+      "exportDefault": false
+    },
+    {
+      "text": "kakao",
+      "exportDefault": false
+    }
+  ],
+  "instructions": [
+    "Predehrejeme si troubu na 165-170 stupnu",
+    "Formu na babovku vymazeme a vysypene hrubou moukou",
+    "Vejce s cukrem vyšleháme do pěny",
+    "Přidáme olej a mléko, pak mouku smíchanou s práškem do pečiva, vanilkový cukr a kůru z citronu.",
+    "Nalijeme testo do formy a peceme 45-50min"
+  ],
+  "cookingTime": "60 min",
+  "servings": 1,
+  "notes": [
+    "Pokud chceme cast kakaovou, rozdelime testo a pridame trochu kakaa",
+    "Muzeme pridat namlete liskove orisky (pak je lepsi ubrat oleje, protoze orisky jsou mastne)"
+  ],
+  "tags": [
+    "moučník"
+  ],
+  "metadata": {
+    "id": null,
+    "sha": null,
+    "createdDate": "2025-09-18T08:50:37.588Z",
+    "createdAt": "2025-09-18T08:50:37.588Z",
+    "author": "eBarborka",
+    "lastModified": "2025-09-18T08:50:37.588Z",
+    "filename": null
+  }
+}
