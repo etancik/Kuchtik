@@ -1,0 +1,136 @@
+{
+  "name": "Zeleninové kari",
+  "ingredients": [
+    {
+      "text": "350 ml kokosového mléka",
+      "exportDefault": true
+    },
+    {
+      "text": "60 g růžiček květáku",
+      "exportDefault": true
+    },
+    {
+      "text": "60 g růžiček brokolice",
+      "exportDefault": true
+    },
+    {
+      "text": "60 g oloupané červené cibule",
+      "exportDefault": true
+    },
+    {
+      "text": "60 g řapíkatého celeru",
+      "exportDefault": true
+    },
+    {
+      "text": "60 g oloupané bulvy celeru",
+      "exportDefault": true
+    },
+    {
+      "text": "60 g oloupané mrkve",
+      "exportDefault": true
+    },
+    {
+      "text": "60 g dužniny zelené papriky",
+      "exportDefault": true
+    },
+    {
+      "text": "60 g dužniny červené papriky",
+      "exportDefault": true
+    },
+    {
+      "text": "60 g dužniny žluté papriky",
+      "exportDefault": true
+    },
+    {
+      "text": "60 g rajčat",
+      "exportDefault": true
+    },
+    {
+      "text": "10 g oloupaného zázvoru",
+      "exportDefault": true
+    },
+    {
+      "text": "5 g oloupaného česneku",
+      "exportDefault": true
+    },
+    {
+      "text": "15 g červené chilli papričky",
+      "exportDefault": true
+    },
+    {
+      "text": "50 g rostlinného oleje",
+      "exportDefault": true
+    },
+    {
+      "text": "50 g másla",
+      "exportDefault": true
+    },
+    {
+      "text": "3 lžíce nahrubo nakrájeného koriandru",
+      "exportDefault": true
+    },
+    {
+      "text": "1 lžička mleté skořice",
+      "exportDefault": false
+    },
+    {
+      "text": "1 kávová lžička mletého kardamomu",
+      "exportDefault": false
+    },
+    {
+      "text": "1 lžička kari koření",
+      "exportDefault": false
+    },
+    {
+      "text": "½ lžičky mletého koriandru",
+      "exportDefault": false
+    },
+    {
+      "text": "1 lžička soli",
+      "exportDefault": false
+    },
+    {
+      "text": "1 lžička mletého hřebíčku",
+      "exportDefault": false
+    },
+    {
+      "text": "60 g oloupané cibule",
+      "exportDefault": false
+    },
+    {
+      "text": "1 odmerka ryze",
+      "exportDefault": true
+    }
+  ],
+  "instructions": [
+    "V misce smícháme kari koření, sůl, kardamom, hřebíček, koriandr a skořici. Dáme stranou.",
+    "V míse smícháme 500 ml vody a kokosové mléko. Dáme stranou.",
+    "Květák a brokolici rozebereme na malé růžičky. Dáme stranou. Oba druhy cibule nakrájíme nahrubo. Dáme stranou.",
+    "Řapíkatý celer, celer, mrkev a papriky nakrájíme na kousky o hraně 2 cm. Dáme stranou.",
+    "Rajčata nakrájíme nahrubo a dáme stranou. Zázvor, česnek a chilli papričku nakrájíme najemno. Dáme stranou.",
+    "V kastrolu na vyšším ohni rozehřejeme olej s máslem, přidáme oba druhy cibule a za stálého míchání 1 minutu restujeme.",
+    "Přidáme mrkev, celer, řapíkatý celer, papriky a za stálého míchání 1 minutu restujeme.",
+    "Stáhneme oheň pod třetinu, přidáme směs koření z misky a restujeme 1 minutu za stálého míchání.",
+    "Přidáme chilli papričku, zázvor, česnek a rajčata. Restujeme 1 minutu za stálého míchání.",
+    "Přilijeme vodu s kokosovým mlékem, zvýšíme oheň a přivedeme k varu.",
+    "Přidáme květák a brokolici, stáhneme oheň pod polovinu a vaříme 5 minut.",
+    "Stáhneme z ohně a vmícháme nakrájený koriandr. Dle potřeby osolíme."
+  ],
+  "cookingTime": "60 min",
+  "servings": 4,
+  "notes": [
+    "https://www.rohlik.cz/chef/407-zeleninove-kari"
+  ],
+  "tags": [
+    "vegetariánské"
+  ],
+  "metadata": {
+    "id": null,
+    "sha": null,
+    "createdDate": "2025-09-18T08:44:09.139Z",
+    "createdAt": "2025-09-18T08:44:09.139Z",
+    "author": "eBarborka",
+    "lastModified": "2025-09-18T08:44:09.139Z",
+    "filename": null
+  }
+}
