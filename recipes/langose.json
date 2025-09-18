@@ -1,0 +1,63 @@
+{
+  "name": "Langose",
+  "ingredients": [
+    {
+      "text": "0.5 drozdi",
+      "exportDefault": true
+    },
+    {
+      "text": "400 g hladke mouky",
+      "exportDefault": true
+    },
+    {
+      "text": "olej na smazeni",
+      "exportDefault": false
+    },
+    {
+      "text": "sul",
+      "exportDefault": false
+    },
+    {
+      "text": "cukr",
+      "exportDefault": false
+    },
+    {
+      "text": "2 strouzky cesneku",
+      "exportDefault": true
+    },
+    {
+      "text": "1 baleni strouhaneho syru",
+      "exportDefault": true
+    },
+    {
+      "text": "kecup",
+      "exportDefault": false
+    },
+    {
+      "text": "olej na cesnek",
+      "exportDefault": false
+    }
+  ],
+  "instructions": [
+    "Zadelame na kvasek z drozdi, 150ml vlazne vody, trocha cukru a trocha mouky",
+    "Az kvasek vzejde, pridame zbytek ingredienci a udelame testo",
+    "Z testa udelame 4 langose a ty osmazime",
+    "Servirujeme se syrem, kecupem a cesnekem v olivovem oleji"
+  ],
+  "cookingTime": "90 min",
+  "servings": 4,
+  "notes": [],
+  "tags": [
+    "hlavní jídlo",
+    "smažené"
+  ],
+  "metadata": {
+    "id": null,
+    "sha": null,
+    "createdDate": "2025-09-18T07:40:05.592Z",
+    "createdAt": "2025-09-18T07:40:05.592Z",
+    "author": "eBarborka",
+    "lastModified": "2025-09-18T07:40:05.592Z",
+    "filename": null
+  }
+}
