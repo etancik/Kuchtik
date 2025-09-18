@@ -1,0 +1,60 @@
+{
+  "name": "Churros",
+  "ingredients": [
+    {
+      "text": "250 g hladke mouky",
+      "exportDefault": true
+    },
+    {
+      "text": "1 lzicka prasku do peciva",
+      "exportDefault": true
+    },
+    {
+      "text": "Sul",
+      "exportDefault": false
+    },
+    {
+      "text": "500  ml oleje na smazeni",
+      "exportDefault": true
+    },
+    {
+      "text": "60 g cukr krystal",
+      "exportDefault": true
+    },
+    {
+      "text": "skorice",
+      "exportDefault": false
+    },
+    {
+      "text": "1 cokolada na vareni",
+      "exportDefault": true
+    },
+    {
+      "text": "100 ml smetany ke slehani",
+      "exportDefault": true
+    }
+  ],
+  "instructions": [
+    "V mělké misce smíchejte cukr a skořici a dejte stranou.",
+    "V druhé, větší míse smíchejte mouku, prášek do pečiva a sůl. Přidejte olej a 250 horké vody. Míchejte, dokud se těsto nespojí - mělo by to být husté a lepkavé, ne řídké a vodnaté.",
+    "V malém hrnci, woku nebo malé, ale hluboké pánvi rozehřejte 5 cm oleje na střední teplotu 170 °C. Těsto přendejte do zdobicího sáčku s hvězdicovou tryskou o průměru 8 mm. Zatímco se olej zahřívá, dejte ho stranou.",
+    "Jakmile je olej rozehřátý, začněte smažit churros. Ze zdobícího sáčku vytlačte cca 15 cm dlouhý kousek těsta a odstřihněte těsně u povrchu oleje, aby se zabránilo rozstřiku.",
+    "Smažte 2-3 minuty nebo dokud nejsou zlatavé a křupavé, občas je v oleji otečte. Po usmažení ze všech stran churros vyjměte na talíř vyložený papírovou utěrkou a nechte okapat. Poté je obalte v cukru se skořicí. Podávejte horké s čokoládovou omáčkou.",
+    "Čokoládu nalámeme a vložíme do žáruvzdorné misky a vlijeme smetanu. V mikrovlnné troubě ohříváme po 30 sekundách za stálého míchání, dokud nevznikne hladká hmota (směs ohřejte 30 s, promíchejte a znovu 30 s zahřívejte, dokud nejste s konzistencí spokojeni). Odstavte na 5 minut, aby omáčka vychladla a mírně zhoustla."
+  ],
+  "cookingTime": "90 min",
+  "servings": 20,
+  "notes": [
+    "https://www.rohlik.cz/chef/10235-churros"
+  ],
+  "tags": [],
+  "metadata": {
+    "id": null,
+    "sha": null,
+    "createdDate": "2025-09-18T08:39:42.065Z",
+    "createdAt": "2025-09-18T08:39:42.065Z",
+    "author": "eBarborka",
+    "lastModified": "2025-09-18T08:39:42.065Z",
+    "filename": null
+  }
+}
