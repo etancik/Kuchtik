@@ -1,0 +1,97 @@
+{
+  "name": "Indicke maslove kure",
+  "ingredients": [
+    {
+      "text": "455 g kureci kousky",
+      "exportDefault": true
+    },
+    {
+      "text": "120ml smetany",
+      "exportDefault": true
+    },
+    {
+      "text": "1 odmerka ryze",
+      "exportDefault": false
+    },
+    {
+      "text": "koriandr",
+      "exportDefault": true
+    },
+    {
+      "text": "6 lzic masla",
+      "exportDefault": true
+    },
+    {
+      "text": "sul",
+      "exportDefault": false
+    },
+    {
+      "text": "pepr",
+      "exportDefault": false
+    },
+    {
+      "text": "kurkuma",
+      "exportDefault": false
+    },
+    {
+      "text": "1 mensi cibule",
+      "exportDefault": true
+    },
+    {
+      "text": "kmin",
+      "exportDefault": false
+    },
+    {
+      "text": "zazvor",
+      "exportDefault": false
+    },
+    {
+      "text": "2 strouzky cesneku",
+      "exportDefault": true
+    },
+    {
+      "text": "skorice",
+      "exportDefault": false
+    },
+    {
+      "text": "200g rajcatovy protlak",
+      "exportDefault": true
+    },
+    {
+      "text": "garam masala",
+      "exportDefault": false
+    },
+    {
+      "text": "120 ml vody",
+      "exportDefault": false
+    }
+  ],
+  "instructions": [
+    "Dej kure do misy a pridej sul, pepr, chili, kurkumu. Nech 15 min marinovat",
+    "Rozpust 2 lzice masla v panvi a orestuj kure",
+    "Vyndej kure do misky vedle",
+    "Dej do panve dalsi 2 lzice masla a pridej cibuli, garam masala, kmin, zazvor, cesnek, skorici, cul a pepr",
+    "Chvili restuj dokud se nepropoji chute",
+    "Pridej rajcatovy protlak a nech probublat",
+    "Pridej vodu, smetanu a az bude bublat pridej kure zpet",
+    "Pod poklici probublavej zhruba 10-15 min",
+    "Pridej dalsi 2 lzice masla, dochut soli a peprem",
+    "Serviruj s ryzi a cerstvym koriandrem"
+  ],
+  "cookingTime": "60 min",
+  "servings": 2,
+  "notes": [],
+  "tags": [
+    "hlavní jídlo",
+    "kuře"
+  ],
+  "metadata": {
+    "id": null,
+    "sha": null,
+    "createdDate": "2025-09-18T08:26:56.689Z",
+    "createdAt": "2025-09-18T08:26:56.689Z",
+    "author": "eBarborka",
+    "lastModified": "2025-09-18T08:26:56.689Z",
+    "filename": null
+  }
+}
