@@ -1,52 +1,59 @@
 {
-  "name": "Langose",
+  "name": "Langoše",
   "ingredients": [
     {
-      "text": "0.5 drozdi",
+      "text": "0.5 kostky čerstvého droždí",
       "exportDefault": true
     },
     {
-      "text": "400 g hladke mouky",
+      "text": "250 g hladké mouky",
       "exportDefault": true
     },
     {
-      "text": "olej na smazeni",
-      "exportDefault": false
-    },
-    {
-      "text": "sul",
-      "exportDefault": false
-    },
-    {
-      "text": "cukr",
-      "exportDefault": false
-    },
-    {
-      "text": "2 strouzky cesneku",
+      "text": "200 ml vlažného mléka",
       "exportDefault": true
     },
     {
-      "text": "1 baleni strouhaneho syru",
+      "text": "1/4 lžičky soli",
       "exportDefault": true
     },
     {
-      "text": "kecup",
+      "text": "1/4 lžičky cukru",
+      "exportDefault": true
+    },
+    {
+      "text": "olej na smažení",
       "exportDefault": false
     },
     {
-      "text": "olej na cesnek",
+      "text": "2 stroužky česneku",
+      "exportDefault": true
+    },
+    {
+      "text": "100 g strouhaného sýru",
+      "exportDefault": true
+    },
+    {
+      "text": "kečup",
+      "exportDefault": false
+    },
+    {
+      "text": "olej na česnek",
       "exportDefault": false
     }
   ],
   "instructions": [
-    "Zadelame na kvasek z drozdi, 150ml vlazne vody, trocha cukru a trocha mouky",
-    "Az kvasek vzejde, pridame zbytek ingredienci a udelame testo",
-    "Z testa udelame 4 langose a ty osmazime",
-    "Servirujeme se syrem, kecupem a cesnekem v olivovem oleji"
+    "Z vlažného mléka, cukru a rozdrobeného droždí vytvoříme kvásek a necháme jej vzejít",
+    "Do mouky dáme sůl, poté přidáme vzešlý kvásek a robotem zaděláme těsto",
+    "Těsto necháme vykynout a pak tvoříme placičky, které smažíme na oleji",
+    "Potřeme rozmixovaným česnekem s olejem, posypeme sýrem a podáváme s kečupem"
   ],
   "cookingTime": "90 min",
-  "servings": 4,
-  "notes": [],
+  "servings": 2,
+  "notes": [
+    "Těsto by mělo být pružné, ale ne tuhé",
+    "Olej na smažení musí být dostatečně horký (170-180°C)"
+  ],
   "tags": [
     "hlavní jídlo",
     "smažené"
@@ -57,7 +64,7 @@
     "createdDate": "2025-09-18T07:40:05.592Z",
     "createdAt": "2025-09-18T07:40:05.592Z",
     "author": "eBarborka",
-    "lastModified": "2025-09-18T07:40:05.592Z",
+    "lastModified": "2025-09-21T12:00:00.000Z",
     "filename": null
   }
 }
