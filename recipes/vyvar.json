@@ -24,6 +24,10 @@
     {
       "text": "pepř",
       "exportDefault": false
+    },
+    {
+      "text": "petržel nebo libeček",
+      "exportDefault": true
     }
   ],
   "instructions": [
@@ -33,7 +37,7 @@
     "Ober maso",
     "Přidej do vývaru dohromady se zeleninou a povař",
     "Přidej široké nudle a vař dle návodu",
-    "Dochuť"
+    "Dochuť solí, pepřem a posyp petrželí nebo libečkem"
   ],
   "cookingTime": "4 h",
   "servings": 6,
