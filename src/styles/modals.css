@@ -103,6 +103,13 @@
   border-color: var(--border-primary) !important;
 }
 
+/* Ensure proper spacing between stacked columns in recipe form */
+@media (max-width: 767px) {
+  #recipe-modal .row .col-md-6:not(:first-child) {
+    margin-top: 1rem;
+  }
+}
+
 #recipe-modal .form-control:focus {
   background-color: var(--bg-white) !important;
   color: var(--text-primary) !important;
