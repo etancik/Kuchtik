@@ -856,12 +856,25 @@ class RecipeUI {
   // Dynamic input management methods (keeping existing functionality)
   addIngredient() {
     const container = document.getElementById('ingredients-container');
+    
+    // Get the exportDefault state from the last ingredient (if any exist)
+    const existingIngredients = container.querySelectorAll('.ingredient-edit-item');
+    let inheritedExportDefault = true; // Default to true if no ingredients exist
+    
+    if (existingIngredients.length > 0) {
+      const lastIngredient = existingIngredients[existingIngredients.length - 1];
+      const lastCheckbox = lastIngredient.querySelector('.ingredient-added-checkbox');
+      if (lastCheckbox) {
+        inheritedExportDefault = lastCheckbox.checked;
+      }
+    }
+    
     const ingredientDiv = document.createElement('div');
     ingredientDiv.className = 'ingredient-edit-item mb-2';
     ingredientDiv.innerHTML = `
       <div class="input-group">
         <div class="input-group-text">
-          <input type="checkbox" class="form-check-input ingredient-added-checkbox" title="Uncheck when used" checked>
+          <input type="checkbox" class="form-check-input ingredient-added-checkbox" title="Uncheck when used" ${inheritedExportDefault ? 'checked' : ''}>
         </div>
         <input type="text" class="form-control ingredient-input" placeholder="${t('recipeForm.ingredientPlaceholder')}" required>
         <button class="btn btn-sm remove-btn" type="button" onclick="recipeUI.removeIngredient(this)" title="Remove ingredient">
