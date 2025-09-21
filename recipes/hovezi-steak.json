@@ -1,0 +1,52 @@
+{
+  "name": "Hovězí steak",
+  "ingredients": [
+    {
+      "text": "2 vyzrálé hovězí roštěnky (230 g každá, tloušťka 2 cm)",
+      "exportDefault": true
+    },
+    {
+      "text": "sůl",
+      "exportDefault": false
+    },
+    {
+      "text": "čerstvě mletý černý pepř",
+      "exportDefault": false
+    },
+    {
+      "text": "1 lžíce rostlinného oleje",
+      "exportDefault": true
+    }
+  ],
+  "instructions": [
+    "Z masa odřežte vnější blány, má-li nějaké. Tence po obou stranách potřete olejem, osolte a opepřete.",
+    "Odložte bokem na talíř na 15-30 minut, aby se maso vzpamatovalo po pobytu v lednici.",
+    "Troubu rozehřejte na 180 stupňů. Pánev se silným dnem zahřejte zprudka a nasucho.",
+    "Zmírněte žár plotýnky na středně silný a vložte do pánve maso. Mělo by začít prudce syčet a vonět.",
+    "Opékejte 2-3 minuty z každé strany, dokud se maso neoddělí z pánve a nebude krásně zbarvené do zlatohnědé barvy.",
+    "Přendejte maso do malého pekáčku a vložte do trouby. Pro medium 5-6 minut, pro medium-well 8-10 minut, pro well done 12-15 minut.",
+    "Opečené maso nechte odpočívat 5-10 minut.",
+    "Nakrájejte na plátky nebo nechte vcelku a ihned podávejte s omáčkou a přílohou."
+  ],
+  "cookingTime": "20 min",
+  "servings": 2,
+  "notes": [
+    "Klíčové je použít vyzrálé hovězí maso alespoň 3 týdny staré",
+    "Maso by mělo být vysoké alespoň 2 cm, jinak se nepodaří dosáhnout růžového středu",
+    "Během odpočívání maso ještě trochu dopěče zbytkovým teplem - počítejte s tím"
+  ],
+  "tags": [
+    "hlavní jídlo",
+    "maso",
+    "rychlé",
+    "hovězí",
+    "steak"
+  ],
+  "metadata": {
+    "createdDate": "2025-09-21T15:30:00Z",
+    "author": "Lukáš Tancer",
+    "lastModified": "2025-09-21T15:30:00Z",
+    "id": "hovezi-steak",
+    "sha": null
+  }
+}
