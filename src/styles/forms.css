@@ -71,14 +71,14 @@ ul, ol {
 
 .ingredient-edit-item:has(.ingredient-added-checkbox:checked) .ingredient-input {
   background-color: var(--bg-white);
-  border-color: var(--color-primary-accent);
+  border-color: var(--border-primary);
   text-decoration: none;
   opacity: 1;
   color: var(--text-primary);
 }
 
 .ingredient-edit-item:has(.ingredient-added-checkbox:checked) .remove-btn {
-  border-color: var(--border-primary) !important; /* Override blue border with grey */
+  border-color: var(--border-primary);
   background-color: var(--bg-light);
   color: var(--text-light);
 }
@@ -86,12 +86,12 @@ ul, ol {
 /* Ingredient states - unchecked = used/completed */
 .ingredient-edit-item:has(.ingredient-added-checkbox:not(:checked)) .input-group-text {
   background-color: var(--bg-muted);
-  border-color: var(--border-muted);
+  border-color: var(--border-primary);
 }
 
 .ingredient-edit-item:has(.ingredient-added-checkbox:not(:checked)) .ingredient-input {
   background-color: var(--bg-very-light);
-  border-color: var(--border-muted);
+  border-color: var(--border-primary);
   text-decoration: none;
   opacity: 1;
   color: var(--text-muted);
@@ -99,7 +99,7 @@ ul, ol {
 }
 
 .ingredient-edit-item:has(.ingredient-added-checkbox:not(:checked)) .remove-btn {
-  border-color: var(--border-muted);
+  border-color: var(--border-primary);
 }
 
 /* Notes form styling - same alignment fixes as ingredients */
@@ -181,7 +181,7 @@ ul, ol {
 
 .tag-remove {
   background-color: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: none;
   color: var(--bg-white);
   padding: 0;
   margin: 0;
