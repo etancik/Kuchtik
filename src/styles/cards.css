@@ -161,7 +161,7 @@
 .search-highlight {
   background-color: var(--color-warning-bg);
   color: var(--color-warning);
-  padding: 2px 4px;
+  padding: 2px 0;
   border-radius: 3px;
   font-weight: var(--font-weight-medium);
   border: 1px solid var(--color-warning-border);
