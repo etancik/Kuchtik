@@ -111,7 +111,9 @@ async function createFullscreenModalHTML(recipe) {
   // Format notes
   const notes = recipeNotes.length > 0 
     ? `<div class="mt-4">
-        <h5>${t('recipes.notes')}:</h5>
+        <h4 class="border-bottom pb-2 mb-3 fullscreen-section-header">
+          <i class="fas fa-sticky-note me-2"></i>${t('recipes.notes')}
+        </h4>
         <ul class="mb-0">${recipeNotes.map(note => `<li>${note}</li>`).join('')}</ul>
        </div>`
     : '';
@@ -160,6 +162,7 @@ async function createFullscreenModalHTML(recipe) {
   const templateData = {
     recipeName,
     keepScreenOnLabel: t('fullscreen.keepScreenOn'),
+    keepScreenOffLabel: t('fullscreen.keepScreenOff'),
     exitFullscreenLabel: t('fullscreen.exitFullscreen'),
     ingredientsLabel: t('recipes.ingredients'),
     instructionsLabel: t('recipes.instructions'),
