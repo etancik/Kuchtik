@@ -30,6 +30,7 @@
     "noResultsMessage": "No recipes match your search. Try different keywords or clear the search.",
     "editRecipe": "Edit Recipe",
     "deleteRecipe": "Delete Recipe",
+    "fullscreenRecipe": "View Fullscreen",
     "signInToManage": "Sign in to create and manage recipes.",
     "loadingError": "Unable to Load Recipes",
     "loadingErrorMessage": "There was a problem loading the recipes: {{error}}",
@@ -45,6 +46,11 @@
     "ingredients": "Ingredients",
     "instructions": "Instructions",
     "notes": "Notes"
+  },
+  "fullscreen": {
+    "title": "Recipe View",
+    "keepScreenOn": "Keep Screen On",
+    "exitFullscreen": "Exit Fullscreen"
   },
   "ingredientsExport": {
     "title": "Export Ingredients to Shopping List",

@@ -132,6 +132,12 @@ export function createRecipeCard(recipe, options = {}) {
             <div class="expand-toggle" data-bs-toggle="collapse" data-bs-target="#recipe-${recipeId}" role="button" aria-expanded="${shouldExpand}">
               <i class="fas fa-chevron-down expand-icon"></i>
             </div>
+            <div class="fullscreen-toggle fullscreen-recipe-btn" 
+                 data-recipe='${JSON.stringify(recipe).replace(/'/g, '&apos;')}' 
+                 title="${t('recipes.fullscreenRecipe')}"
+                 role="button">
+              <i class="fas fa-expand"></i>
+            </div>
           </div>
         </div>
         
@@ -258,6 +264,22 @@ export function createRecipeCard(recipe, options = {}) {
         });
       });
     }
+  }
+
+  // Set up event listener for fullscreen button (always available)
+  const fullscreenBtn = div.querySelector('.fullscreen-recipe-btn');
+  if (fullscreenBtn) {
+    fullscreenBtn.addEventListener('click', (event) => {
+      event.stopPropagation(); // Prevent card collapse toggle
+      const recipeData = JSON.parse(fullscreenBtn.getAttribute('data-recipe'));
+      
+      // Import and use fullscreen functionality
+      import('../services/fullscreenRecipe.js').then(({ showFullscreenRecipe }) => {
+        showFullscreenRecipe(recipeData);
+      }).catch(error => {
+        console.error('Failed to load fullscreen recipe:', error);
+      });
+    });
   }
 
   return div;

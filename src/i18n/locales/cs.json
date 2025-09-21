@@ -30,6 +30,7 @@
     "createRecipe": "Vytvořit Recept",
     "editRecipe": "Upravit Recept",
     "deleteRecipe": "Smazat Recept",
+    "fullscreenRecipe": "Zobrazit na Celou Obrazovku",
     "signInToManage": "Přihlaste se pro vytváření a správu receptů.",
     "loadingError": "Nelze Načíst Recepty",
     "loadingErrorMessage": "Při načítání receptů došlo k problému: {{error}}",
@@ -45,6 +46,11 @@
     "ingredients": "Ingredience",
     "instructions": "Postup",
     "notes": "Poznámky"
+  },
+  "fullscreen": {
+    "title": "Zobrazení Receptu",
+    "keepScreenOn": "Ponechat Obrazovku Rozsvícenou",
+    "exitFullscreen": "Ukončit Celou Obrazovku"
   },
   "ingredientsExport": {
     "title": "Export Ingrediencí do Nákupního Seznamu",

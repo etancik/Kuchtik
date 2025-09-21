@@ -179,7 +179,7 @@ button {
 
 /* Recipe card improvements */
 .checkbox-container {
-  padding: 8px;
+  padding: 12px;
   margin-right: 12px;
   border-radius: 6px;
   transition: background-color 0.2s ease;
@@ -187,6 +187,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 44px; /* Ensure consistent touch target */
 }
 
 .checkbox-container:hover {
@@ -265,8 +266,12 @@ button {
   cursor: pointer;
   transition: background-color 0.2s ease;
   border-radius: 4px;
-  padding: 4px;
-  margin: -4px;
+  padding: 8px;
+  margin: -8px;
+  min-height: 44px; /* Consistent touch target */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .recipe-title-area:hover {
@@ -275,10 +280,14 @@ button {
 
 .expand-toggle {
   cursor: pointer;
-  padding: 8px;
+  padding: 12px;
   border-radius: 4px;
   transition: background-color 0.2s ease;
-  margin-right: -8px;
+  margin-right: 2px; /* Small gap to separate from fullscreen toggle */
+  min-height: 44px; /* Consistent touch target */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .expand-toggle:hover {
@@ -287,6 +296,12 @@ button {
 
 .recipe-header:hover .checkbox-container {
   background-color: rgba(13, 110, 253, 0.15);
+}
+
+/* Show subtle highlight on header hover for interactive elements */
+.recipe-header:hover .expand-toggle,
+.recipe-header:hover .fullscreen-toggle {
+  background-color: rgba(108, 117, 125, 0.1);
 }
 
 .recipe-title {
@@ -696,4 +711,78 @@ button {
 
 .step-move-btn:disabled {
   opacity: 0.3;
+}
+
+/* Fullscreen recipe modal styles */
+.fullscreen-recipe-btn {
+  min-width: 40px !important;
+  max-width: 60px !important;
+  width: auto !important;
+}
+
+/* Fullscreen toggle in recipe header - matches expand toggle styling */
+.fullscreen-toggle {
+  cursor: pointer;
+  padding: 12px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+  margin-left: 2px; /* Small gap to separate from expand toggle */
+  color: #6c757d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  min-height: 44px; /* Consistent touch target */
+}
+
+.fullscreen-toggle:hover {
+  background-color: rgba(25, 135, 84, 0.1);
+  color: #198754;
+}
+
+.fullscreen-toggle i {
+  font-size: 0.875rem;
+}
+
+#fullscreenRecipeModal .modal-content {
+  background: linear-gradient(135deg, #2d3436 0%, #636e72 100%);
+}
+
+#fullscreenRecipeModal .modal-body {
+  padding: 2rem;
+}
+
+#fullscreenRecipeModal h4 {
+  color: #74b9ff;
+}
+
+#fullscreenRecipeModal .border-bottom {
+  border-color: #636e72 !important;
+}
+
+#fullscreenRecipeModal .badge {
+  background-color: #636e72 !important;
+}
+
+#fullscreenRecipeModal ol li,
+#fullscreenRecipeModal ul li {
+  line-height: 1.6;
+  margin-bottom: 0.75rem;
+}
+
+/* Keep screen on toggle styling */
+#keepScreenOnToggle:checked {
+  background-color: #00b894;
+  border-color: #00b894;
+}
+
+/* Responsive adjustments for fullscreen modal */
+@media (max-width: 991.98px) {
+  #fullscreenRecipeModal .modal-body {
+    padding: 1rem;
+  }
+  
+  #fullscreenRecipeModal .fs-5 {
+    font-size: 1.1rem !important;
+  }
 }
