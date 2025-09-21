@@ -50,6 +50,24 @@ class TemplateLoader {
   }
 
   /**
+   * Load template and process with data substitution
+   * @param {string} templatePath - Path to template file
+   * @param {Object} data - Data object with keys matching template placeholders
+   * @returns {Promise<string>} Processed HTML template
+   */
+  async loadAndProcessTemplate(templatePath, data = {}) {
+    let template = await this.loadTemplate(templatePath);
+    
+    // Replace placeholders with data values
+    Object.entries(data).forEach(([key, value]) => {
+      const placeholder = `{{${key}}}`;
+      template = template.replace(new RegExp(placeholder, 'g'), value || '');
+    });
+    
+    return template;
+  }
+
+  /**
    * Clear template cache
    */
   clearCache() {

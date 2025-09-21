@@ -1,10 +1,51 @@
 /**
- * Fullscreen recipe viewer with screen wake lock functionality
+ * Fullscreen recipe viewer with screen wake lock functionality and deeplink support
  */
 
 import { t } from '../i18n/i18n.js';
+import { generateFilenameFromRecipeName } from '../utils/recipeUtils.js';
+import { templateLoader } from '../utils/templateLoader.js';
 
+// Global variables for modal management
+let currentModal = null;
 let wakeLock = null;
+
+/**
+ * Update URL to include fullscreen recipe parameter
+ * @param {string} recipeId - Recipe ID to include in URL
+ */
+export function updateUrlForFullscreen(recipeId) {
+  const url = new window.URL(window.location);
+  url.searchParams.set('recipe', recipeId);
+  window.history.pushState(
+    { fullscreenRecipe: recipeId },
+    '',
+    url.toString().replace(window.location.origin, '')
+  );
+}
+
+/**
+ * Remove fullscreen from URL
+ */
+export function removeFullscreenFromUrl() {
+  const url = new window.URL(window.location);
+  url.searchParams.delete('recipe');
+  window.history.pushState(
+    null,
+    '',
+    url.toString().replace(window.location.origin, '')
+  );
+}
+
+/**
+ * Parse fullscreen recipe ID from current URL
+ * @returns {Object|null} Object with recipeId or null if not found
+ */
+export function parseFullscreenUrl() {
+  const urlParams = new window.URLSearchParams(window.location.search);
+  const recipeId = urlParams.get('recipe');
+  return recipeId ? { recipeId } : null;
+}
 
 /**
  * Request screen wake lock to keep screen on
@@ -42,11 +83,11 @@ async function releaseWakeLock() {
 }
 
 /**
- * Create fullscreen recipe modal HTML
+ * Create fullscreen recipe modal HTML using template
  * @param {Object} recipe - Recipe data object
- * @returns {string} HTML string for the modal
+ * @returns {Promise<string>} HTML string for the modal
  */
-function createFullscreenModalHTML(recipe) {
+async function createFullscreenModalHTML(recipe) {
   const recipeName = recipe.name || 'Untitled Recipe';
   const recipeTags = recipe.tags || [];
   const recipeIngredients = recipe.ingredients || [];
@@ -62,7 +103,7 @@ function createFullscreenModalHTML(recipe) {
   }).join('');
 
   // Format instructions
-  const steps = recipeSteps.map((step, index) => {
+  const instructions = recipeSteps.map((step, index) => {
     return `<li class="mb-3"><strong>${index + 1}.</strong> ${step}</li>`;
   }).join('');
 
@@ -84,73 +125,43 @@ function createFullscreenModalHTML(recipe) {
        </div>`
     : '';
 
-  return `
-    <div class="modal fade" id="fullscreenRecipeModal" tabindex="-1" aria-labelledby="fullscreenRecipeModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-fullscreen">
-        <div class="modal-content bg-dark text-light">
-          <div class="modal-header border-secondary d-flex justify-content-between">
-            <h1 class="modal-title fs-4 me-3" id="fullscreenRecipeModalLabel">${recipeName}</h1>
-            <div class="d-flex align-items-center gap-3 flex-shrink-0">
-              <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" id="keepScreenOnToggle">
-                <label class="form-check-label text-light" for="keepScreenOnToggle">
-                  ${t('fullscreen.keepScreenOn')}
-                </label>
-              </div>
-              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="${t('fullscreen.exitFullscreen')}"></button>
-            </div>
-          </div>
-          <div class="modal-body">
-            <div class="container-fluid">
-              <div class="row">
-                <div class="col-12">
-                  ${tags}
-                  
-                  <!-- Recipe info -->
-                  <div class="row mb-4">
-                    ${servings ? `<div class="col-md-6 mb-2">
-                      <strong><i class="fas fa-users me-2"></i>${t('recipes.servings')}:</strong> ${servings}
-                    </div>` : ''}
-                    ${cookingTime ? `<div class="col-md-6 mb-2">
-                      <strong><i class="fas fa-clock me-2"></i>${t('recipes.cookingTime')}:</strong> ${cookingTime}
-                    </div>` : ''}
-                  </div>
+  // Format servings and cooking time
+  const servingsInfo = servings 
+    ? `<div class="col-md-6 mb-2">
+        <strong><i class="fas fa-users me-2"></i>${t('recipes.servings')}:</strong> ${servings}
+       </div>` 
+    : '';
 
-                  <!-- Two column layout for larger screens -->
-                  <div class="row">
-                    <div class="col-lg-6 mb-4">
-                      <h4 class="border-bottom border-secondary pb-2 mb-3">
-                        <i class="fas fa-list-ul me-2"></i>${t('recipes.ingredients')}
-                      </h4>
-                      <ul class="list-unstyled fs-5">
-                        ${ingredients}
-                      </ul>
-                    </div>
-                    <div class="col-lg-6 mb-4">
-                      <h4 class="border-bottom border-secondary pb-2 mb-3">
-                        <i class="fas fa-tasks me-2"></i>${t('recipes.instructions')}
-                      </h4>
-                      <ol class="fs-5">
-                        ${steps}
-                      </ol>
-                      ${notes}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
+  const cookingTimeInfo = cookingTime 
+    ? `<div class="col-md-6 mb-2">
+        <strong><i class="fas fa-clock me-2"></i>${t('recipes.cookingTime')}:</strong> ${cookingTime}
+       </div>` 
+    : '';
+
+  // Template data
+  const templateData = {
+    recipeName,
+    keepScreenOnLabel: t('fullscreen.keepScreenOn'),
+    exitFullscreenLabel: t('fullscreen.exitFullscreen'),
+    ingredientsLabel: t('recipes.ingredients'),
+    instructionsLabel: t('recipes.instructions'),
+    tags,
+    servingsInfo,
+    cookingTimeInfo,
+    ingredients,
+    instructions,
+    notes
+  };
+
+  return await templateLoader.loadAndProcessTemplate('src/templates/fullscreen-modal.html', templateData);
 }
 
 /**
  * Show recipe in fullscreen mode
  * @param {Object} recipe - Recipe data object
+ * @param {boolean} updateUrl - Whether to update the URL (default: true)
  */
-export function showFullscreenRecipe(recipe) {
+export async function showFullscreenRecipe(recipe, updateUrl = true) {
   // Remove existing modal if present
   const existingModal = document.getElementById('fullscreenRecipeModal');
   if (existingModal) {
@@ -158,12 +169,19 @@ export function showFullscreenRecipe(recipe) {
   }
 
   // Create and append new modal
-  const modalHTML = createFullscreenModalHTML(recipe);
+  const modalHTML = await createFullscreenModalHTML(recipe);
   document.body.insertAdjacentHTML('beforeend', modalHTML);
 
   // Get modal element and initialize Bootstrap modal
   const modalElement = document.getElementById('fullscreenRecipeModal');
   const modal = new window.bootstrap.Modal(modalElement);
+  currentModal = { modal, recipe };
+
+  // Update URL if requested
+  if (updateUrl) {
+    const recipeId = recipe.id || generateFilenameFromRecipeName(recipe.name).replace('.json', '');
+    updateUrlForFullscreen(recipeId);
+  }
 
   // Set up wake lock toggle
   const wakeLockToggle = modalElement.querySelector('#keepScreenOnToggle');
@@ -179,6 +197,12 @@ export function showFullscreenRecipe(recipe) {
   modalElement.addEventListener('hidden.bs.modal', async () => {
     await releaseWakeLock();
     modalElement.remove();
+    currentModal = null;
+    
+    // Remove fullscreen from URL when modal is closed
+    if (updateUrl) {
+      removeFullscreenFromUrl();
+    }
   });
 
   // Handle visibility change to re-request wake lock if needed
@@ -190,4 +214,70 @@ export function showFullscreenRecipe(recipe) {
 
   // Show the modal
   modal.show();
+}
+
+/**
+ * Handle browser back/forward navigation
+ * @param {Function} getRecipeById - Function to get recipe by ID
+ */
+export function handleFullscreenNavigation(getRecipeById) {
+  window.addEventListener('popstate', async () => {
+    const urlData = parseFullscreenUrl();
+    
+    if (urlData && urlData.recipeId) {
+      // URL indicates fullscreen should be shown
+      if (!currentModal) {
+        try {
+          const recipe = await getRecipeById(urlData.recipeId);
+          if (recipe) {
+            await showFullscreenRecipe(recipe, false); // Don't update URL again
+          } else {
+            console.warn('Recipe not found for deeplink:', urlData.recipeId);
+            removeFullscreenFromUrl();
+          }
+        } catch (error) {
+          console.error('Error loading recipe for deeplink:', error);
+          removeFullscreenFromUrl();
+        }
+      }
+    } else {
+      // URL indicates fullscreen should be closed
+      if (currentModal) {
+        currentModal.modal.hide();
+      }
+    }
+  });
+}
+
+/**
+ * Initialize fullscreen from URL on page load
+ * @param {Function} getRecipeById - Function to get recipe by ID
+ */
+export async function initializeFullscreenFromUrl(getRecipeById) {
+  const urlData = parseFullscreenUrl();
+  
+  console.log('🔗 DEEPLINK: Checking URL for deeplink:', window.location.search);
+  
+  if (urlData && urlData.recipeId) {
+    console.log('🔍 DEEPLINK: Looking for recipe with ID:', urlData.recipeId);
+    try {
+      const recipe = await getRecipeById(urlData.recipeId);
+      console.log('📖 DEEPLINK: Found recipe:', recipe ? recipe.name : 'NOT FOUND');
+      if (recipe) {
+        // Small delay to ensure the page is fully loaded
+        setTimeout(async () => {
+          console.log('🖥️ DEEPLINK: Showing fullscreen recipe:', recipe.name);
+          await showFullscreenRecipe(recipe, false); // Don't update URL since we're loading from URL
+        }, 100);
+      } else {
+        console.warn('DEEPLINK: Recipe not found for deeplink:', urlData.recipeId);
+        removeFullscreenFromUrl();
+      }
+    } catch (error) {
+      console.error('DEEPLINK: Error loading recipe from deeplink:', error);
+      removeFullscreenFromUrl();
+    }
+  } else {
+    console.log('🔗 DEEPLINK: No deeplink found in URL');
+  }
 }

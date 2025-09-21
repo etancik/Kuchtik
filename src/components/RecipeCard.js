@@ -274,8 +274,8 @@ export function createRecipeCard(recipe, options = {}) {
       const recipeData = JSON.parse(fullscreenBtn.getAttribute('data-recipe'));
       
       // Import and use fullscreen functionality
-      import('../services/fullscreenRecipe.js').then(({ showFullscreenRecipe }) => {
-        showFullscreenRecipe(recipeData);
+      import('../services/fullscreenRecipe.js').then(async ({ showFullscreenRecipe }) => {
+        await showFullscreenRecipe(recipeData);
       }).catch(error => {
         console.error('Failed to load fullscreen recipe:', error);
       });

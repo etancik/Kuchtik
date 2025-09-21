@@ -4,11 +4,12 @@
 
 import RecipeRepository from './repositories/RecipeRepository.js';
 import { renderRecipeCard } from './components/RecipeCard.js';
-import { getSelectedRecipeNames, collectIngredientsGroupedByRecipe, searchRecipesWithHighlighting } from './utils/recipeUtils.js';
+import { getSelectedRecipeNames, collectIngredientsGroupedByRecipe, searchRecipesWithHighlighting, generateFilenameFromRecipeName } from './utils/recipeUtils.js';
 import { recipeUI } from './components/RecipeUI.js';
 import { githubAuth } from './services/githubAuth.js';
 import { ingredientsExportService } from './services/ingredientsExport.js';
 import { i18n, t } from './i18n/i18n.js';
+import { handleFullscreenNavigation, initializeFullscreenFromUrl } from './services/fullscreenRecipe.js';
 
 // Application state
 const state = {
@@ -194,6 +195,30 @@ async function initializeApp() {
   
   // Update auth status
   updateAuthStatus();
+  
+  // Initialize deeplink functionality
+  console.log('🔗 Setting up deeplink navigation...');
+  handleFullscreenNavigation(async (normalizedId) => {
+    // Find recipe by normalized ID - need to match against all recipes
+    const recipes = await state.repository.getAll();
+    return recipes.find(recipe => {
+      const recipeId = recipe.id || generateFilenameFromRecipeName(recipe.name).replace('.json', '');
+      return recipeId === normalizedId;
+    });
+  });
+  await initializeFullscreenFromUrl(async (normalizedId) => {
+    // Find recipe by normalized ID - need to match against all recipes
+    console.log('🔍 DEEPLINK: Looking up recipe with normalized ID:', normalizedId);
+    const recipes = await state.repository.getAll();
+    
+    const foundRecipe = recipes.find(recipe => {
+      const recipeId = recipe.id || generateFilenameFromRecipeName(recipe.name).replace('.json', '');
+      return recipeId === normalizedId;
+    });
+    
+    console.log('📖 DEEPLINK: Found recipe:', foundRecipe ? foundRecipe.name : 'NOT FOUND');
+    return foundRecipe;
+  });
   
   console.log('✅ Main application initialized successfully');
 }
