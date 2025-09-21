@@ -5,7 +5,6 @@
 
 import { t } from '../i18n/i18n.js';
 import { highlightText } from '../utils/recipeUtils.js';
-import { githubAuth } from '../services/githubAuth.js';
 
 /**
  * Simple recipe validation for English format
@@ -44,16 +43,13 @@ export function createRecipeCard(recipe, options = {}) {
   // Use English field names directly
   const recipeName = recipe.name || 'Untitled Recipe';
   const recipeTags = recipe.tags || [];
-  const recipeIngredients = recipe.ingredients || [];
-  const recipeSteps = recipe.instructions || [];
-  const recipeNotes = recipe.notes || [];
   
   // Generate recipe ID early for use in ingredient IDs
   const recipeId = recipe.metadata?.id || recipeName.replace(/\s+/g, '-').toLowerCase();
   
-  // Extract highlighting options
-  const { matches = {}, shouldExpand = false } = options;
-  const { name: nameMatches = [], tags: tagMatches = [], ingredients: ingredientMatches = [] } = matches;
+  // Extract highlighting options - remove shouldExpand since we don't use collapsing anymore
+  const { matches = {} } = options;
+  const { name: nameMatches = [], tags: tagMatches = [] } = matches;
   
   // Apply highlighting to recipe name
   const highlightedName = highlightText(recipeName, nameMatches);
@@ -78,59 +74,22 @@ export function createRecipeCard(recipe, options = {}) {
 
   // Handle fields safely with highlighting
   const tags = highlightedTags || recipeTags.join(', ');
-  
-  // Apply highlighting to ingredients for display
-  const highlightedIngredients = Array.isArray(recipeIngredients) ? 
-    recipeIngredients.map(ingredient => {
-      // Handle both string and object formats for ingredients
-      const ingredientText = typeof ingredient === 'string' ? ingredient : ingredient.text;
-      
-      // Find matches that apply to this ingredient
-      const allIngredientsText = recipeIngredients.map(ing => 
-        typeof ing === 'string' ? ing : ing.text
-      ).join(' ');
-      const relevantMatches = ingredientMatches.filter(match => {
-        const matchText = allIngredientsText.substring(match.start, match.end);
-        return ingredientText.toLowerCase().includes(matchText.toLowerCase());
-      });
-      return highlightText(ingredientText, relevantMatches);
-    }) : [];
-    
-  const ingredients = highlightedIngredients.length > 0 
-    ? highlightedIngredients.map((ingredient) => {
-        return `<li class="ingredient-item">
-          <span class="ingredient-text">${ingredient}</span>
-        </li>`;
-      }).join('')
-    : '';
-  const steps = Array.isArray(recipeSteps)
-    ? recipeSteps.map((k) => `<li>${k}</li>`).join('')
-    : '';
-  const notes =
-    Array.isArray(recipeNotes) && recipeNotes.length > 0
-      ? `<div class="mt-3"><h6>${t('recipeForm.notes')}:</h6><ul>${recipeNotes.map((n) => `<li>${n}</li>`).join('')}</ul></div>`
-      : '';
-
-  const isAuthenticated = githubAuth.isAuthenticated();
 
   div.innerHTML = `
     <div class="card recipe-card position-relative">
-      <div class="card-body p-0">
-        <!-- Collapsed Header (always visible) -->
+      <div class="card-body p-3">
+        <!-- Simple Recipe Header (no collapse) -->
         <div class="recipe-header">
-          <div class="d-flex align-items-center p-3">
+          <div class="d-flex align-items-center">
             <div class="checkbox-container">
               <input type="checkbox" class="selectRecipe" id="checkbox-${recipeId}">
             </div>
-            <div class="flex-grow-1 recipe-title-area" data-bs-toggle="collapse" data-bs-target="#recipe-${recipeId}" role="button" aria-expanded="${shouldExpand}">
+            <div class="flex-grow-1 recipe-title-area">
               <h6 class="mb-1 recipe-title">${highlightedName}</h6>
               <div class="text-muted small recipe-subtitle">
                 ${tags ? `${t('recipes.tags')}: ${tags}` : ''}
                 ${tags && subtitleText ? ' • ' : ''}${subtitleText}
               </div>
-            </div>
-            <div class="expand-toggle" data-bs-toggle="collapse" data-bs-target="#recipe-${recipeId}" role="button" aria-expanded="${shouldExpand}">
-              <i class="fas fa-chevron-down expand-icon"></i>
             </div>
             <div class="fullscreen-toggle fullscreen-recipe-btn" 
                  data-recipe='${JSON.stringify(recipe).replace(/'/g, '&apos;')}' 
@@ -140,72 +99,17 @@ export function createRecipeCard(recipe, options = {}) {
             </div>
           </div>
         </div>
-        
-        <!-- Expandable Content -->
-        <div class="collapse${shouldExpand ? ' show' : ''}" id="recipe-${recipeId}">
-          <div class="recipe-content px-3 pb-3">
-            <div class="card shadow-sm h-100">
-            <div class="card-body"
-            <!-- Recipe details -->
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <h6>${t('recipeForm.ingredients')}:</h6>
-                <ul class="mb-0">${ingredients}</ul>
-              </div>
-              <div class="col-md-6 mb-3">
-                <h6>${t('recipeForm.instructions')}:</h6>
-                <ol class="mb-0">${steps}</ol>
-              </div>
-            </div>
-            ${notes}
-            ${isAuthenticated ? `
-            <!-- Action buttons at bottom -->
-            <div class="d-flex justify-content-end gap-2 mt-3 pt-3 border-top">
-              <button class="btn btn-outline-primary d-flex align-items-center edit-recipe-btn" 
-                      data-recipe='${JSON.stringify(recipe).replace(/'/g, '&apos;')}' 
-                      title="${t('recipes.editRecipe')}">
-                <i class="fas fa-edit me-2"></i>
-                <span>${t('common.edit')}</span>
-              </button>
-              <button class="btn btn-outline-danger btn-sm d-flex align-items-center delete-recipe-btn" 
-                      style="width: auto; min-width: 40px; max-width: 60px;"
-                      data-recipe-id='${recipe.metadata?.id || recipeName}' 
-                      data-recipe-name='${recipeName}' 
-                      title="${t('recipes.deleteRecipe')}">
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
-            ` : ''}
-          </div>
-        </div>
       </div>
     </div>
   `;
 
-  // Add event listeners for expand/collapse animation
-  const collapseElement = div.querySelector('.collapse');
-  const expandIcons = div.querySelectorAll('.expand-icon');
-  
-  collapseElement.addEventListener('show.bs.collapse', () => {
-    expandIcons.forEach(icon => {
-      icon.style.transform = 'rotate(180deg)';
-    });
-  });
-  
-  collapseElement.addEventListener('hide.bs.collapse', () => {
-    expandIcons.forEach(icon => {
-      icon.style.transform = 'rotate(0deg)';
-    });
-  });
-
-  // Add event listeners for checkbox to prevent collapse but allow export functionality
+  // Add event listeners for checkbox to prevent any unwanted interactions
+  // Add event listeners for checkbox functionality
   const checkboxContainer = div.querySelector('.checkbox-container');
   const checkbox = div.querySelector('.selectRecipe');
   
-  // Handle container click - prevent collapse but allow checkbox functionality
+  // Handle container click - allow checkbox functionality
   checkboxContainer.addEventListener('click', (event) => {
-    event.stopPropagation(); // Prevent collapse
-    // Let the checkbox handle its own toggle naturally
     if (event.target !== checkbox) {
       // If clicking on container (not checkbox itself), toggle checkbox
       checkbox.checked = !checkbox.checked;
@@ -216,57 +120,10 @@ export function createRecipeCard(recipe, options = {}) {
     }
   });
   
-  // Handle checkbox click - prevent collapse but allow normal checkbox behavior
-  checkbox.addEventListener('click', (event) => {
-    event.stopPropagation(); // Prevent collapse
+  // Handle checkbox click - allow normal checkbox behavior
+  checkbox.addEventListener('click', () => {
     // Let the change event bubble naturally for export functionality
-  });
-  
-  // Prevent mouse events that might trigger collapse
-  checkboxContainer.addEventListener('mousedown', (event) => {
-    event.stopPropagation();
-  });
-  
-  checkboxContainer.addEventListener('mouseup', (event) => {
-    event.stopPropagation();
-  });
-
-  // Set up event listeners for edit and delete buttons (only if authenticated)
-  if (isAuthenticated) {
-    const editBtn = div.querySelector('.edit-recipe-btn');
-    const deleteBtn = div.querySelector('.delete-recipe-btn');
-    
-    if (editBtn) {
-      editBtn.addEventListener('click', (event) => {
-        event.stopPropagation(); // Prevent card collapse toggle
-        const recipeData = JSON.parse(editBtn.getAttribute('data-recipe'));
-        
-        // Import and use RecipeUI dynamically
-        import('./RecipeUI.js').then(({ recipeUI }) => {
-          recipeUI.showEditForm(recipeData);
-        }).catch(error => {
-          console.error('Failed to load RecipeUI:', error);
-        });
-      });
-    }
-    
-    if (deleteBtn) {
-      deleteBtn.addEventListener('click', (event) => {
-        event.stopPropagation(); // Prevent card collapse toggle
-        const recipeId = deleteBtn.getAttribute('data-recipe-id');
-        const recipeName = deleteBtn.getAttribute('data-recipe-name');
-        
-        // Import and use RecipeUI dynamically
-        import('./RecipeUI.js').then(({ recipeUI }) => {
-          recipeUI.showDeleteConfirmation(recipeId, recipeName);
-        }).catch(error => {
-          console.error('Failed to load RecipeUI:', error);
-        });
-      });
-    }
-  }
-
-  // Set up event listener for fullscreen button (always available)
+  });  // Set up event listener for fullscreen button (always available)
   const fullscreenBtn = div.querySelector('.fullscreen-recipe-btn');
   if (fullscreenBtn) {
     fullscreenBtn.addEventListener('click', (event) => {

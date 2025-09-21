@@ -1,6 +1,6 @@
 /* Recipe Cards - Main UI Component Styles */
 
-/* Recipe card collapsible styles */
+/* Recipe card styles - simple list format */
 .recipe-card {
   transition: all 0.3s ease;
   border: 1px solid var(--border-light);
@@ -95,7 +95,6 @@
 }
 
 /* Show subtle highlight on header hover for interactive elements */
-.recipe-header:hover .expand-toggle,
 .recipe-header:hover .fullscreen-toggle {
   background-color: rgba(108, 117, 125, 0.1);
 }
@@ -110,34 +109,6 @@
   font-size: var(--font-size-md);
   color: var(--text-light);
   margin: 0;
-}
-
-.expand-icon {
-  transition: transform 0.3s ease;
-  color: var(--text-light);
-  font-size: var(--font-size-md);
-}
-
-.recipe-content {
-  background-color: var(--bg-lighter);
-  border-top: 1px solid var(--border-light);
-}
-
-.recipe-content h6 {
-  color: var(--text-secondary);
-  font-weight: var(--font-weight-semibold);
-  margin-bottom: var(--space-sm);
-}
-
-.recipe-content ul,
-.recipe-content ol {
-  margin-left: var(--space-lg);
-  margin-bottom: 0;
-}
-
-.recipe-content li {
-  margin-bottom: var(--space-xs);
-  line-height: 1.4;
 }
 
 /* Edit and Delete Recipe Button Styling */

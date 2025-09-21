@@ -2,12 +2,12 @@
 <div class="modal fade" id="ingredientsModal" tabindex="-1" aria-labelledby="ingredientsModalTitle" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
     <div class="modal-content">
-      <div class="modal-header">
+      <div class="modal-header" style="position: relative;">
         <h5 class="modal-title" id="ingredientsModalTitle">
           <i class="fas fa-shopping-cart me-2"></i>
           <span data-i18n="ingredientsExport.exportTitle">Export Ingredients</span>
         </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="position: absolute; top: 1rem; right: 1rem; z-index: 1060;"></button>
       </div>
       
       <div class="modal-body">
@@ -22,11 +22,11 @@
 
         <!-- Select All / Deselect All controls -->
         <div class="mb-3 d-flex gap-2">
-          <button type="button" class="btn btn-outline-primary btn-sm" id="selectAllIngredients">
+          <button type="button" class="btn btn-outline-primary" id="selectAllIngredients">
             <i class="fas fa-check-square me-1"></i>
             <span data-i18n="ingredientsExport.selectAll">Select All</span>
           </button>
-          <button type="button" class="btn btn-outline-secondary btn-sm" id="deselectAllIngredients">
+          <button type="button" class="btn btn-outline-secondary" id="deselectAllIngredients">
             <i class="fas fa-square me-1"></i>
             <span data-i18n="ingredientsExport.deselectAll">Deselect All</span>
           </button>

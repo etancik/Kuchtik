@@ -5,6 +5,7 @@
 import { t } from '../i18n/i18n.js';
 import { generateFilenameFromRecipeName } from '../utils/recipeUtils.js';
 import { templateLoader } from '../utils/templateLoader.js';
+import { githubAuth } from './githubAuth.js';
 
 // Global variables for modal management
 let currentModal = null;
@@ -139,12 +140,30 @@ async function createFullscreenModalHTML(recipe) {
     : '';
 
   // Template data
+  const isAuthenticated = githubAuth.isAuthenticated();
+  
+  const actionButtons = isAuthenticated ? `
+    <div class="d-flex gap-3 align-items-center">
+      <button class="btn btn-outline-primary d-flex align-items-center fullscreen-edit-btn" 
+              id="fullscreenEditBtn"
+              title="${t('recipes.editRecipe')}">
+        <i class="fas fa-edit me-2"></i>
+        <span>${t('common.edit')}</span>
+      </button>
+      <button class="btn btn-outline-danger d-flex align-items-center fullscreen-delete-btn" 
+              id="fullscreenDeleteBtn"
+              title="${t('recipes.deleteRecipe')}">
+        <i class="fas fa-trash me-1"></i>
+      </button>
+    </div>` : '';
+
   const templateData = {
     recipeName,
     keepScreenOnLabel: t('fullscreen.keepScreenOn'),
     exitFullscreenLabel: t('fullscreen.exitFullscreen'),
     ingredientsLabel: t('recipes.ingredients'),
     instructionsLabel: t('recipes.instructions'),
+    actionButtons,
     tags,
     servingsInfo,
     cookingTimeInfo,
@@ -192,6 +211,40 @@ export async function showFullscreenRecipe(recipe, updateUrl = true) {
       await releaseWakeLock();
     }
   });
+
+  // Set up edit and delete buttons (only if authenticated)
+  if (githubAuth.isAuthenticated()) {
+    const editBtn = modalElement.querySelector('#fullscreenEditBtn');
+    const deleteBtn = modalElement.querySelector('#fullscreenDeleteBtn');
+
+    if (editBtn) {
+      editBtn.addEventListener('click', async () => {
+        // Close fullscreen modal first
+        modal.hide();
+        // Import and use RecipeUI dynamically
+        try {
+          const { recipeUI } = await import('../components/RecipeUI.js');
+          recipeUI.showEditForm(recipe);
+        } catch (error) {
+          console.error('Failed to load RecipeUI:', error);
+        }
+      });
+    }
+
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', async () => {
+        // Import and use RecipeUI dynamically
+        try {
+          const { recipeUI } = await import('../components/RecipeUI.js');
+          const recipeId = recipe.metadata?.id || recipe.name;
+          const recipeName = recipe.name;
+          recipeUI.showDeleteConfirmation(recipeId, recipeName);
+        } catch (error) {
+          console.error('Failed to load RecipeUI:', error);
+        }
+      });
+    }
+  }
 
   // Clean up when modal is closed
   modalElement.addEventListener('hidden.bs.modal', async () => {

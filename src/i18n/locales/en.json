@@ -49,7 +49,7 @@
   },
   "fullscreen": {
     "title": "Recipe View",
-    "keepScreenOn": "Keep Screen On",
+    "keepScreenOn": "Keep On",
     "exitFullscreen": "Exit Fullscreen"
   },
   "ingredientsExport": {
