@@ -1,47 +1,48 @@
 {
-  "name": "Vyvar",
+  "name": "Vývar",
   "ingredients": [
     {
-      "text": "maso (kure, veprove zebra, hovezi?)",
+      "text": "maso (kuře, vepřové žebra, hovězí)",
       "exportDefault": true
     },
     {
       "text": "2 cibule",
-      "exportDefault": true
-    },
-    {
-      "text": "1 mrazena zelenina",
-      "exportDefault": true
-    },
-    {
-      "text": "nudle",
-      "exportDefault": true
-    },
-    {
-      "text": "sul",
       "exportDefault": false
     },
     {
-      "text": "pepr",
+      "text": "1 mrazená zelenina",
+      "exportDefault": true
+    },
+    {
+      "text": "široké nudle",
+      "exportDefault": false
+    },
+    {
+      "text": "sůl",
+      "exportDefault": false
+    },
+    {
+      "text": "pepř",
       "exportDefault": false
     }
   ],
   "instructions": [
-    "Dej do hrnce maso s cibuli a zalij vodou",
-    "Var cca 3 h",
-    "Az je uvareno, slij vyvar a zalij maso studenou vodou",
+    "Dej do hrnce maso s cibulí a zalij vodou",
+    "Vař cca 2-4 h (kuře 1,5-2 h, vepřové žebra 3-3,5 h, hovězí 4 h)",
+    "Až je uvařeno, slij vývar a zalij maso studenou vodou",
     "Ober maso",
-    "Pridej do vyvaru dohromady se zeleninou a povar",
-    "Pridej nudle a var dle navodu",
-    "Dochut"
+    "Přidej do vývaru dohromady se zeleninou a povař",
+    "Přidej široké nudle a vař dle návodu",
+    "Dochuť"
   ],
   "cookingTime": "4 h",
   "servings": 6,
   "notes": [
-    "Muzeme pridat masove kulicky"
+    "Můžeme přidat masové kuličky"
   ],
   "tags": [
     "hlavní jídlo",
+    "polévka",
     "česká kuchyně"
   ],
   "metadata": {
