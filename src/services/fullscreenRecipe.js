@@ -161,8 +161,6 @@ async function createFullscreenModalHTML(recipe) {
 
   const templateData = {
     recipeName,
-    keepScreenOnLabel: t('fullscreen.keepScreenOn'),
-    keepScreenOffLabel: t('fullscreen.keepScreenOff'),
     exitFullscreenLabel: t('fullscreen.exitFullscreen'),
     ingredientsLabel: t('recipes.ingredients'),
     instructionsLabel: t('recipes.instructions'),
@@ -205,15 +203,8 @@ export async function showFullscreenRecipe(recipe, updateUrl = true) {
     updateUrlForFullscreen(recipeId);
   }
 
-  // Set up wake lock toggle
-  const wakeLockToggle = modalElement.querySelector('#keepScreenOnToggle');
-  wakeLockToggle.addEventListener('change', async (e) => {
-    if (e.target.checked) {
-      await requestWakeLock();
-    } else {
-      await releaseWakeLock();
-    }
-  });
+  // Always request wake lock for fullscreen mode
+  await requestWakeLock();
 
   // Set up edit and delete buttons (only if authenticated)
   if (githubAuth.isAuthenticated()) {

@@ -49,8 +49,6 @@
   },
   "fullscreen": {
     "title": "Zobrazení Receptu",
-    "keepScreenOn": "Nechat svítit",
-    "keepScreenOff": "Nechat zhasnout",
     "exitFullscreen": "Ukončit Celou Obrazovku"
   },
   "ingredientsExport": {
