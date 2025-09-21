@@ -127,6 +127,18 @@
   }
 }
 
+/* Hide spinner arrows on number inputs in ingredients export */
+.recipe-scale-input::-webkit-outer-spin-button,
+.recipe-scale-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.recipe-scale-input[type=number] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
 /* Fullscreen modal specific styling */
 #fullscreenRecipeModal .modal-content {
   background-color: var(--bg-white);

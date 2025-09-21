@@ -58,8 +58,8 @@ ul, ol {
   border-radius: 6px;
 }
 
-#languageDropdown .dropdown-toggle::after {
-  margin-left: 4px;
+#languageDropdown.dropdown-toggle::after {
+  display: none !important;
 }
 
 .dropdown-item {
