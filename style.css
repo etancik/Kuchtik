@@ -1,3 +1,6 @@
+/* Import skeleton card styles */
+@import './src/styles/skeleton.css';
+
 body { 
   font-family: sans-serif; 
 }

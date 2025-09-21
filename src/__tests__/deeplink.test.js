@@ -2,6 +2,7 @@
  * Deeplink functionality tests
  */
 
+import { jest } from '@jest/globals';
 import { 
   updateUrlForFullscreen, 
   removeFullscreenFromUrl, 
@@ -15,6 +16,51 @@ describe('Deeplink URL Management', () => {
   const originalHistory = window.history;
   const originalURL = window.URL;
   const originalURLSearchParams = window.URLSearchParams;
+  
+  beforeEach(() => {
+    // Mock fetch for template loading
+    global.fetch = jest.fn().mockImplementation((url) => {
+      if (url.includes('fullscreen-modal.html')) {
+        return Promise.resolve({
+          ok: true,
+          text: () => Promise.resolve(`
+            <div class="modal fade" id="fullscreenRecipeModal" tabindex="-1">
+              <div class="modal-dialog modal-fullscreen">
+                <div class="modal-content bg-dark text-light">
+                  <div class="modal-header">
+                    <h1 class="modal-title" id="fullscreenRecipeModalLabel">{{recipeName}}</h1>
+                    <div class="form-check form-switch">
+                      <input class="form-check-input" type="checkbox" id="keepScreenOnToggle">
+                      <label class="form-check-label text-light" for="keepScreenOnToggle">
+                        {{keepScreenOnLabel}}
+                      </label>
+                    </div>
+                  </div>
+                  <div class="modal-body">
+                    {{ingredients}}
+                    {{instructions}}
+                  </div>
+                </div>
+              </div>
+            </div>
+          `)
+        });
+      }
+      return Promise.reject(new Error(`Unmocked URL: ${url}`));
+    });
+    
+    // Mock Bootstrap
+    global.window = Object.create(window);
+    global.window.bootstrap = {
+      Modal: jest.fn().mockImplementation(() => ({
+        show: jest.fn(),
+        hide: jest.fn()
+      }))
+    };
+    
+    // Clean up DOM
+    document.body.innerHTML = '';
+  });
   
   // Mock URLSearchParams class
   class MockURLSearchParams {
@@ -216,6 +262,49 @@ describe('Deeplink Navigation', () => {
   const originalHistory = window.history;
   
   beforeEach(() => {
+    // Mock fetch for template loading
+    global.fetch = jest.fn().mockImplementation((url) => {
+      if (url.includes('fullscreen-modal.html')) {
+        return Promise.resolve({
+          ok: true,
+          text: () => Promise.resolve(`
+            <div class="modal fade" id="fullscreenRecipeModal" tabindex="-1">
+              <div class="modal-dialog modal-fullscreen">
+                <div class="modal-content bg-dark text-light">
+                  <div class="modal-header">
+                    <h1 class="modal-title" id="fullscreenRecipeModalLabel">{{recipeName}}</h1>
+                    <div class="form-check form-switch">
+                      <input class="form-check-input" type="checkbox" id="keepScreenOnToggle">
+                      <label class="form-check-label text-light" for="keepScreenOnToggle">
+                        {{keepScreenOnLabel}}
+                      </label>
+                    </div>
+                  </div>
+                  <div class="modal-body">
+                    {{ingredients}}
+                    {{instructions}}
+                  </div>
+                </div>
+              </div>
+            </div>
+          `)
+        });
+      }
+      return Promise.reject(new Error(`Unmocked URL: ${url}`));
+    });
+    
+    // Mock Bootstrap
+    global.window = Object.create(window);
+    global.window.bootstrap = {
+      Modal: jest.fn().mockImplementation(() => ({
+        show: jest.fn(),
+        hide: jest.fn()
+      }))
+    };
+    
+    // Clean up DOM
+    document.body.innerHTML = '';
+    
     // Mock window.location and history
     delete window.location;
     delete window.history;

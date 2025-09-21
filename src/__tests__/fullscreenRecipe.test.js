@@ -7,6 +7,74 @@ import { showFullscreenRecipe } from '../services/fullscreenRecipe.js';
 
 describe('Fullscreen Recipe', () => {
   beforeEach(() => {
+    // Mock fetch for template loading
+    global.fetch = jest.fn().mockImplementation((url) => {
+      if (url.includes('fullscreen-modal.html')) {
+        return Promise.resolve({
+          ok: true,
+          text: () => Promise.resolve(`
+            <div class="modal fade" id="fullscreenRecipeModal" tabindex="-1" aria-labelledby="fullscreenRecipeModalLabel" aria-hidden="true">
+              <div class="modal-dialog modal-fullscreen">
+                <div class="modal-content bg-dark text-light">
+                  <div class="modal-header border-secondary d-flex justify-content-between">
+                    <h1 class="modal-title fs-4 me-3" id="fullscreenRecipeModalLabel">{{recipeName}}</h1>
+                    <div class="form-check form-switch">
+                      <input class="form-check-input" type="checkbox" id="keepScreenOnToggle">
+                      <label class="form-check-label text-light" for="keepScreenOnToggle">
+                        {{keepScreenOnLabel}}
+                      </label>
+                    </div>
+                  </div>
+                  <div class="modal-body">
+                    {{ingredients}}
+                    {{instructions}}
+                  </div>
+                </div>
+              </div>
+            </div>
+          `)
+        });
+      }
+      return Promise.reject(new Error(`Unmocked URL: ${url}`));
+    });
+
+    // Mock window.location and history
+    delete window.location;
+    delete window.history;
+    
+    window.location = {
+      href: 'http://localhost:3000/',
+      origin: 'http://localhost:3000',
+      pathname: '/',
+      search: '',
+      toString: () => 'http://localhost:3000/'
+    };
+    
+    window.history = {
+      pushState: jest.fn(),
+      replaceState: jest.fn()
+    };
+
+    // Mock URL constructor
+    global.URL = class MockURL {
+      constructor(url) {
+        if (typeof url === 'object') {
+          this.href = url.href || 'http://localhost:3000/';
+        } else {
+          this.href = url;
+        }
+        this.searchParams = {
+          set: jest.fn(),
+          get: jest.fn(),
+          delete: jest.fn(),
+          toString: jest.fn(() => '')
+        };
+      }
+      toString() {
+        return this.href;
+      }
+    };
+
     // Mock Bootstrap
     global.window = Object.create(window);
     global.window.bootstrap = {
@@ -32,7 +100,7 @@ describe('Fullscreen Recipe', () => {
     document.body.innerHTML = '';
   });
 
-  test('should create and show fullscreen modal with recipe data', () => {
+  test('should create and show fullscreen modal with recipe data', async () => {
     const mockRecipe = {
       name: 'Test Recipe',
       ingredients: [
@@ -46,7 +114,7 @@ describe('Fullscreen Recipe', () => {
       notes: ['Serve hot']
     };
 
-    showFullscreenRecipe(mockRecipe);
+    await showFullscreenRecipe(mockRecipe);
 
     // Check if modal was created
     const modal = document.getElementById('fullscreenRecipeModal');
@@ -71,28 +139,28 @@ describe('Fullscreen Recipe', () => {
     expect(window.bootstrap.Modal).toHaveBeenCalled();
   });
 
-  test('should handle recipe with minimal data', () => {
+  test('should handle recipe with minimal data', async () => {
     const mockRecipe = {
       name: 'Simple Recipe'
     };
 
-    showFullscreenRecipe(mockRecipe);
+    await showFullscreenRecipe(mockRecipe);
 
     const modal = document.getElementById('fullscreenRecipeModal');
     expect(modal).toBeTruthy();
     expect(modal.innerHTML).toContain('Simple Recipe');
   });
 
-  test('should remove existing modal before creating new one', () => {
+  test('should remove existing modal before creating new one', async () => {
     const mockRecipe = { name: 'Recipe 1' };
     
-    showFullscreenRecipe(mockRecipe);
+    await showFullscreenRecipe(mockRecipe);
     const firstModal = document.getElementById('fullscreenRecipeModal');
     expect(firstModal.innerHTML).toContain('Recipe 1');
 
     // Show another recipe
     const mockRecipe2 = { name: 'Recipe 2' };
-    showFullscreenRecipe(mockRecipe2);
+    await showFullscreenRecipe(mockRecipe2);
     
     const secondModal = document.getElementById('fullscreenRecipeModal');
     expect(secondModal.innerHTML).toContain('Recipe 2');

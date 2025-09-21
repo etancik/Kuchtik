@@ -129,6 +129,13 @@ export class PublicGitHubAdapter {
     return null;
   }
 
+  /**
+   * List recipe files - alias for getFileList() for compatibility with progressive loading
+   */
+  async listRecipeFiles() {
+    return this.getFileList();
+  }
+
   // These methods are not available for public access
   createFile() { throw new Error('Create operation not available in public mode'); }
   updateFile() { throw new Error('Update operation not available in public mode'); }

@@ -10,6 +10,7 @@ import { githubAuth } from './services/githubAuth.js';
 import { ingredientsExportService } from './services/ingredientsExport.js';
 import { i18n, t } from './i18n/i18n.js';
 import { handleFullscreenNavigation, initializeFullscreenFromUrl } from './services/fullscreenRecipe.js';
+import { skeletonCardService } from './services/skeletonCardService.js';
 
 // Application state
 const state = {
@@ -112,6 +113,17 @@ async function initializeApp() {
   // Load and render recipes using repository
   try {
     console.log('🔄 Loading recipes from repository...');
+    
+    // Initialize skeleton card service
+    await skeletonCardService.init();
+    
+    // Show skeleton cards while loading
+    if (state.recipeListElement) {
+      const estimatedCount = skeletonCardService.estimateCardCount();
+      skeletonCardService.showSkeletons(state.recipeListElement, estimatedCount);
+    }
+    
+    // TEMPORARY: Use regular getAll method instead of progressive loading
     state.recipes = await state.repository.getAll();
     
     // Sort recipes with most recently modified first
@@ -122,10 +134,19 @@ async function initializeApp() {
       matches: { name: [], tags: [], ingredients: [] }, 
       shouldExpand: false 
     })); // Initialize filtered recipes with no highlighting
+    
+    // Hide skeletons and render real recipes
+    if (state.recipeListElement) {
+      skeletonCardService.hideSkeletons(state.recipeListElement);
+    }
     renderRecipes(state.filteredRecipes);
     console.log(`✅ Loaded and rendered ${state.recipes.length} recipes`);
   } catch (error) {
     console.error('❌ Failed to load recipes:', error);
+    // Hide skeletons on error and show error message
+    if (state.recipeListElement && skeletonCardService.isShowingSkeletons(state.recipeListElement)) {
+      skeletonCardService.hideSkeletons(state.recipeListElement);
+    }
     // Show empty state or error message
     showLoadingError(error);
   }

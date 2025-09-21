@@ -730,6 +730,13 @@ export class GitHubAPIAdapter {
       throw error;
     }
   }
+
+  /**
+   * List recipe files - alias for getFileList() for compatibility with progressive loading
+   */
+  async listRecipeFiles() {
+    return this.getFileList();
+  }
 }
 
 // Create and export singleton instance
