@@ -55,7 +55,7 @@
   "ingredientsExport": {
     "title": "Export Ingredients to Shopping List",
     "exportTitle": "Export Ingredients",
-    "description": "Review and select the ingredients you want to add to your shopping list. All ingredients are selected by default.",
+    "description": "Review and select the ingredients you want to add to your shopping list. Ingredients are pre-selected based on your recipe settings.",
     "selectAll": "Select All",
     "deselectAll": "Deselect All",
     "portionScale": "Portion Scale",

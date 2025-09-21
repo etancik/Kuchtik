@@ -1,0 +1,338 @@
+/* Modal & Fullscreen Components - Consolidated */
+
+/* Base modal styling */
+.modal-content {
+  background-color: var(--bg-white);
+  color: var(--text-primary);
+  border: none;
+  box-shadow: var(--shadow-lg);
+}
+
+.modal-header {
+  padding: var(--space-xl);
+  border-bottom: 1px solid var(--border-light);
+  background-color: var(--bg-light);
+}
+
+.modal-header .modal-title {
+  flex-grow: 1;
+  margin-right: var(--space-lg);
+  color: var(--color-dark);
+  font-weight: var(--font-weight-semibold);
+}
+
+.modal-body {
+  padding: var(--space-2xl);
+  background-color: var(--bg-white);
+  color: var(--text-primary);
+}
+
+/* Fullscreen modal specific styling - LIGHT THEME */
+#fullscreenRecipeModal .modal-content {
+  background-color: var(--bg-white) !important;
+  color: var(--text-primary) !important;
+}
+
+#fullscreenRecipeModal .modal-header {
+  background-color: var(--bg-light) !important;
+  color: var(--text-primary) !important;
+  border-bottom: 1px solid var(--border-light) !important;
+}
+
+#fullscreenRecipeModal .modal-body {
+  background-color: var(--bg-white) !important;
+  color: var(--text-primary) !important;
+}
+
+#fullscreenRecipeModal .modal-title {
+  color: var(--color-dark) !important;
+}
+
+#fullscreenRecipeModal .text-muted {
+  color: var(--text-light) !important;
+}
+
+/* Fullscreen section headers */
+.fullscreen-section-header.border-bottom {
+  border-color: var(--border-light) !important;
+  color: var(--text-secondary) !important;
+}
+
+/* Recipe creation/edit modal styling */
+#recipe-modal .modal-content {
+  background-color: var(--bg-white) !important;
+  color: var(--text-primary) !important;
+}
+
+#recipe-modal .modal-header {
+  background-color: var(--bg-light) !important;
+  border-bottom: 1px solid var(--border-light) !important;
+}
+
+#recipe-modal .modal-body {
+  background-color: var(--bg-white) !important;
+  color: var(--text-primary) !important;
+}
+
+#recipe-modal .form-label {
+  color: var(--text-primary) !important;
+}
+
+#recipe-modal .form-control {
+  background-color: var(--bg-white) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-primary) !important;
+}
+
+#recipe-modal .form-control:focus {
+  background-color: var(--bg-white) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Fullscreen modal specific styling */
+#fullscreenRecipeModal .modal-content {
+  background-color: var(--bg-white);
+  color: var(--text-primary);
+  border: none;
+  box-shadow: var(--shadow-lg);
+}
+
+#fullscreenRecipeModal .modal-header {
+  padding: var(--space-xl);
+  border-bottom: 1px solid var(--border-light);
+  background-color: var(--bg-light);
+}
+
+#fullscreenRecipeModal .modal-header .modal-title {
+  flex-grow: 1;
+  margin-right: var(--space-lg);
+  color: var(--color-dark);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Enhanced close button for fullscreen modal */
+/* Fullscreen modal layout */
+.modal-fullscreen .modal-header {
+  border-bottom: none;
+  padding-bottom: 0;
+  padding-right: 4rem; /* Make room for absolute positioned close button */
+}
+
+.modal-fullscreen .modal-header-secondary {
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+/* Enhanced fullscreen modal close button */
+.modal-fullscreen .btn-close {
+  font-size: 1.2rem;
+  padding: 0.25rem;
+  background: none;
+  border: none;
+  border-radius: 0;
+  width: auto;
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  z-index: 10;
+  color: var(--bs-body-color);
+  opacity: 0.7;
+}
+
+/* Responsive sizing */
+@media (min-width: 768px) {
+  .modal-fullscreen .btn-close {
+    font-size: 1.4rem;
+    padding: 0.5rem;
+  }
+}
+
+@media (min-width: 992px) {
+  .modal-fullscreen .btn-close {
+    font-size: 1.6rem;
+    padding: 0.5rem;
+  }
+}
+
+.modal-fullscreen .btn-close:hover {
+  opacity: 1;
+  color: var(--bs-dark);
+}
+
+.modal-fullscreen .btn-close:focus {
+  opacity: 1;
+  color: var(--bs-dark);
+  outline: none !important;
+  box-shadow: none !important;
+  background: none !important;
+  border: none !important;
+}
+
+.modal-fullscreen .btn-close:focus-visible {
+  outline: 1px dotted rgba(0, 0, 0, 0.3);
+  outline-offset: 2px;
+}
+
+.modal-fullscreen .btn-close i {
+  font-size: inherit;
+}
+
+.modal-fullscreen .btn-close:hover i {
+  color: var(--bs-dark);
+}
+
+#fullscreenRecipeModal .btn-close:focus {
+  background-color: var(--color-danger);
+  border-color: var(--color-danger);
+  opacity: 1;
+  box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+}
+
+#fullscreenRecipeModal .modal-body {
+  padding: var(--space-2xl);
+  background-color: var(--bg-white);
+}
+
+#fullscreenRecipeModal h4 {
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--space-lg);
+}
+
+#fullscreenRecipeModal .border-bottom {
+  border-color: var(--border-light) !important;
+}
+
+#fullscreenRecipeModal .badge {
+  background-color: var(--color-primary) !important;
+}
+
+#fullscreenRecipeModal ol li,
+#fullscreenRecipeModal ul li {
+  line-height: 1.6;
+  margin-bottom: var(--space-md);
+  color: var(--text-secondary);
+}
+
+/* Recipe info cards in modal */
+#fullscreenRecipeModal .recipe-info-item {
+  background-color: var(--bg-light);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin-bottom: var(--space-sm);
+}
+
+#fullscreenRecipeModal .recipe-info-item h6 {
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--space-xs);
+}
+
+/* Content sections styling */
+#fullscreenRecipeModal .ingredients-section,
+#fullscreenRecipeModal .instructions-section {
+  background-color: var(--bg-lighter);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  border: 1px solid var(--border-light);
+}
+
+/* Notes section styling */
+#fullscreenRecipeModal .notes-section {
+  background-color: var(--color-warning-bg);
+  border: 1px solid var(--color-warning-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  margin-top: var(--space-lg);
+}
+
+#fullscreenRecipeModal .notes-section h6 {
+  color: var(--color-warning);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Fullscreen toggle styling */
+.fullscreen-toggle {
+  cursor: pointer;
+  padding: var(--space-md);
+  border-radius: var(--radius-sm);
+  transition: var(--transition-normal);
+  color: var(--text-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  min-height: var(--touch-target);
+  flex-shrink: 0; /* Prevent shrinking */
+}
+
+.fullscreen-toggle:hover {
+  background-color: rgba(25, 135, 84, 0.1);
+  color: var(--color-success);
+}
+
+.fullscreen-toggle i {
+  font-size: var(--font-size-md);
+}
+
+.fullscreen-recipe-btn {
+  min-width: 40px !important;
+  max-width: 60px !important;
+  width: auto !important;
+}
+
+/* Keep screen on toggle */
+#keepScreenOnToggle:checked {
+  background-color: var(--color-success-light);
+  border-color: var(--color-success-light);
+}
+
+/* Responsive modal adjustments */
+@media (max-width: 991.98px) {
+  .modal-body {
+    padding: var(--space-lg);
+  }
+  
+  .modal-header {
+    padding: var(--space-lg);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-lg);
+  }
+  
+  .modal-header .modal-title {
+    margin-right: 0;
+    margin-bottom: var(--space-sm);
+  }
+  
+  #fullscreenRecipeModal .modal-body {
+    padding: var(--space-lg);
+  }
+  
+  #fullscreenRecipeModal .modal-header {
+    padding: var(--space-lg);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-lg);
+  }
+  
+  #fullscreenRecipeModal .modal-header .modal-title {
+    margin-right: 0;
+    margin-bottom: var(--space-sm);
+  }
+  
+  #fullscreenRecipeModal .fs-5 {
+    font-size: var(--font-size-lg) !important;
+  }
+  
+  /* Adjust close button position for mobile */
+  #fullscreenRecipeModal .btn-close {
+    top: var(--space-md);
+    right: var(--space-md);
+    width: 40px !important;
+    height: 40px !important;
+  }
+}

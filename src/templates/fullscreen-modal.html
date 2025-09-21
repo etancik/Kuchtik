@@ -1,16 +1,20 @@
 <div class="modal fade" id="fullscreenRecipeModal" tabindex="-1" aria-labelledby="fullscreenRecipeModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-fullscreen">
     <div class="modal-content">
-      <div class="modal-header d-flex justify-content-between">
-        <h1 class="modal-title fs-4 me-3" id="fullscreenRecipeModalLabel">{{recipeName}}</h1>
-        <div class="d-flex align-items-center gap-3 flex-shrink-0">
-          <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" id="keepScreenOnToggle">
-            <label class="form-check-label text-muted" for="keepScreenOnToggle">
-              {{keepScreenOnLabel}}
-            </label>
-          </div>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{exitFullscreenLabel}}"></button>
+      <div class="modal-header position-relative">
+        <h1 class="modal-title fs-4 pe-5" id="fullscreenRecipeModalLabel">{{recipeName}}</h1>
+        <!-- Close button positioned absolutely in top right -->
+        <button type="button" class="btn-close position-absolute top-0 end-0 mt-3 me-3" data-bs-dismiss="modal" aria-label="{{exitFullscreenLabel}}">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <!-- Keep screen on toggle moved to separate row for better mobile layout -->
+      <div class="modal-header-secondary px-3 py-3">
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" id="keepScreenOnToggle">
+          <label class="form-check-label text-muted" for="keepScreenOnToggle">
+            {{keepScreenOnLabel}}
+          </label>
         </div>
       </div>
       <div class="modal-body">
@@ -28,7 +32,7 @@
               <!-- Two column layout for larger screens -->
               <div class="row">
                 <div class="col-lg-6 mb-4">
-                  <h4 class="border-bottom border-secondary pb-2 mb-3">
+                  <h4 class="border-bottom pb-2 mb-3 fullscreen-section-header">
                     <i class="fas fa-list-ul me-2"></i>{{ingredientsLabel}}
                   </h4>
                   <ul class="list-unstyled fs-5">
@@ -36,7 +40,7 @@
                   </ul>
                 </div>
                 <div class="col-lg-6 mb-4">
-                  <h4 class="border-bottom border-secondary pb-2 mb-3">
+                  <h4 class="border-bottom pb-2 mb-3 fullscreen-section-header">
                     <i class="fas fa-tasks me-2"></i>{{instructionsLabel}}
                   </h4>
                   <ol class="fs-5">

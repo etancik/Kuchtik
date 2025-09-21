@@ -1,0 +1,164 @@
+/* Button System - Consolidated & Consistent */
+
+/* Base button reset */
+button {
+  width: 100%;
+  max-width: 300px;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--font-size-md);
+  line-height: 1.5;
+  text-align: center;
+  transition: var(--transition-fast);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-lg);
+  min-height: var(--button-height);
+}
+
+/* Button size variations */
+.btn-sm {
+  padding: var(--space-xs) var(--space-sm) !important;
+  font-size: var(--font-size-sm) !important;
+  line-height: 1 !important;
+  min-height: var(--icon-size-md) !important;
+  height: var(--icon-size-md) !important;
+}
+
+.btn-auto-width {
+  width: auto !important;
+  max-width: none !important;
+}
+
+/* Header buttons - larger size for better usability */
+#languageDropdown,
+#authBtn,
+#createRecipeBtn {
+  padding: var(--space-md) var(--space-lg) !important;
+  font-size: var(--font-size-md) !important;
+  min-height: var(--touch-target) !important;
+  height: auto !important;
+  line-height: 1.5 !important;
+}
+
+/* Override btn-sm for header buttons specifically */
+#languageDropdown.btn-sm,
+#authBtn.btn-sm,
+#createRecipeBtn.btn-sm {
+  padding: var(--space-md) var(--space-lg) !important;
+  font-size: var(--font-size-md) !important;
+  min-height: var(--touch-target) !important;
+  height: auto !important;
+  line-height: 1.5 !important;
+}
+
+/* Language flag styling - make it larger */
+#currentLanguageFlag {
+  font-size: 1.25em;
+  line-height: 1;
+}
+
+.btn-icon {
+  min-width: var(--touch-target);
+  max-width: 60px;
+  width: auto;
+  padding: var(--space-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Remove button styles */
+.remove-btn {
+  background-color: var(--bg-light);
+  border: 1px solid var(--border-primary);
+  color: var(--text-light);
+  border-radius: var(--radius-md);
+  transition: var(--transition-fast);
+  min-width: 2.5rem;
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-md);
+  padding: var(--space-sm) var(--space-lg);
+}
+
+.remove-btn:hover {
+  background-color: var(--color-danger);
+  border-color: var(--color-danger);
+  color: var(--bg-white);
+  transform: scale(1.05);
+}
+
+.remove-btn:focus {
+  box-shadow: var(--shadow-danger-focus);
+}
+
+/* Smaller remove button styling (for forms) */
+.remove-btn-small {
+  background-color: var(--bg-light);
+  border: 1px solid var(--border-primary);
+  border-left: 0;
+  color: var(--text-light);
+  transition: var(--transition-fast);
+  min-width: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-md);
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: 0;
+  /* Match textarea behavior */
+  height: auto !important;
+  align-self: stretch !important;
+  flex-shrink: 0 !important;
+  min-height: var(--input-height) !important;
+}
+
+.remove-btn-small:hover {
+  background-color: var(--color-danger);
+  border-color: var(--color-danger);
+  color: var(--bg-white);
+}
+
+/* Step control buttons */
+.step-move-btn {
+  padding: 2px 6px !important;
+  font-size: var(--font-size-sm) !important;
+  line-height: 1 !important;
+  width: auto !important;
+  min-width: var(--icon-size-md) !important;
+  height: var(--icon-size-md) !important;
+}
+
+.step-move-btn:disabled {
+  opacity: var(--opacity-disabled);
+}
+
+/* Button group overrides */
+.btn-group .btn {
+  max-width: none;
+  width: auto;
+}
+
+.input-group .btn {
+  width: auto;
+  max-width: none;
+}
+
+/* Destructive button variant */
+.input-group .btn-outline-secondary {
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+.input-group .btn-outline-secondary:hover {
+  background-color: var(--color-danger);
+  border-color: var(--color-danger);
+  color: var(--bg-white);
+}
+
+.input-group .btn-outline-secondary:focus {
+  box-shadow: var(--shadow-danger-focus);
+}

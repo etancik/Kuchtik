@@ -102,9 +102,9 @@ async function createFullscreenModalHTML(recipe) {
     return `<li class="mb-2">${text}</li>`;
   }).join('');
 
-  // Format instructions
-  const instructions = recipeSteps.map((step, index) => {
-    return `<li class="mb-3"><strong>${index + 1}.</strong> ${step}</li>`;
+  // Format instructions (no manual numbering since we use <ol>)
+  const instructions = recipeSteps.map((step) => {
+    return `<li class="mb-3">${step}</li>`;
   }).join('');
 
   // Format notes

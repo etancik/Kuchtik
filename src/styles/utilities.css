@@ -1,0 +1,131 @@
+/* Layout & Utility Classes */
+
+/* Base layout */
+body {
+  font-family: sans-serif;
+}
+
+ul, ol {
+  margin-left: 20px;
+}
+
+/* Header styling */
+.container h1 {
+  color: var(--color-dark);
+}
+
+/* Export button styling */
+#exportBtn {
+  max-width: none;
+  width: auto;
+  display: none; /* Hidden by default */
+}
+
+/* Sticky export button when recipes are selected */
+.sticky-export-btn {
+  position: fixed !important;
+  bottom: 20px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 1050 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  border: 2px solid var(--color-primary-dark) !important;
+  font-weight: bold !important;
+  animation: slideUp 0.3s ease-out !important;
+}
+
+.sticky-export-btn:hover {
+  transform: translateX(-50%) translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3) !important;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateX(-50%) translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Language switcher styling */
+#languageDropdown {
+  font-size: 16px;
+  min-width: auto;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+#languageDropdown .dropdown-toggle::after {
+  margin-left: 4px;
+}
+
+.dropdown-item {
+  font-size: 14px;
+}
+
+.dropdown-item:hover {
+  background-color: var(--bg-light);
+}
+
+/* Generic utility classes */
+.text-muted-custom {
+  color: var(--text-muted) !important;
+}
+
+.bg-light-custom {
+  background-color: var(--bg-light) !important;
+}
+
+.border-custom {
+  border-color: var(--border-primary) !important;
+}
+
+.rounded-custom {
+  border-radius: var(--radius-md) !important;
+}
+
+.shadow-custom {
+  box-shadow: var(--shadow-md) !important;
+}
+
+/* Animation utilities */
+.fade-in {
+  animation: fadeIn var(--transition-slow);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.recipe-card-fade-in {
+  animation: fadeIn var(--transition-slow);
+}
+
+/* Spacing utilities (when you need custom spacing) */
+.spacing-xs { gap: var(--space-xs); }
+.spacing-sm { gap: var(--space-sm); }
+.spacing-md { gap: var(--space-md); }
+.spacing-lg { gap: var(--space-lg); }
+.spacing-xl { gap: var(--space-xl); }
+
+.margin-xs { margin: var(--space-xs); }
+.margin-sm { margin: var(--space-sm); }
+.margin-md { margin: var(--space-md); }
+.margin-lg { margin: var(--space-lg); }
+.margin-xl { margin: var(--space-xl); }
+
+.padding-xs { padding: var(--space-xs); }
+.padding-sm { padding: var(--space-sm); }
+.padding-md { padding: var(--space-md); }
+.padding-lg { padding: var(--space-lg); }
+.padding-xl { padding: var(--space-xl); }

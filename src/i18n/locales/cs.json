@@ -55,7 +55,7 @@
   "ingredientsExport": {
     "title": "Export Ingrediencí do Nákupního Seznamu",
     "exportTitle": "Export Ingrediencí",
-    "description": "Zkontrolujte a vyberte ingredience, které chcete přidat do svého nákupního seznamu. Všechny ingredience jsou vybrané ve výchozím nastavení.",
+    "description": "Zkontrolujte a vyberte ingredience, které chcete přidat do svého nákupního seznamu. Ingredience jsou předvybrané na základě nastavení receptu.",
     "selectAll": "Vybrat Vše",
     "deselectAll": "Zrušit Výběr",
     "portionScale": "Velikost Porce",

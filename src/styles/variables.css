@@ -1,0 +1,107 @@
+/* CSS Custom Properties - Design System Variables */
+:root {
+  /* Color System */
+  --color-primary: #0d6efd;
+  --color-primary-light: #007bff;
+  --color-primary-dark: #0056b3;
+  --color-primary-accent: #6bb6ff;
+  --color-primary-bg: #e8f4fd;
+  
+  --color-success: #198754;
+  --color-success-light: #00b894;
+  
+  --color-danger: #dc3545;
+  --color-danger-hover: #c82333;
+  
+  --color-warning: #856404;
+  --color-warning-bg: #fff3cd;
+  --color-warning-border: #ffeaa7;
+  
+  --color-secondary: #6c757d;
+  --color-light: #f8f9fa;
+  --color-dark: #333;
+  
+  /* Background Colors */
+  --bg-white: #ffffff;
+  --bg-light: #f8f9fa;
+  --bg-lighter: #fafafa;
+  --bg-muted: #f9fbf9;
+  --bg-very-light: #fdfefe;
+  
+  /* Text Colors */
+  --text-primary: #212529;
+  --text-secondary: #495057;
+  --text-muted: #4a5568;
+  --text-light: #6c757d;
+  
+  /* Border Colors */
+  --border-primary: #dee2e6;
+  --border-light: #e9ecef;
+  --border-active: #86b7fe;
+  --border-muted: #9ca3a3;
+  
+  /* Spacing System (based on 0.25rem = 4px) */
+  --space-xs: 0.25rem;   /* 4px */
+  --space-sm: 0.5rem;    /* 8px */
+  --space-md: 0.75rem;   /* 12px */
+  --space-lg: 1rem;      /* 16px */
+  --space-xl: 1.5rem;    /* 24px */
+  --space-2xl: 2rem;     /* 32px */
+  
+  /* Border Radius */
+  --radius-sm: 0.25rem;   /* 4px */
+  --radius-md: 0.375rem;  /* 6px */
+  --radius-lg: 0.5rem;    /* 8px */
+  --radius-xl: 1rem;      /* 16px */
+  
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.2s ease;
+  --transition-slow: 0.3s ease-in-out;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  --shadow-focus: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+  --shadow-danger-focus: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+  
+  /* Typography */
+  --font-size-sm: 0.75rem;
+  --font-size-md: 0.875rem;
+  --font-size-lg: 1.1rem;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  
+  /* Component Sizing */
+  --button-height: 2.5rem;
+  --input-height: 38px;
+  --input-height-focus: 60px;
+  --icon-size-sm: 20px;
+  --icon-size-md: 24px;
+  --touch-target: 44px;
+  
+  /* Opacity Levels */
+  --opacity-disabled: 0.3;
+  --opacity-muted: 0.5;
+  --opacity-hover: 0.7;
+  --opacity-semi: 0.9;
+}
+
+/* Dark mode overrides - DISABLED for now to ensure consistent light theme */
+/* @media (prefers-color-scheme: dark) {
+  :root {
+    --bg-white: #1a1a1a;
+    --bg-light: #2a2a2a;
+    --bg-lighter: #3a3a3a;
+    --bg-muted: #404040;
+    
+    --text-primary: #ffffff;
+    --text-secondary: #e0e0e0;
+    --text-muted: #b0b0b0;
+    
+    --border-primary: #404040;
+    --border-light: #505050;
+  }
+} */
