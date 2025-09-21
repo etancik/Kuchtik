@@ -748,6 +748,15 @@ button {
   background: linear-gradient(135deg, #2d3436 0%, #636e72 100%);
 }
 
+#fullscreenRecipeModal .modal-header {
+  padding: 1.5rem;
+}
+
+#fullscreenRecipeModal .modal-header .modal-title {
+  flex-grow: 1;
+  margin-right: 1rem;
+}
+
 #fullscreenRecipeModal .modal-body {
   padding: 2rem;
 }
@@ -780,6 +789,18 @@ button {
 @media (max-width: 991.98px) {
   #fullscreenRecipeModal .modal-body {
     padding: 1rem;
+  }
+  
+  #fullscreenRecipeModal .modal-header {
+    padding: 1rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  #fullscreenRecipeModal .modal-header .modal-title {
+    margin-right: 0;
+    margin-bottom: 0.5rem;
   }
   
   #fullscreenRecipeModal .fs-5 {

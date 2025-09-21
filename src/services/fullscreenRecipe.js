@@ -88,9 +88,9 @@ function createFullscreenModalHTML(recipe) {
     <div class="modal fade" id="fullscreenRecipeModal" tabindex="-1" aria-labelledby="fullscreenRecipeModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-fullscreen">
         <div class="modal-content bg-dark text-light">
-          <div class="modal-header border-secondary">
-            <h1 class="modal-title fs-4" id="fullscreenRecipeModalLabel">${recipeName}</h1>
-            <div class="d-flex align-items-center gap-3">
+          <div class="modal-header border-secondary d-flex justify-content-between">
+            <h1 class="modal-title fs-4 me-3" id="fullscreenRecipeModalLabel">${recipeName}</h1>
+            <div class="d-flex align-items-center gap-3 flex-shrink-0">
               <div class="form-check form-switch">
                 <input class="form-check-input" type="checkbox" id="keepScreenOnToggle">
                 <label class="form-check-label text-light" for="keepScreenOnToggle">
