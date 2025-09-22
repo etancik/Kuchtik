@@ -203,8 +203,10 @@ export async function showFullscreenRecipe(recipe, updateUrl = true) {
     updateUrlForFullscreen(recipeId);
   }
 
-  // Always request wake lock for fullscreen mode
-  await requestWakeLock();
+  // Request wake lock for fullscreen mode (non-blocking)
+  requestWakeLock().catch(err => {
+    console.warn('Wake lock not available on this device:', err);
+  });
 
   // Set up edit and delete buttons (only if authenticated)
   if (githubAuth.isAuthenticated()) {
