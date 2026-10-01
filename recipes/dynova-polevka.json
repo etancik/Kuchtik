@@ -77,16 +77,15 @@
     "Serviruj se zakysanou smetanou a dynovymi seminky a olivovym olejem"
   ],
   "tags": [
-    "hlavní jídlo",
-    "kuře"
+    "hlavní jídlo"
   ],
   "metadata": {
-    "id": null,
-    "sha": null,
+    "id": "dynova-polevka",
+    "sha": "941d78ad020d215645349d50f6d73c8f386f784c",
     "createdDate": "2025-09-18T08:11:16.441Z",
     "createdAt": "2025-09-18T08:11:16.441Z",
     "author": "eBarborka",
-    "lastModified": "2025-09-18T08:11:16.441Z",
+    "lastModified": "2026-10-01T13:24:44.895Z",
     "filename": null
   }
 }
