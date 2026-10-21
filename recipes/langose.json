@@ -6,7 +6,7 @@
       "exportDefault": true
     },
     {
-      "text": "250 g hladké mouky",
+      "text": "300 g hladké mouky",
       "exportDefault": true
     },
     {
@@ -59,12 +59,12 @@
     "smažené"
   ],
   "metadata": {
-    "id": null,
-    "sha": null,
+    "id": "langose",
+    "sha": "03ce34b28c48e422caf8272bbbcaba2a93fadb7e",
     "createdDate": "2025-09-18T07:40:05.592Z",
     "createdAt": "2025-09-18T07:40:05.592Z",
     "author": "eBarborka",
-    "lastModified": "2025-09-21T12:00:00.000Z",
+    "lastModified": "2026-10-21T14:26:51.385Z",
     "filename": null
   }
 }
