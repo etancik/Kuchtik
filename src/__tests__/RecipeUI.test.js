@@ -65,7 +65,7 @@ global.document = {
 };
 
 // Import the singleton instance after mocking
-const recipeUI = (await import('../components/RecipeUI.js')).default;
+const { recipeUI } = await import('../components/RecipeUI.js');
 
 describe('RecipeUI Repository Integration Tests', () => {
   beforeEach(() => {
