@@ -88,15 +88,15 @@ test('Worker isolates Access audiences and writes preview edits with the read re
   });
 
   assert.equal((await worker.fetch(request(web), env)).status, 401);
-  assert.equal((await worker.fetch(request(web + '/sprava/', { audience: 'mcp' }), env)).status, 401);
+  assert.equal((await worker.fetch(request(web + '/admin/', { audience: 'mcp' }), env)).status, 401);
   const branchEnv = { ...env, GITHUB_APP_PRIVATE_KEY: undefined, PREVIEW_INTEGRATION_HOST: undefined };
   assert.equal((await worker.fetch(request(branchWeb + '/style.css', { audience: 'web' }), branchEnv)).status, 200);
-  assert.equal((await worker.fetch(request(branchWeb + '/sprava/', { audience: 'web' }), branchEnv)).status, 404);
+  assert.equal((await worker.fetch(request(branchWeb + '/admin/', { audience: 'web' }), branchEnv)).status, 404);
   assert.equal((await worker.fetch(request(branchWeb + '/mcp', { audience: 'mcp' }), branchEnv)).status, 401);
-  const html = await worker.fetch(request(web + '/sprava/', { audience: 'web' }), env);
+  const html = await worker.fetch(request(web + '/admin/', { audience: 'web' }), env);
   assert.equal(await html.text(), '/index.html');
   assert.equal(html.headers.get('Cache-Control'), 'private, no-store');
-  assert.equal((await worker.fetch(request(web + '/sprava/', {
+  assert.equal((await worker.fetch(request(web + '/admin/', {
     audience: 'web', claims: { exp: 1 },
   }), env)).status, 401);
 
@@ -123,13 +123,13 @@ test('Worker isolates Access audiences and writes preview edits with the read re
   assert.equal(JSON.parse(result.result.content[0].text).commit, commit);
   assert.equal(calls.filter(call => call.method === 'PUT').length, 1);
 
-  const editorWrite = await worker.fetch(request(web + '/sprava/api/recipes/rizky.json', {
+  const editorWrite = await worker.fetch(request(web + '/admin/api/recipes/rizky.json', {
     audience: 'web', method: 'PUT', origin: web, body: { recipe: { ...recipe, name: 'Kuřecí řízky' }, revision },
   }), env);
   assert.equal(editorWrite.status, 200);
   assert.equal(calls.filter(call => call.method === 'PUT').length, 2);
 
-  const foreignOrigin = await worker.fetch(request(web + '/sprava/api/recipes/rizky.json', {
+  const foreignOrigin = await worker.fetch(request(web + '/admin/api/recipes/rizky.json', {
     audience: 'web', method: 'PUT', origin: branchWeb, body: { recipe, revision },
   }), env);
   assert.equal(foreignOrigin.status, 403);

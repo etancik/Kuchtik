@@ -1,16 +1,16 @@
 const hostMode = typeof document !== 'undefined' ? document.querySelector('meta[name="kuchtik-host"]')?.content : null;
 export const readOnlyWorker = hostMode === 'readonly-worker';
 export const workerHosted = hostMode === 'worker' || readOnlyWorker;
-export const editorMode = workerHosted && location.pathname === '/sprava/';
+export const editorMode = workerHosted && location.pathname === '/admin/';
 
 export function switchView() {
   const url = new window.URL(location.href);
-  url.pathname = editorMode ? '/' : '/sprava/';
+  url.pathname = editorMode ? '/' : '/admin/';
   location.assign(url);
 }
 
 export async function editorRequest(path, options) {
-  const response = await fetch('/sprava/api/' + path, {
+  const response = await fetch('/admin/api/' + path, {
     redirect: 'error',
     ...options,
   }).catch(() => {
