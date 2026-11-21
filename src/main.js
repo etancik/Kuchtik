@@ -577,12 +577,25 @@ function updateAuthStatus() {
   if (!authBtn) return;
 
   if (workerHosted) {
-    if (readOnlyWorker) {
+    const account = document.getElementById('editorAccount');
+    const viewLabel = t(editorMode ? 'navigation.publicView' : 'navigation.editRecipes');
+    if (account && !account.hidden) {
       authBtn.classList.replace('d-flex', 'd-none');
-      return;
+      if (readOnlyWorker) {
+        const accountButton = document.getElementById('editorAccountButton');
+        accountButton.classList.remove('dropdown-toggle');
+        accountButton.disabled = true;
+      } else {
+        const viewButton = document.getElementById('editorAccountView');
+        viewButton.textContent = viewLabel;
+        viewButton.onclick = switchView;
+      }
+    } else if (readOnlyWorker) {
+      authBtn.classList.replace('d-flex', 'd-none');
+    } else {
+      authBtn.textContent = viewLabel;
+      authBtn.onclick = switchView;
     }
-    authBtn.textContent = t(editorMode ? 'navigation.publicView' : 'navigation.editRecipes');
-    authBtn.onclick = switchView;
     createBtn?.setAttribute('aria-label', t('recipes.createRecipe'));
     createBtn?.style.setProperty('display', editorMode ? 'inline-flex' : 'none', 'important');
     return;
