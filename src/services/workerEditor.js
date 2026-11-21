@@ -1,5 +1,6 @@
-export const workerHosted = typeof document !== 'undefined' &&
-  document.querySelector('meta[name="kuchtik-host"]')?.content === 'worker';
+const hostMode = typeof document !== 'undefined' ? document.querySelector('meta[name="kuchtik-host"]')?.content : null;
+export const readOnlyWorker = hostMode === 'readonly-worker';
+export const workerHosted = hostMode === 'worker' || readOnlyWorker;
 export const editorMode = workerHosted && location.pathname === '/sprava/';
 
 export function switchView() {
