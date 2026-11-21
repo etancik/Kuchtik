@@ -341,6 +341,11 @@ export function searchRecipes(recipes, query, minScore = 0.1) {
   });
 }
 
+export function escapeHtml(value) {
+  const entities = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+  return String(value ?? '').replace(/[&<>"']/g, character => entities[character]);
+}
+
 /**
  * Apply highlighting to text based on match positions
  * @param {string} text - Original text
@@ -349,7 +354,7 @@ export function searchRecipes(recipes, query, minScore = 0.1) {
  */
 export function highlightText(text, matches) {
   if (!text || !matches || matches.length === 0) {
-    return text || '';
+    return escapeHtml(text);
   }
   
   // Sort matches by start position
@@ -365,15 +370,15 @@ export function highlightText(text, matches) {
     // Only create highlight tags if there's actual non-empty content
     if (matchText && matchText.trim().length > 0) {
       // Add text before match
-      result += text.substring(lastIndex, match.start);
+      result += escapeHtml(text.substring(lastIndex, match.start));
       // Add highlighted match
-      result += `<mark class="search-highlight">${matchText}</mark>`;
+      result += `<mark class="search-highlight">${escapeHtml(matchText)}</mark>`;
       lastIndex = match.end;
     }
   });
   
   // Add remaining text after last match
-  result += text.substring(lastIndex);
+  result += escapeHtml(text.substring(lastIndex));
   
   return result;
 }

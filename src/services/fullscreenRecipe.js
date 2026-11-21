@@ -3,7 +3,7 @@
  */
 
 import { t } from '../i18n/i18n.js';
-import { generateFilenameFromRecipeName } from '../utils/recipeUtils.js';
+import { escapeHtml, generateFilenameFromRecipeName } from '../utils/recipeUtils.js';
 import { templateLoader } from '../utils/templateLoader.js';
 import { githubAuth } from './githubAuth.js';
 
@@ -93,19 +93,19 @@ async function createFullscreenModalHTML(recipe) {
   const recipeTags = recipe.tags || [];
   const recipeIngredients = recipe.ingredients || [];
   const recipeSteps = recipe.instructions || [];
-  const recipeNotes = recipe.notes || [];
+  const recipeNotes = typeof recipe.notes === 'string' ? [recipe.notes] : recipe.notes ?? [];
   const servings = recipe.servings || '';
   const cookingTime = recipe.cookingTime || '';
 
   // Format ingredients
   const ingredients = recipeIngredients.map(ingredient => {
     const text = typeof ingredient === 'string' ? ingredient : ingredient.text || '';
-    return `<li class="mb-2">${text}</li>`;
+    return `<li class="mb-2">${escapeHtml(text)}</li>`;
   }).join('');
 
   // Format instructions (no manual numbering since we use <ol>)
   const instructions = recipeSteps.map((step) => {
-    return `<li class="mb-3">${step}</li>`;
+    return `<li class="mb-3">${escapeHtml(step)}</li>`;
   }).join('');
 
   // Format notes
@@ -114,7 +114,7 @@ async function createFullscreenModalHTML(recipe) {
         <h4 class="border-bottom pb-2 mb-3 fullscreen-section-header">
           <i class="fas fa-sticky-note me-2"></i>${t('recipes.notes')}
         </h4>
-        <ul class="mb-0">${recipeNotes.map(note => `<li>${note}</li>`).join('')}</ul>
+        <ul class="mb-0">${recipeNotes.map(note => `<li>${escapeHtml(note)}</li>`).join('')}</ul>
        </div>`
     : '';
 
@@ -123,7 +123,7 @@ async function createFullscreenModalHTML(recipe) {
     ? `<div class="mb-3">
         <small class="text-muted">
           <i class="fas fa-tags me-1"></i>
-          ${recipeTags.map(tag => `<span class="badge bg-secondary me-1">${tag}</span>`).join('')}
+          ${recipeTags.map(tag => `<span class="badge bg-secondary me-1">${escapeHtml(tag)}</span>`).join('')}
         </small>
        </div>`
     : '';
@@ -131,13 +131,13 @@ async function createFullscreenModalHTML(recipe) {
   // Format servings and cooking time
   const servingsInfo = servings 
     ? `<div class="col-md-6 mb-2">
-        <strong><i class="fas fa-users me-2"></i>${t('recipes.servings')}:</strong> ${servings}
+        <strong><i class="fas fa-users me-2"></i>${t('recipes.servings')}:</strong> ${escapeHtml(servings)}
        </div>` 
     : '';
 
   const cookingTimeInfo = cookingTime 
     ? `<div class="col-md-6 mb-2">
-        <strong><i class="fas fa-clock me-2"></i>${t('recipes.cookingTime')}:</strong> ${cookingTime}
+        <strong><i class="fas fa-clock me-2"></i>${t('recipes.cookingTime')}:</strong> ${escapeHtml(cookingTime)}
        </div>` 
     : '';
 
@@ -160,7 +160,7 @@ async function createFullscreenModalHTML(recipe) {
     </div>` : '';
 
   const templateData = {
-    recipeName,
+    recipeName: escapeHtml(recipeName),
     exitFullscreenLabel: t('fullscreen.exitFullscreen'),
     ingredientsLabel: t('recipes.ingredients'),
     instructionsLabel: t('recipes.instructions'),
@@ -199,7 +199,7 @@ export async function showFullscreenRecipe(recipe, updateUrl = true) {
 
   // Update URL if requested
   if (updateUrl) {
-    const recipeId = recipe.id || generateFilenameFromRecipeName(recipe.name).replace('.json', '');
+    const recipeId = recipe.metadata?.id || recipe.id || generateFilenameFromRecipeName(recipe.name).replace('.json', '');
     updateUrlForFullscreen(recipeId);
   }
 
@@ -234,7 +234,7 @@ export async function showFullscreenRecipe(recipe, updateUrl = true) {
           const { recipeUI } = await import('../components/RecipeUI.js');
           const recipeId = recipe.metadata?.id || recipe.name;
           const recipeName = recipe.name;
-          recipeUI.showDeleteConfirmation(recipeId, recipeName);
+          recipeUI.showDeleteConfirmation(recipeId, recipeName, recipe.metadata?.sha);
         } catch (error) {
           console.error('Failed to load RecipeUI:', error);
         }

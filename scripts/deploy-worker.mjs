@@ -1,0 +1,17 @@
+import { spawnSync } from 'node:child_process';
+
+const mode = process.argv[2];
+const { WORKERS_CI, WORKERS_CI_BRANCH, WORKERS_CI_COMMIT_SHA, WORKERS_CI_BUILD_UUID } = process.env;
+const branch = { production: 'main', preview: 'kuchtik-preview' }[mode];
+if (!branch || WORKERS_CI !== '1' || WORKERS_CI_BRANCH !== branch ||
+    !/^[a-f0-9]{40}$/i.test(WORKERS_CI_COMMIT_SHA ?? '') ||
+    !/^[a-f0-9-]{36}$/i.test(WORKERS_CI_BUILD_UUID ?? '')) {
+  throw new Error('Deploy requires the corresponding Cloudflare Workers Builds branch and build context.');
+}
+
+const args = ['--yes', 'wrangler@4.151.2', 'deploy',
+  '--message', 'Git ' + WORKERS_CI_COMMIT_SHA + ' / Build ' + WORKERS_CI_BUILD_UUID];
+args.push('--env', mode === 'preview' ? 'preview' : '');
+const result = spawnSync('npx', args, { stdio: 'inherit' });
+if (result.error) throw result.error;
+process.exitCode = result.status ?? 1;

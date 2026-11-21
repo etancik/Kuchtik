@@ -10,7 +10,10 @@
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
     "format": "prettier --write src/",
-    "build": "echo 'No build step needed for now'",
+    "build": "node scripts/build-worker.mjs",
+    "test:worker": "node --test worker/*.test.js",
+    "deploy": "node scripts/deploy-worker.mjs production",
+    "preview": "node scripts/deploy-worker.mjs preview",
     "dev": "echo 'Open index.html in browser or use Live Server'"
   },
   "keywords": [

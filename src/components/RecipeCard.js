@@ -4,7 +4,7 @@
  */
 
 import { t } from '../i18n/i18n.js';
-import { highlightText } from '../utils/recipeUtils.js';
+import { escapeHtml, highlightText } from '../utils/recipeUtils.js';
 
 /**
  * Simple recipe validation for English format
@@ -73,7 +73,7 @@ export function createRecipeCard(recipe, options = {}) {
     subtitleParts.length > 0 ? subtitleParts.join(' • ') : '';
 
   // Handle fields safely with highlighting
-  const tags = highlightedTags || recipeTags.join(', ');
+  const tags = highlightedTags;
 
   div.innerHTML = `
     <div class="card recipe-card position-relative">
@@ -82,17 +82,17 @@ export function createRecipeCard(recipe, options = {}) {
         <div class="recipe-header">
           <div class="d-flex align-items-center">
             <div class="checkbox-container">
-              <input type="checkbox" class="selectRecipe" id="checkbox-${recipeId}">
+              <input type="checkbox" class="selectRecipe" id="checkbox-${escapeHtml(recipeId)}">
             </div>
             <div class="flex-grow-1 recipe-title-area">
               <h6 class="mb-1 recipe-title">${highlightedName}</h6>
               <div class="text-muted small recipe-subtitle">
                 ${tags ? `${t('recipes.tags')}: ${tags}` : ''}
-                ${tags && subtitleText ? ' • ' : ''}${subtitleText}
+                ${tags && subtitleText ? ' • ' : ''}${escapeHtml(subtitleText)}
               </div>
             </div>
             <div class="fullscreen-toggle fullscreen-recipe-btn" 
-                 data-recipe='${JSON.stringify(recipe).replace(/'/g, '&apos;')}' 
+                 data-recipe='${escapeHtml(JSON.stringify(recipe))}'
                  title="${t('recipes.fullscreenRecipe')}"
                  role="button">
               <i class="fas fa-expand"></i>
