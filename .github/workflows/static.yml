@@ -38,7 +38,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
           cache: 'npm'
       
       - name: Install dependencies
@@ -50,6 +50,9 @@ jobs:
       - name: Run tests
         run: npm test
       
+      - name: Test Worker and MCP
+        run: npm run test:worker
+
       - name: Run tests with coverage
         run: npm run test:coverage
 
@@ -69,8 +72,15 @@ jobs:
         uses: actions/configure-pages@v5
       
       - name: Prepare deployment files
+        env:
+          KUCHTIK_PAGES_REDIRECT: ${{ vars.KUCHTIK_PAGES_REDIRECT }}
         run: |
           mkdir -p deploy
+          if [ "$KUCHTIK_PAGES_REDIRECT" = "1" ]; then
+            cp scripts/pages-redirect.html deploy/index.html
+            cp scripts/pages-redirect.html deploy/404.html
+            exit 0
+          fi
           cp index.html deploy/
           cp style.css deploy/
           cp favicon.svg deploy/

@@ -3,13 +3,14 @@
  * Handles authentication using GitHub Personal Access Tokens
  */
 
+import { workerHosted, editorMode } from './workerEditor.js';
 import { CONFIG } from '../config/github.js';
 import { templateLoader } from '../utils/templateLoader.js';
 
 class GitHubAuthService {
   constructor() {
-    this.accessToken = localStorage.getItem('github_access_token');
-    this.userInfo = JSON.parse(localStorage.getItem('github_user_info') || 'null');
+    this.accessToken = workerHosted ? null : localStorage.getItem('github_access_token');
+    this.userInfo = workerHosted ? null : JSON.parse(localStorage.getItem('github_user_info') || 'null');
   }
 
   /**
@@ -17,7 +18,7 @@ class GitHubAuthService {
    * @returns {boolean} Authentication status
    */
   isAuthenticated() {
-    return !!this.accessToken;
+    return workerHosted ? editorMode : !!this.accessToken;
   }
 
   /**

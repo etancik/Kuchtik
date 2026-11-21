@@ -140,6 +140,23 @@ repo.on('recipesUpdated', (recipes) => {
 **Dependencies:** Jest, ESLint, Prettier (dev only)
 **Deployment:** Static files, no build process required
 
+## Cloudflare nasazení
+
+Kuchtík má veřejný přehled a editor na `/sprava/`. Editor ukládá přes Worker a GitHub App.
+MCP používá vlastní hostname a zpřístupňuje nástroje pro hledání, načtení a úpravu receptu.
+Úprava posílá revizi z načteného receptu a vrací SHA commitu. Při konfliktu načti recept znovu.
+
+| Prostředí | Větev buildu | Web | MCP | Větev receptů |
+| --- | --- | --- | --- | --- |
+| Pracovní preview | Pracovní větev | URL z Workers Builds | — | Veřejné recepty pouze pro čtení |
+| Integrační preview | `kuchtik-preview` | URL z Workers Builds | `/mcp` na adrese integračního preview | `kuchtik-preview-recipes` |
+| Produkce | `main` | `kuchtik.tancer.cz` | `mcp-kuchtik.tancer.cz/mcp` | `main` |
+
+1. V Cloudflare ověř živý stav hostname a Access. Na Workeru nastav Access v režimu Previews only, v produkci chraň `/sprava` a všechny jeho podcesty. Pro MCP nastav Managed OAuth a ověř očekávané audience. Povol jen potřebné OAuth redirect URI pro ChatGPT a Claude Code. Custom Domains připoj až po ověření politik. Pracovní preview používají společný Access issuer a audience. Přihlašovací údaje GitHub App, `MCP_WRITER_EMAIL`, MCP audience a `PREVIEW_INTEGRATION_HOST` nastav pouze v pojmenovaném integračním preview. Hostname opiš z jeho stabilní URL.
+2. GitHub App nainstaluj jen do `etancik/Kuchtik` s Contents Read and write. Worker potřebuje `GITHUB_APP_ID`, `GITHUB_INSTALLATION_ID` a secret `GITHUB_APP_PRIVATE_KEY`. Dále nastav `ACCESS_ISSUER`, `ACCESS_WEB_AUD`, `ACCESS_MCP_AUD` a `MCP_WRITER_EMAIL`. Nastavení a klíč patří do Cloudflare. Preview používá pevně danou testovací větev, kterou založ z `main`.
+3. Pro Workers Builds nastav root repozitáře a `npm run build`, pro preview `npm run preview`, pro produkci `npm run deploy`. Po úspěšném nasazení pošli uživateli stabilní Preview URL z Workers Builds nebo z komentáře v PR a uveď větev. U odkazu ověř Access; při chybě buildu uveď výsledek a odkaz na build. Lokální kontrola probíhá přes `npm run lint`, `npm run test:worker` a `npm run build`. Dále ověř GitHub Pages CI a chráněné preview.
+4. Na preview ověř přihlášení a obnovu relace v obou MCP klientech, zápis oprávněného účtu, odmítnutí jiného účtu a konflikt verzí. Ověř také webový editor, odkaz `?recipe=…` a iOS Zkratky. Po ověření produkční adresy přidej kartu rozcestníku. Proměnná `KUCHTIK_PAGES_REDIRECT=1` v GitHub Actions zapne po ručním spuštění workflow přesměrování staré Pages adresy včetně query a fragmentu.
+
 ## License
 
 This project is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License - see the [LICENSE](LICENSE) file for details.
