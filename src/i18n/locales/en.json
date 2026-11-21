@@ -15,7 +15,6 @@
     "optional": "Optional"
   },
   "navigation": {
-    "editRecipes": "Edit recipes",
     "signIn": "Sign In",
     "signOut": "Sign Out",
     "user": "User"

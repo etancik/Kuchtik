@@ -1,15 +1,47 @@
 const hostMode = typeof document !== 'undefined' ? document.querySelector('meta[name="kuchtik-host"]')?.content : null;
 export const readOnlyWorker = hostMode === 'readonly-worker';
 export const workerHosted = hostMode === 'worker' || readOnlyWorker;
-export const editorMode = workerHosted && location.pathname === '/admin/';
+export let editorMode = false;
 
-export function switchView() {
+export async function initializeWorkerSession() {
+  if (!workerHosted || readOnlyWorker) return null;
+
+  const account = document.getElementById('editorAccount');
+  if (!account.hidden) {
+    editorMode = true;
+    return true;
+  }
+
+  try {
+    const response = await fetch('/admin/api/session', {
+      redirect: 'manual',
+      signal: AbortSignal.timeout(5000),
+    });
+    if (response.type === 'opaqueredirect' || response.status === 401 || response.status === 403) {
+      return false;
+    }
+    if (!response.ok) return null;
+
+    const { authenticated, displayName } = await response.json();
+    if (authenticated !== true) return null;
+
+    document.getElementById('editorAccountName').textContent = displayName;
+    account.hidden = false;
+    editorMode = true;
+    return true;
+  } catch {
+    // The public catalog remains usable when the session check is unavailable.
+    return null;
+  }
+}
+
+export function signInToWorker() {
   const url = new window.URL(location.href);
-  url.pathname = editorMode ? '/' : '/admin/';
+  url.pathname = '/admin/';
   location.assign(url);
 }
 
-export async function editorRequest(path, options) {
+async function editorRequest(path, options) {
   const response = await fetch('/admin/api/' + path, {
     redirect: 'error',
     ...options,
