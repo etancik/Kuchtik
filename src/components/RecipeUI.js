@@ -1333,6 +1333,3 @@ class RecipeUI {
 
 // Create and export singleton instance (will be initialized with repository from main.js)
 export const recipeUI = new RecipeUI();
-
-// Export the class for testing
-export { RecipeUI };
