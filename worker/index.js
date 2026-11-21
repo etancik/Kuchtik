@@ -42,13 +42,18 @@ function editorAssets(request, env, pathname) {
   return env.ASSETS.fetch(new Request(url, request));
 }
 
-async function assets(request, env, pathname, isPrivate) {
+async function assets(request, env, pathname, isPrivate, readOnly) {
   const response = await editorAssets(request, env, pathname);
   const headers = new Headers(response.headers);
   headers.set('Content-Security-Policy', "script-src 'self' https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js; form-action 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'");
   headers.set('X-Content-Type-Options', 'nosniff');
   if (isPrivate) headers.set('Cache-Control', 'private, no-store');
-  return new Response(response.body, { status: response.status, headers });
+  const result = new Response(response.body, { status: response.status, headers });
+  return readOnly && pathname === '/' && response.ok
+    ? new HTMLRewriter().on('meta[name="kuchtik-host"]', {
+      element: element => element.setAttribute('content', 'readonly-worker'),
+    }).transform(result)
+    : result;
 }
 
 async function handleMcp(request, env, url) {
@@ -92,20 +97,24 @@ export default {
   async fetch(request, env) {
     try {
       const url = new URL(request.url);
-      if (env.MCP_HOST && url.hostname === env.MCP_HOST) return await handleMcp(request, env, url);
-      if (!env.WEB_HOST || url.hostname !== env.WEB_HOST) throw new HttpError(404, 'Not found.');
+      const preview = env.PREVIEW === '1';
+      const integrationPreview = preview && url.hostname === env.PREVIEW_INTEGRATION_HOST && !!env.GITHUB_APP_PRIVATE_KEY;
+      if (preview ? integrationPreview && url.pathname === '/mcp' : env.PREVIEW === '0' && url.hostname === env.MCP_HOST) {
+        return await handleMcp(request, env, url);
+      }
+      if (!preview && (env.PREVIEW !== '0' || url.hostname !== env.WEB_HOST)) throw new HttpError(404, 'Not found.');
 
       const editor = url.pathname === '/sprava' || url.pathname.startsWith(prefix);
-      const preview = env.PREVIEW === '1';
       let identity;
       if (editor || preview) {
         identity = await accessIdentity(request, env, env.ACCESS_WEB_AUD);
         if (!identity) throw new HttpError(401, 'Cloudflare Access authentication required.');
       }
+      if (preview && editor && !integrationPreview) throw new HttpError(404, 'Not found.');
       if (url.pathname === '/sprava') return Response.redirect(new URL(prefix + url.search, url), 308);
       if (url.pathname.startsWith(prefix + 'api/')) return await handleEditorApi(request, env, url, identity);
       const pathname = editor ? '/' + url.pathname.slice(prefix.length) : url.pathname;
-      return await assets(request, env, pathname, editor || preview);
+      return await assets(request, env, pathname, editor || preview, preview && !integrationPreview);
     } catch (error) {
       return error instanceof HttpError ? json({ error: error.message }, error.status)
         : json({ error: 'Kuchtik could not complete the request.' }, 502);

@@ -1,0 +1,1 @@
+- Po úspěšném nasazení preview sdílej s uživatelem větev a stabilní Preview URL z Cloudflare Builds nebo komentáře v PR. Ověř výsledek buildu a ochranu Access.
