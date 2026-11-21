@@ -6,7 +6,7 @@ import RecipeRepository from './repositories/RecipeRepository.js';
 import { renderRecipeCard } from './components/RecipeCard.js';
 import { getSelectedRecipeNames, collectIngredientsGroupedByRecipe, searchRecipesWithHighlighting, generateFilenameFromRecipeName } from './utils/recipeUtils.js';
 import { recipeUI } from './components/RecipeUI.js';
-import { workerHosted, readOnlyWorker, editorMode, switchView, editorRequest, workerRecipeAdapter, publicWorkerRecipeAdapter } from './services/workerEditor.js';
+import { workerHosted, readOnlyWorker, editorMode, switchView, workerRecipeAdapter, publicWorkerRecipeAdapter } from './services/workerEditor.js';
 import { githubAuth } from './services/githubAuth.js';
 import { ingredientsExportService } from './services/ingredientsExport.js';
 import { i18n, t } from './i18n/i18n.js';
@@ -104,16 +104,6 @@ async function initializeApp() {
     createButton.style.setProperty('display', 'none', 'important');
     console.log('🔧 DEBUG: Initially hiding create button with !important');
   }
-  const editorAccount = document.getElementById('editorAccount');
-  if (editorMode && editorAccount) {
-    editorRequest('session').then(({ displayName }) => {
-      if (displayName) {
-        editorAccount.textContent = displayName;
-        editorAccount.hidden = false;
-      }
-    }).catch(error => console.error('Unable to load editor account:', error));
-  }
-
   const exportBtn = document.getElementById('exportBtn');
   const searchInput = document.getElementById('searchInput');
   

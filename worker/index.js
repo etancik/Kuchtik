@@ -42,18 +42,32 @@ function editorAssets(request, env, pathname) {
   return env.ASSETS.fetch(new Request(url, request));
 }
 
-async function assets(request, env, pathname, isPrivate, readOnly) {
+function accountName(identity) {
+  return identity.name || identity.email.split('@')[0];
+}
+
+async function assets(request, env, pathname, identity, readOnly) {
   const response = await editorAssets(request, env, pathname);
   const headers = new Headers(response.headers);
   headers.set('Content-Security-Policy', "script-src 'self' https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js; form-action 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'");
   headers.set('X-Content-Type-Options', 'nosniff');
-  if (isPrivate) headers.set('Cache-Control', 'private, no-store');
+  if (identity) headers.set('Cache-Control', 'private, no-store');
   const result = new Response(response.body, { status: response.status, headers });
-  return readOnly && pathname === '/' && response.ok
-    ? new HTMLRewriter().on('meta[name="kuchtik-host"]', {
+  if (!identity || pathname !== '/' || !response.ok ||
+      !headers.get('Content-Type')?.startsWith('text/html')) return result;
+
+  const rewriter = new HTMLRewriter().on('#editorAccount', {
+    element: element => {
+      element.setInnerContent(accountName(identity));
+      element.removeAttribute('hidden');
+    },
+  });
+  if (readOnly) {
+    rewriter.on('meta[name="kuchtik-host"]', {
       element: element => element.setAttribute('content', 'readonly-worker'),
-    }).transform(result)
-    : result;
+    });
+  }
+  return rewriter.transform(result);
 }
 
 async function handleMcp(request, env, url) {
@@ -83,7 +97,7 @@ function publicRecipe({ metadata, ...recipe }) {
 
 async function handleEditorApi(request, env, url, identity) {
   if (url.pathname === prefix + 'api/session' && request.method === 'GET') {
-    return json({ authenticated: true, displayName: identity.name || identity.email.split('@')[0] });
+    return json({ authenticated: true, displayName: accountName(identity) });
   }
 
   const store = recipeStore(env);
@@ -132,7 +146,7 @@ export default {
         return json(filename ? publicRecipe(await store.get(filename)) : (await store.all()).map(publicRecipe));
       }
       const pathname = editor ? '/' + url.pathname.slice(prefix.length) : url.pathname;
-      return await assets(request, env, pathname, editor || preview, preview && !integrationPreview);
+      return await assets(request, env, pathname, identity, preview && !integrationPreview);
     } catch (error) {
       return error instanceof HttpError ? json({ error: error.message }, error.status)
         : json({ error: 'Kuchtik could not complete the request.' }, 502);
