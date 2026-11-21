@@ -1,13 +1,13 @@
 const hostMode = typeof document !== 'undefined' ? document.querySelector('meta[name="kuchtik-host"]')?.content : null;
 export const readOnlyWorker = hostMode === 'readonly-worker';
-export const workerHosted = hostMode === 'worker' || readOnlyWorker;
+const authenticatedWorker = hostMode === 'authenticated-worker';
+export const workerHosted = hostMode === 'worker' || authenticatedWorker || readOnlyWorker;
 export let editorMode = false;
 
 export async function initializeWorkerSession() {
   if (!workerHosted || readOnlyWorker) return null;
 
-  const account = document.getElementById('editorAccount');
-  if (!account.hidden) {
+  if (authenticatedWorker) {
     editorMode = true;
     return true;
   }
@@ -22,11 +22,9 @@ export async function initializeWorkerSession() {
     }
     if (!response.ok) return null;
 
-    const { authenticated, displayName } = await response.json();
+    const { authenticated } = await response.json();
     if (authenticated !== true) return null;
 
-    document.getElementById('editorAccountName').textContent = displayName;
-    account.hidden = false;
     editorMode = true;
     return true;
   } catch {

@@ -56,15 +56,11 @@ async function assets(request, env, pathname, identity, readOnly) {
   if (!identity || pathname !== '/' || !response.ok ||
       !headers.get('Content-Type')?.startsWith('text/html')) return result;
 
-  const rewriter = new HTMLRewriter()
-    .on('#editorAccount', { element: element => element.removeAttribute('hidden') })
-    .on('#editorAccountName', { element: element => element.setInnerContent(accountName(identity)) });
-  if (readOnly) {
-    rewriter.on('meta[name="kuchtik-host"]', {
-      element: element => element.setAttribute('content', 'readonly-worker'),
-    });
-  }
-  return rewriter.transform(result);
+  return new HTMLRewriter()
+    .on('meta[name="kuchtik-host"]', {
+      element: element => element.setAttribute('content', readOnly ? 'readonly-worker' : 'authenticated-worker'),
+    })
+    .transform(result);
 }
 
 async function handleMcp(request, env, url) {
