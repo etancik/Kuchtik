@@ -6,7 +6,7 @@ import RecipeRepository from './repositories/RecipeRepository.js';
 import { renderRecipeCard } from './components/RecipeCard.js';
 import { getSelectedRecipeNames, collectIngredientsGroupedByRecipe, searchRecipesWithHighlighting, generateFilenameFromRecipeName } from './utils/recipeUtils.js';
 import { recipeUI } from './components/RecipeUI.js';
-import { workerHosted, readOnlyWorker, editorMode, switchView, workerRecipeAdapter, publicWorkerRecipeAdapter } from './services/workerEditor.js';
+import { workerHosted, readOnlyWorker, editorMode, switchView, editorRequest, workerRecipeAdapter, publicWorkerRecipeAdapter } from './services/workerEditor.js';
 import { githubAuth } from './services/githubAuth.js';
 import { ingredientsExportService } from './services/ingredientsExport.js';
 import { i18n, t } from './i18n/i18n.js';
@@ -89,6 +89,14 @@ async function initializeApp() {
     
     // Update UI button states
     updateAuthStatus();
+    if (workerHosted && !readOnlyWorker && document.getElementById('editorAccount')?.hidden) {
+      editorRequest('session').then(({ authenticated, displayName }) => {
+        if (!authenticated || !displayName) return;
+        document.getElementById('editorAccountName').textContent = displayName;
+        document.getElementById('editorAccount').hidden = false;
+        updateAuthStatus();
+      }).catch(() => {}); // The public catalog is also available without an Access session.
+    }
     
     console.log('✅ RecipeRepository initialized');
   } catch (error) {
@@ -577,30 +585,28 @@ function updateAuthStatus() {
   if (!authBtn) return;
 
   if (workerHosted) {
-    const account = document.getElementById('editorAccount');
-    const viewLabel = t(editorMode ? 'navigation.publicView' : 'navigation.editRecipes');
-    if (account && !account.hidden) {
-      authBtn.classList.replace('d-flex', 'd-none');
-      if (readOnlyWorker) {
-        const accountButton = document.getElementById('editorAccountButton');
-        accountButton.classList.remove('dropdown-toggle');
-        accountButton.disabled = true;
-      } else {
-        const viewButton = document.getElementById('editorAccountView');
-        viewButton.textContent = viewLabel;
-        viewButton.onclick = switchView;
-      }
-    } else if (readOnlyWorker) {
-      authBtn.classList.replace('d-flex', 'd-none');
-    } else {
-      authBtn.textContent = viewLabel;
+    authBtn.classList.toggle('d-none', readOnlyWorker);
+    authBtn.classList.toggle('d-flex', !readOnlyWorker);
+    if (!readOnlyWorker) {
+      const signedIn = !document.getElementById('editorAccount').hidden;
+      const label = signedIn ? 'navigation.editRecipes' : 'navigation.signIn';
+      const labelElement = authBtn.querySelector('span');
+      labelElement.classList.remove('d-none', 'd-sm-inline');
+      labelElement.dataset.i18n = label;
+      labelElement.textContent = t(label);
+      const icon = authBtn.querySelector('i');
+      icon.classList.toggle('fa-sign-in-alt', !signedIn);
+      icon.classList.toggle('fa-pen', signedIn);
+      icon.setAttribute('aria-hidden', 'true');
+      if (signedIn) authBtn.setAttribute('aria-pressed', String(editorMode));
+      authBtn.classList.toggle('active', editorMode);
       authBtn.onclick = switchView;
     }
     createBtn?.setAttribute('aria-label', t('recipes.createRecipe'));
     createBtn?.style.setProperty('display', editorMode ? 'inline-flex' : 'none', 'important');
     return;
   }
-  
+
   if (githubAuth.isAuthenticated()) {
     const userInfo = githubAuth.getUserInfo();
     const userName = userInfo?.name || userInfo?.login || t('navigation.user');

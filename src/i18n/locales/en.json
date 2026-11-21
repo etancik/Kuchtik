@@ -16,7 +16,6 @@
   },
   "navigation": {
     "editRecipes": "Edit recipes",
-    "publicView": "Public view",
     "signIn": "Sign In",
     "signOut": "Sign Out",
     "user": "User"

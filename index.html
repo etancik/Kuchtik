@@ -32,18 +32,13 @@
           </ul>
         </div>
         
-        <div id="editorAccount" class="dropdown" hidden>
-          <button class="btn btn-outline-secondary btn-sm dropdown-toggle d-flex align-items-center" type="button" id="editorAccountButton" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="fas fa-user me-1" aria-hidden="true"></i><span id="editorAccountName"></span>
-          </button>
-          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="editorAccountButton">
-            <li><button class="dropdown-item" type="button" id="editorAccountView"></button></li>
-          </ul>
-        </div>
+        <span id="editorAccount" class="text-body-secondary" hidden>
+          <i class="fas fa-user me-1" aria-hidden="true"></i><span id="editorAccountName"></span>
+        </span>
 
         <!-- Auth and Create buttons -->
         <div class="btn-group" role="group">
-          <button id="authBtn" class="btn btn-outline-primary btn-sm d-flex align-items-center">
+          <button id="authBtn" type="button" class="btn btn-outline-primary btn-sm d-flex align-items-center">
             <i class="fas fa-sign-in-alt me-1"></i>
             <span class="d-none d-sm-inline" data-i18n="navigation.signIn">Sign In</span>
           </button>

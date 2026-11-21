@@ -32,7 +32,6 @@ button {
 
 /* Header buttons - larger size for better usability */
 #languageDropdown,
-#editorAccountButton,
 #authBtn,
 #createRecipeBtn {
   padding: var(--space-md) var(--space-lg) !important;
