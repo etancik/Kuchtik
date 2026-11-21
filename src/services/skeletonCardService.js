@@ -34,7 +34,7 @@ export class SkeletonCardService {
         <div class="card recipe-card position-relative">
           <div class="card-body p-0">
             <div class="recipe-header">
-              <div class="d-flex align-items-center p-3">
+              <div class="d-flex align-items-center">
                 <div class="checkbox-container">
                   <input type="checkbox" class="selectRecipe" disabled>
                 </div>

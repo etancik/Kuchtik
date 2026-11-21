@@ -16,14 +16,13 @@
   border-radius: var(--radius-md);
 }
 
-/* Recipe header layout - proper spacing between elements */
-.recipe-header .d-flex {
-  gap: var(--space-sm); /* Add consistent spacing between header elements */
-}
-
 /* Recipe selection checkbox styles */
 .checkbox-container {
   cursor: pointer;
+  position: relative;
+  z-index: 2;
+  align-self: stretch;
+  min-width: 4rem;
   padding: var(--space-md);
   border-radius: var(--radius-sm);
   transition: var(--transition-normal);
@@ -59,16 +58,12 @@
 }
 
 .recipe-title-area {
-  padding: var(--space-sm);
-  margin: calc(-1 * var(--space-sm));
-  min-height: var(--touch-target); /* Consistent touch target */
+  min-width: 0;
+  min-height: var(--touch-target);
+  padding: var(--space-md) var(--space-lg) var(--space-md) var(--space-sm);
   display: flex;
   flex-direction: column;
   justify-content: center;
-}
-
-.recipe-header:hover .checkbox-container {
-  background-color: rgba(13, 110, 253, 0.15);
 }
 
 .recipe-title {
@@ -87,6 +82,13 @@
   font: inherit;
   text-align: start;
   overflow-wrap: anywhere;
+}
+
+.recipe-title-button::after {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  content: "";
 }
 
 .recipe-title-button:hover,

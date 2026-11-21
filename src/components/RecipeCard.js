@@ -77,15 +77,16 @@ export function createRecipeCard(recipe, options = {}) {
 
   div.innerHTML = `
     <div class="card recipe-card position-relative">
-      <div class="card-body p-3">
+      <div class="card-body p-0">
         <!-- Simple Recipe Header (no collapse) -->
         <div class="recipe-header">
           <div class="d-flex align-items-center">
-            <div class="checkbox-container">
-              <input type="checkbox" class="selectRecipe" id="checkbox-${escapeHtml(recipeId)}">
-            </div>
+            <label class="checkbox-container">
+              <input type="checkbox" class="selectRecipe" id="checkbox-${escapeHtml(recipeId)}"
+                     aria-labelledby="recipe-title-${escapeHtml(recipeId)}">
+            </label>
             <div class="flex-grow-1 recipe-title-area">
-              <h6 class="mb-1 recipe-title">
+              <h6 class="mb-1 recipe-title" id="recipe-title-${escapeHtml(recipeId)}">
                 <button type="button" class="recipe-title-button">${highlightedName}</button>
               </h6>
               <div class="text-muted small recipe-subtitle">
@@ -99,23 +100,6 @@ export function createRecipeCard(recipe, options = {}) {
     </div>
   `;
 
-  // Add event listeners for checkbox to prevent any unwanted interactions
-  // Add event listeners for checkbox functionality
-  const checkboxContainer = div.querySelector('.checkbox-container');
-  const checkbox = div.querySelector('.selectRecipe');
-  
-  // Handle container click - allow checkbox functionality
-  checkboxContainer.addEventListener('click', (event) => {
-    if (event.target !== checkbox) {
-      // If clicking on container (not checkbox itself), toggle checkbox
-      checkbox.checked = !checkbox.checked;
-      // Dispatch a proper change event that will bubble up for export functionality
-      const changeEvent = document.createEvent('Event');
-      changeEvent.initEvent('change', true, true);
-      checkbox.dispatchEvent(changeEvent);
-    }
-  });
-  
   div.querySelector('.recipe-title-button').addEventListener('click', async () => {
     try {
       const { showFullscreenRecipe } = await import('../services/fullscreenRecipe.js');
