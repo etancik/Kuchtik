@@ -1,1 +1,2 @@
 - Po úspěšném nasazení preview sdílej s uživatelem větev a stabilní Preview URL z Cloudflare Builds nebo komentáře v PR. Ověř výsledek buildu a ochranu Access.
+- Při ověření preview zkontroluj anonymní přihlášení Cloudflare Access a načtení receptů po přihlášení.
