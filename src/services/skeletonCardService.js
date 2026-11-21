@@ -42,12 +42,6 @@ export class SkeletonCardService {
                   <div class="skeleton skeleton-title"></div>
                   <div class="skeleton skeleton-subtitle"></div>
                 </div>
-                <div class="expand-toggle" role="button">
-                  <i class="fas fa-chevron-down expand-icon"></i>
-                </div>
-                <div class="fullscreen-toggle" role="button" title="View recipe in fullscreen">
-                  <i class="fas fa-expand"></i>
-                </div>
               </div>
             </div>
           </div>
