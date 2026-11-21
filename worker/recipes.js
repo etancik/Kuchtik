@@ -118,6 +118,7 @@ function throwGitHubError(response, mutation = false) {
 }
 
 export function recipeStore(env) {
+  if (!['0', '1'].includes(env.PREVIEW)) throw new HttpError(503, 'Recipe environment is not configured.');
   const branch = env.PREVIEW === '1' ? 'kuchtik-preview-recipes' : 'main';
   const ref = '?ref=' + branch;
 

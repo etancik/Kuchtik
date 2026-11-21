@@ -4,8 +4,9 @@ import { createPrivateKey, createSign, generateKeyPairSync, createVerify } from 
 import worker from './index.js';
 import { mcpReply } from './mcp.js';
 
-const web = 'https://kuchtik-preview.tancer.cz';
-const mcp = 'https://mcp-kuchtik-preview.tancer.cz';
+const web = 'https://kuchtik-preview-tancer-kuchtik.etancik.workers.dev';
+const mcp = web;
+const branchWeb = 'https://feature-tancer-kuchtik.etancik.workers.dev';
 const issuer = 'https://test.cloudflareaccess.com';
 const writer = 'editor@example.test';
 const revision = 'a'.repeat(40);
@@ -36,7 +37,7 @@ function request(url, { audience, method = 'GET', origin, body, claims } = {}) {
 
 const env = {
   WEB_HOST: new URL(web).hostname,
-  MCP_HOST: new URL(mcp).hostname,
+  PREVIEW_INTEGRATION_HOST: new URL(web).hostname,
   PREVIEW: '1',
   ACCESS_ISSUER: issuer,
   ACCESS_WEB_AUD: 'web',
@@ -88,6 +89,10 @@ test('Worker isolates Access audiences and writes preview edits with the read re
 
   assert.equal((await worker.fetch(request(web), env)).status, 401);
   assert.equal((await worker.fetch(request(web + '/sprava/', { audience: 'mcp' }), env)).status, 401);
+  const branchEnv = { ...env, GITHUB_APP_PRIVATE_KEY: undefined, PREVIEW_INTEGRATION_HOST: undefined };
+  assert.equal((await worker.fetch(request(branchWeb + '/style.css', { audience: 'web' }), branchEnv)).status, 200);
+  assert.equal((await worker.fetch(request(branchWeb + '/sprava/', { audience: 'web' }), branchEnv)).status, 404);
+  assert.equal((await worker.fetch(request(branchWeb + '/mcp', { audience: 'mcp' }), branchEnv)).status, 401);
   const html = await worker.fetch(request(web + '/sprava/', { audience: 'web' }), env);
   assert.equal(await html.text(), '/index.html');
   assert.equal(html.headers.get('Cache-Control'), 'private, no-store');
@@ -125,7 +130,7 @@ test('Worker isolates Access audiences and writes preview edits with the read re
   assert.equal(calls.filter(call => call.method === 'PUT').length, 2);
 
   const foreignOrigin = await worker.fetch(request(web + '/sprava/api/recipes/rizky.json', {
-    audience: 'web', method: 'PUT', origin: mcp, body: { recipe, revision },
+    audience: 'web', method: 'PUT', origin: branchWeb, body: { recipe, revision },
   }), env);
   assert.equal(foreignOrigin.status, 403);
   assert.equal(calls.filter(call => call.method === 'PUT').length, 2);
