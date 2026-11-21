@@ -1,5 +1,5 @@
 const hostMode = typeof document !== 'undefined' ? document.querySelector('meta[name="kuchtik-host"]')?.content : null;
-export const readOnlyWorker = hostMode === 'readonly-worker';
+const readOnlyWorker = hostMode === 'readonly-worker';
 const authenticatedWorker = hostMode === 'authenticated-worker';
 export const workerHosted = hostMode === 'worker' || authenticatedWorker || readOnlyWorker;
 export let editorMode = false;

@@ -5,13 +5,9 @@ on:
   # Runs on pushes targeting the default branch
   push:
     branches: ["main"]
-    paths-ignore:
-      - 'recipes/**'
   # Runs on pull requests
   pull_request:
     branches: ["main"]
-    paths-ignore:
-      - 'recipes/**'
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -47,6 +43,9 @@ jobs:
       - name: Run linting
         run: npm run lint
       
+      - name: Check unused code and dependencies
+        run: npm run knip
+
       - name: Run tests
         run: npm test
       
@@ -71,22 +70,12 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
       
-      - name: Prepare deployment files
-        env:
-          KUCHTIK_PAGES_REDIRECT: ${{ vars.KUCHTIK_PAGES_REDIRECT }}
+      - name: Prepare redirect pages
         run: |
           mkdir -p deploy
-          if [ "$KUCHTIK_PAGES_REDIRECT" = "1" ]; then
-            cp scripts/pages-redirect.html deploy/index.html
-            cp scripts/pages-redirect.html deploy/404.html
-            exit 0
-          fi
-          cp index.html deploy/
-          cp style.css deploy/
-          cp favicon.svg deploy/
-          cp -r src deploy/
-          cp -r recipes deploy/
-      
+          cp scripts/pages-redirect.html deploy/index.html
+          cp scripts/pages-redirect.html deploy/404.html
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

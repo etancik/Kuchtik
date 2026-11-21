@@ -30,7 +30,7 @@ function validateEnglishRecipe(recipe) {
  * @param {boolean} options.shouldExpand - Whether to expand the card initially
  * @returns {HTMLElement} Recipe card element
  */
-export function createRecipeCard(recipe, options = {}) {
+function createRecipeCard(recipe, options = {}) {
   // Validate English format
   if (!validateEnglishRecipe(recipe)) {
     console.error('Invalid recipe data - expected English format:', recipe);
@@ -127,14 +127,4 @@ export function renderRecipeCard(recipe, container, options = {}) {
   }
 
   return card;
-}
-
-/**
- * Clear all recipe cards from container
- * @param {HTMLElement} container - Container element to clear
- */
-export function clearRecipeCards(container) {
-  if (container) {
-    container.innerHTML = '';
-  }
 }

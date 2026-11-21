@@ -85,4 +85,3 @@ class TemplateLoader {
 
 // Export singleton instance
 export const templateLoader = new TemplateLoader();
-export default templateLoader;

@@ -5,7 +5,7 @@
 
 import { describe, test, expect, beforeAll, afterAll, beforeEach } from '@jest/globals';
 import RecipeRepository from '../repositories/RecipeRepository.js';
-import gitHubAPIAdapter from '../adapters/GitHubAPIAdapter.js';
+import { gitHubAPIAdapter } from '../adapters/GitHubAPIAdapter.js';
 
 describe('RecipeRepository Integration', () => {
   let repository;

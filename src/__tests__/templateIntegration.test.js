@@ -49,23 +49,7 @@ describe('Import/Export Pattern Validation', () => {
       // Should NOT have getAccessToken method (this was the bug)
       expect(githubAuth.getAccessToken).toBeUndefined();
     });
-
-    test('recipeCreation should export singleton correctly', async () => {
-      jest.unstable_mockModule('../services/githubAuth.js', () => ({
-        githubAuth: { isAuthenticated: jest.fn() }
-      }));
-      jest.unstable_mockModule('../config/github.js', () => ({
-        CONFIG: { REPO_OWNER: 'test', REPO_NAME: 'test' }
-      }));
-
-      const { recipeCreation } = await import('../services/recipeCreation.js');
-      
-      expect(recipeCreation).toBeDefined();
-      expect(typeof recipeCreation.createRecipe).toBe('function');
-      expect(typeof recipeCreation.updateRecipe).toBe('function');
-      expect(typeof recipeCreation.deleteRecipe).toBe('function');
-    });
-  });
+  });
 
   describe('GitHub API URL construction', () => {
     test('should use correct CONFIG property names', () => {

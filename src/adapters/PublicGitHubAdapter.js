@@ -5,7 +5,7 @@
 
 import { CONFIG } from '../config/github.js';
 
-export class PublicGitHubAdapter {
+class PublicGitHubAdapter {
   constructor() {
     this.baseRawUrl = `https://raw.githubusercontent.com/${CONFIG.REPO_OWNER}/${CONFIG.REPO_NAME}/main/recipes`;
     this.baseApiUrl = `https://api.github.com/repos/${CONFIG.REPO_OWNER}/${CONFIG.REPO_NAME}`;
@@ -144,4 +144,3 @@ export class PublicGitHubAdapter {
 }
 
 export const publicGitHubAdapter = new PublicGitHubAdapter();
-export default publicGitHubAdapter;

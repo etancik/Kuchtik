@@ -5,13 +5,13 @@ A recipe management web application with iOS Shortcuts integration, built with v
 ## Features
 
 - **Recipe Management**: Create, edit, and delete recipes with form validation
-- **GitHub Storage**: Recipes stored as JSON files in GitHub repository
+- **Storage**: Recipes stored in Cloudflare D1
 - **iOS Shortcuts Export**: Export selected recipe ingredients to iOS Shortcuts (can forward to Reminders)
 - **Search**: Filter recipes by name, tags, and ingredients with highlighting
 - **Internationalization**: Czech and English language support
 - **Drag & Drop**: Reorder recipe steps in the editor
 - **Caching**: 5-minute client-side caching for faster loading
-- **Authentication**: GitHub Personal Access Token authentication
+- **Authentication**: Cloudflare Access protects editing
 
 ## Architecture
 
@@ -22,10 +22,9 @@ Three-layer architecture:
    - Client-side caching (5 minute expiry)
    - Event emission for UI updates
 
-2. **GitHubAPIAdapter** (`src/adapters/GitHubAPIAdapter.js`)
-   - GitHub API communication
-   - Multiple loading strategies with fallbacks
-   - UTF-8 encoding handling
+2. **Cloudflare Worker** (`worker/index.js`)
+   - Public recipe catalog and protected editing API
+   - Persists recipes in D1
 
 3. **RecipeUI** (`src/components/RecipeUI.js`)
    - Form handling and validation
@@ -45,14 +44,13 @@ Three-layer architecture:
 │   ├── i18n/                     # Translation files
 │   ├── config/                   # Configuration
 │   └── __tests__/                # Test files
-├── recipes/                      # Recipe JSON files
 ├── index.html                    # Main HTML
 └── style.css                     # Styles
 
 ## Setup
 
 **Requirements:**
-- Node.js (v18+)
+- Node.js 22.12+
 - Modern browser with ES modules support
 
 **Install:**
@@ -61,24 +59,7 @@ npm install
 npm test  # Verify setup
 ```
 
-**Run:**
-```bash
-python3 -m http.server 8000
-# Open http://localhost:8000
-```
-
-## GitHub Authentication
-
-To create/edit recipes, authenticate with GitHub:
-
-1. **Create Personal Access Token:**
-   - Go to [GitHub Settings → Personal access tokens](https://github.com/settings/tokens/new)
-   - Generate new token (classic)
-   - Select scopes: `repo` and `user`
-
-2. **Configure:**
-   - Update `src/config/github.js` with your repository details
-   - Click "Sign In" in the app and paste your token
+**Preview:** Open the Access-protected URL from Cloudflare Workers Builds.
 
 ## Available Scripts
 
@@ -87,6 +68,7 @@ npm test              # Run tests
 npm run test:watch    # Watch mode
 npm run test:coverage # Coverage report
 npm run lint          # Check code style
+npm run knip          # Check for unused code and dependencies
 npm run lint:fix      # Fix style issues
 ```
 
@@ -137,8 +119,8 @@ repo.on('recipesUpdated', (recipes) => {
 ## Technical Details
 
 **Browser Support:** Modern browsers with ES2022 support
-**Dependencies:** Jest, ESLint, Prettier (dev only)
-**Deployment:** Static files, no build process required
+**Dependencies:** Jest, ESLint, Knip and Prettier for development
+**Deployment:** Cloudflare Workers with D1
 
 ## Cloudflare deployment
 
@@ -152,20 +134,20 @@ The Worker serves the public catalog and the Access-protected editor at `/admin/
 
 ### Import existing recipes
 
-Run these commands from the reviewed checkout containing the desired `recipes/*.json` snapshot. Seed the preview first. Before production cutover, seed production from the final Git snapshot and compare the source count with D1.
+Use an explicit directory with recipe JSON files when initializing an empty D1 database. The former Git snapshot is available in commit `d0cffd835f759067615dc353cb83d37808efaca2`.
 
 ```sh
-node scripts/seed-recipes.mjs recipes-seed.sql
+node scripts/seed-recipes.mjs /path/to/recipe-json recipes-seed.sql
 npx wrangler@4.151.2 d1 execute tancer-kuchtik-preview --remote --file migrations/0001_recipes.sql
 npx wrangler@4.151.2 d1 execute tancer-kuchtik-preview --remote --file recipes-seed.sql
 npx wrangler@4.151.2 d1 execute tancer-kuchtik-preview --remote --command "SELECT count(*) FROM recipes"
 ```
 
-For production use the same three Wrangler commands with `tancer-kuchtik-production`. Import is additive, so retrying it preserves existing rows. Run the import only during setup to avoid recreating a recipe deleted after cutover. Keep the generated SQL outside Git. Git JSONs remain the pre-cutover snapshot. D1 becomes the source after cutover.
+Import is additive, so retrying it preserves existing rows. Use the import only for initial setup to avoid recreating deleted recipes. Keep the generated SQL outside Git. D1 is the source for the live catalog.
 
 For Workers Builds use `npm run build`, `npm run preview` and `npm run deploy`. Keep the Worker Access mode set to Previews only and protect the production `/admin` path and its descendants. Only the configured `PREVIEW_INTEGRATION_HOST` permits preview writes. For MCP configure Managed OAuth, `ACCESS_MCP_AUD` and `MCP_WRITER_EMAIL` on the intended environment. Set `ACCESS_ISSUER` and `ACCESS_WEB_AUD` for the editor.
 
-Before cutover, check the public catalog, editor login, saving and a stale revision on preview. Verify MCP if its hostname is configured. After production serves D1, set `KUCHTIK_PAGES_REDIRECT=1` and run the GitHub Pages workflow to redirect the legacy URL, preserving query and fragment.
+The legacy GitHub Pages URL redirects to Kuchtík and preserves the query and fragment.
 
 ## License
 

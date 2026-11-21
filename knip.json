@@ -1,0 +1,12 @@
+{
+  "entry": [
+    "worker/index.js",
+    "worker/**/*.test.js",
+    "scripts/*.mjs"
+  ],
+  "project": [
+    "src/**/*.js",
+    "worker/**/*.js",
+    "scripts/*.mjs"
+  ]
+}

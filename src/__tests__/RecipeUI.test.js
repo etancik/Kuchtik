@@ -26,7 +26,7 @@ jest.unstable_mockModule('../repositories/RecipeRepository.js', () => ({
 }));
 
 jest.unstable_mockModule('../adapters/GitHubAPIAdapter.js', () => ({
-  default: {}
+  gitHubAPIAdapter: {}
 }));
 
 // Mock i18n system
@@ -65,7 +65,7 @@ global.document = {
 };
 
 // Import the singleton instance after mocking
-const recipeUI = (await import('../components/RecipeUI.js')).default;
+const { recipeUI } = await import('../components/RecipeUI.js');
 
 describe('RecipeUI Repository Integration Tests', () => {
   beforeEach(() => {
