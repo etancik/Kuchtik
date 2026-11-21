@@ -3,7 +3,7 @@ import { mcpReply, supportsProtocol } from './mcp.js';
 import { HttpError, recipeStore } from './recipes.js';
 
 const noCache = { 'Cache-Control': 'no-store' };
-const prefix = '/sprava/';
+const prefix = '/admin/';
 
 function json(value, status = 200) {
   return Response.json(value, { status, headers: noCache });
@@ -79,7 +79,7 @@ async function handleEditorApi(request, env, url, identity) {
   if (url.pathname === prefix + 'api/session' && request.method === 'GET') return json({ authenticated: true });
 
   const store = recipeStore(env);
-  const match = /^\/sprava\/api\/recipes(?:\/([a-z0-9-]+\.json))?$/.exec(url.pathname);
+  const match = /^\/admin\/api\/recipes(?:\/([a-z0-9-]+\.json))?$/.exec(url.pathname);
   if (!match) throw new HttpError(404, 'Not found.');
   const filename = match[1];
   if (request.method === 'GET') return json(filename ? await store.get(filename) : await store.list());
@@ -104,14 +104,14 @@ export default {
       }
       if (!preview && (env.PREVIEW !== '0' || url.hostname !== env.WEB_HOST)) throw new HttpError(404, 'Not found.');
 
-      const editor = url.pathname === '/sprava' || url.pathname.startsWith(prefix);
+      const editor = url.pathname === '/admin' || url.pathname.startsWith(prefix);
       let identity;
       if (editor || preview) {
         identity = await accessIdentity(request, env, env.ACCESS_WEB_AUD);
         if (!identity) throw new HttpError(401, 'Cloudflare Access authentication required.');
       }
       if (preview && editor && !integrationPreview) throw new HttpError(404, 'Not found.');
-      if (url.pathname === '/sprava') return Response.redirect(new URL(prefix + url.search, url), 308);
+      if (url.pathname === '/admin') return Response.redirect(new URL(prefix + url.search, url), 308);
       if (url.pathname.startsWith(prefix + 'api/')) return await handleEditorApi(request, env, url, identity);
       const pathname = editor ? '/' + url.pathname.slice(prefix.length) : url.pathname;
       return await assets(request, env, pathname, editor || preview, preview && !integrationPreview);
