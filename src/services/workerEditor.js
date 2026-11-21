@@ -15,7 +15,7 @@ export async function initializeWorkerSession() {
   try {
     const response = await fetch('/admin/api/session', {
       redirect: 'manual',
-      signal: AbortSignal.timeout(5000),
+      signal: window.AbortSignal?.timeout?.(5000),
     });
     if (response.type === 'opaqueredirect' || response.status === 401 || response.status === 403) {
       return false;
