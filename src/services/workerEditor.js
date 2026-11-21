@@ -9,7 +9,7 @@ export function switchView() {
   location.assign(url);
 }
 
-export async function editorRequest(path, options) {
+async function editorRequest(path, options) {
   const response = await fetch('/admin/api/' + path, {
     redirect: 'error',
     ...options,

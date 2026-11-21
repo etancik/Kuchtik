@@ -14,7 +14,7 @@ export class HttpError extends Error {
   }
 }
 
-export function isRecipeFilename(value) {
+function isRecipeFilename(value) {
   return typeof value === 'string' && /^[a-z0-9]+(?:-[a-z0-9]+)*\.json$/.test(value);
 }
 

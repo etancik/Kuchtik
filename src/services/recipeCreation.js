@@ -547,4 +547,3 @@ class RecipeCreationService {
 
 // Export singleton instance
 export const recipeCreation = new RecipeCreationService();
-export default recipeCreation;

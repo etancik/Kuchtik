@@ -719,4 +719,3 @@ class IngredientsExportService {
 
 // Export singleton instance
 export const ingredientsExportService = new IngredientsExportService();
-export default ingredientsExportService;

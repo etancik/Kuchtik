@@ -260,4 +260,3 @@ class GitHubAuthService {
 
 // Export singleton instance
 export const githubAuth = new GitHubAuthService();
-export default githubAuth;
