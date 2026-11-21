@@ -34,19 +34,13 @@ export class SkeletonCardService {
         <div class="card recipe-card position-relative">
           <div class="card-body p-0">
             <div class="recipe-header">
-              <div class="d-flex align-items-center p-3">
+              <div class="d-flex align-items-center">
                 <div class="checkbox-container">
                   <input type="checkbox" class="selectRecipe" disabled>
                 </div>
                 <div class="flex-grow-1 recipe-title-area">
                   <div class="skeleton skeleton-title"></div>
                   <div class="skeleton skeleton-subtitle"></div>
-                </div>
-                <div class="expand-toggle" role="button">
-                  <i class="fas fa-chevron-down expand-icon"></i>
-                </div>
-                <div class="fullscreen-toggle" role="button" title="View recipe in fullscreen">
-                  <i class="fas fa-expand"></i>
                 </div>
               </div>
             </div>

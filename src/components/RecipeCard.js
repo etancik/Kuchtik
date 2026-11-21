@@ -77,25 +77,22 @@ export function createRecipeCard(recipe, options = {}) {
 
   div.innerHTML = `
     <div class="card recipe-card position-relative">
-      <div class="card-body p-3">
+      <div class="card-body p-0">
         <!-- Simple Recipe Header (no collapse) -->
         <div class="recipe-header">
           <div class="d-flex align-items-center">
-            <div class="checkbox-container">
-              <input type="checkbox" class="selectRecipe" id="checkbox-${escapeHtml(recipeId)}">
-            </div>
+            <label class="checkbox-container">
+              <input type="checkbox" class="selectRecipe" id="checkbox-${escapeHtml(recipeId)}"
+                     aria-labelledby="recipe-title-${escapeHtml(recipeId)}">
+            </label>
             <div class="flex-grow-1 recipe-title-area">
-              <h6 class="mb-1 recipe-title">${highlightedName}</h6>
+              <h6 class="mb-1 recipe-title" id="recipe-title-${escapeHtml(recipeId)}">
+                <button type="button" class="recipe-title-button">${highlightedName}</button>
+              </h6>
               <div class="text-muted small recipe-subtitle">
                 ${tags ? `${t('recipes.tags')}: ${tags}` : ''}
                 ${tags && subtitleText ? ' • ' : ''}${escapeHtml(subtitleText)}
               </div>
-            </div>
-            <div class="fullscreen-toggle fullscreen-recipe-btn" 
-                 data-recipe='${escapeHtml(JSON.stringify(recipe))}'
-                 title="${t('recipes.fullscreenRecipe')}"
-                 role="button">
-              <i class="fas fa-expand"></i>
             </div>
           </div>
         </div>
@@ -103,41 +100,14 @@ export function createRecipeCard(recipe, options = {}) {
     </div>
   `;
 
-  // Add event listeners for checkbox to prevent any unwanted interactions
-  // Add event listeners for checkbox functionality
-  const checkboxContainer = div.querySelector('.checkbox-container');
-  const checkbox = div.querySelector('.selectRecipe');
-  
-  // Handle container click - allow checkbox functionality
-  checkboxContainer.addEventListener('click', (event) => {
-    if (event.target !== checkbox) {
-      // If clicking on container (not checkbox itself), toggle checkbox
-      checkbox.checked = !checkbox.checked;
-      // Dispatch a proper change event that will bubble up for export functionality
-      const changeEvent = document.createEvent('Event');
-      changeEvent.initEvent('change', true, true);
-      checkbox.dispatchEvent(changeEvent);
+  div.querySelector('.recipe-title-button').addEventListener('click', async () => {
+    try {
+      const { showFullscreenRecipe } = await import('../services/fullscreenRecipe.js');
+      await showFullscreenRecipe(recipe);
+    } catch (error) {
+      console.error('Failed to load fullscreen recipe:', error);
     }
   });
-  
-  // Handle checkbox click - allow normal checkbox behavior
-  checkbox.addEventListener('click', () => {
-    // Let the change event bubble naturally for export functionality
-  });  // Set up event listener for fullscreen button (always available)
-  const fullscreenBtn = div.querySelector('.fullscreen-recipe-btn');
-  if (fullscreenBtn) {
-    fullscreenBtn.addEventListener('click', (event) => {
-      event.stopPropagation(); // Prevent card collapse toggle
-      const recipeData = JSON.parse(fullscreenBtn.getAttribute('data-recipe'));
-      
-      // Import and use fullscreen functionality
-      import('../services/fullscreenRecipe.js').then(async ({ showFullscreenRecipe }) => {
-        await showFullscreenRecipe(recipeData);
-      }).catch(error => {
-        console.error('Failed to load fullscreen recipe:', error);
-      });
-    });
-  }
 
   return div;
 }

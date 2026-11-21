@@ -425,36 +425,6 @@
   font-weight: var(--font-weight-semibold);
 }
 
-/* Fullscreen toggle styling */
-.fullscreen-toggle {
-  cursor: pointer;
-  padding: var(--space-md);
-  border-radius: var(--radius-sm);
-  transition: var(--transition-normal);
-  color: var(--text-light);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  user-select: none;
-  min-height: var(--touch-target);
-  flex-shrink: 0; /* Prevent shrinking */
-}
-
-.fullscreen-toggle:hover {
-  background-color: rgba(25, 135, 84, 0.1);
-  color: var(--color-success);
-}
-
-.fullscreen-toggle i {
-  font-size: var(--font-size-md);
-}
-
-.fullscreen-recipe-btn {
-  min-width: 40px !important;
-  max-width: 60px !important;
-  width: auto !important;
-}
-
 /* Keep screen on toggle with state-based icons */
 #keepScreenOnToggle:checked {
   background-color: var(--color-success-light);
