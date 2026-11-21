@@ -117,6 +117,13 @@ test('Worker shares D1 recipes across public, editor and MCP routes and rejects 
   assert.equal((await worker.fetch(request(live + '/api/recipes', { method: 'POST' }), production)).status, 405);
   assert.equal((await worker.fetch(request(live + '/admin/api/catalog'), production)).status, 401);
 
+  const sessionUrl = web + '/admin/api/session';
+  assert.equal((await worker.fetch(request(sessionUrl, { audience: 'mcp' }), env)).status, 401);
+  const session = await worker.fetch(request(sessionUrl, { audience: 'web', claims: { name: 'Test Editor' } }), env);
+  assert.deepEqual(await session.json(), { authenticated: true, displayName: 'Test Editor' });
+  const fallbackSession = await worker.fetch(request(sessionUrl, { audience: 'web' }), env);
+  assert.deepEqual(await fallbackSession.json(), { authenticated: true, displayName: 'editor' });
+
   const editorCatalog = await worker.fetch(request(web + '/admin/api/catalog', { audience: 'web' }), env);
   assert.equal((await editorCatalog.json())[0].metadata.sha, saved.revision);
   const editorEdit = (revision, origin = web) => worker.fetch(request(web + '/admin/api/recipes/rizky.json', {

@@ -82,7 +82,9 @@ function publicRecipe({ metadata, ...recipe }) {
 }
 
 async function handleEditorApi(request, env, url, identity) {
-  if (url.pathname === prefix + 'api/session' && request.method === 'GET') return json({ authenticated: true });
+  if (url.pathname === prefix + 'api/session' && request.method === 'GET') {
+    return json({ authenticated: true, displayName: identity.name || identity.email.split('@')[0] });
+  }
 
   const store = recipeStore(env);
   if (url.pathname === prefix + 'api/catalog' && request.method === 'GET') return json(await store.all());
