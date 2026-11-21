@@ -32,6 +32,7 @@ button {
 
 /* Header buttons - larger size for better usability */
 #languageDropdown,
+#editorAccountButton,
 #authBtn,
 #createRecipeBtn {
   padding: var(--space-md) var(--space-lg) !important;
@@ -39,17 +40,7 @@ button {
   min-height: var(--touch-target) !important;
   height: auto !important;
   line-height: 1.5 !important;
-}
-
-/* Override btn-sm for header buttons specifically */
-#languageDropdown.btn-sm,
-#authBtn.btn-sm,
-#createRecipeBtn.btn-sm {
-  padding: var(--space-md) var(--space-lg) !important;
-  font-size: var(--font-size-md) !important;
-  min-height: var(--touch-target) !important;
-  height: auto !important;
-  line-height: 1.5 !important;
+  border-radius: var(--radius-md);
 }
 
 /* Language flag styling - make it larger */
