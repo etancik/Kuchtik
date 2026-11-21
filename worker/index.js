@@ -42,18 +42,25 @@ function editorAssets(request, env, pathname) {
   return env.ASSETS.fetch(new Request(url, request));
 }
 
-async function assets(request, env, pathname, isPrivate, readOnly) {
+function accountName(identity) {
+  return identity.name || identity.email.split('@')[0];
+}
+
+async function assets(request, env, pathname, identity, readOnly) {
   const response = await editorAssets(request, env, pathname);
   const headers = new Headers(response.headers);
   headers.set('Content-Security-Policy', "script-src 'self' https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js; form-action 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'");
   headers.set('X-Content-Type-Options', 'nosniff');
-  if (isPrivate) headers.set('Cache-Control', 'private, no-store');
+  if (identity) headers.set('Cache-Control', 'private, no-store');
   const result = new Response(response.body, { status: response.status, headers });
-  return readOnly && pathname === '/' && response.ok
-    ? new HTMLRewriter().on('meta[name="kuchtik-host"]', {
-      element: element => element.setAttribute('content', 'readonly-worker'),
-    }).transform(result)
-    : result;
+  if (!identity || pathname !== '/' || !response.ok ||
+      !headers.get('Content-Type')?.startsWith('text/html')) return result;
+
+  return new HTMLRewriter()
+    .on('meta[name="kuchtik-host"]', {
+      element: element => element.setAttribute('content', readOnly ? 'readonly-worker' : 'authenticated-worker'),
+    })
+    .transform(result);
 }
 
 async function handleMcp(request, env, url) {
@@ -75,10 +82,19 @@ async function handleMcp(request, env, url) {
   return result ? json(result) : new Response(null, { status: 202, headers: noCache });
 }
 
+function publicRecipe({ metadata, ...recipe }) {
+  const publicMetadata = { ...metadata };
+  delete publicMetadata.sha;
+  return { ...recipe, metadata: publicMetadata };
+}
+
 async function handleEditorApi(request, env, url, identity) {
-  if (url.pathname === prefix + 'api/session' && request.method === 'GET') return json({ authenticated: true });
+  if (url.pathname === prefix + 'api/session' && request.method === 'GET') {
+    return json({ authenticated: true, displayName: accountName(identity) });
+  }
 
   const store = recipeStore(env);
+  if (url.pathname === prefix + 'api/catalog' && request.method === 'GET') return json(await store.all());
   const match = /^\/admin\/api\/recipes(?:\/([a-z0-9-]+\.json))?$/.exec(url.pathname);
   if (!match) throw new HttpError(404, 'Not found.');
   const filename = match[1];
@@ -98,7 +114,7 @@ export default {
     try {
       const url = new URL(request.url);
       const preview = env.PREVIEW === '1';
-      const integrationPreview = preview && url.hostname === env.PREVIEW_INTEGRATION_HOST && !!env.GITHUB_APP_PRIVATE_KEY;
+      const integrationPreview = preview && url.hostname === env.PREVIEW_INTEGRATION_HOST && !!env.RECIPES_DB;
       if (preview ? integrationPreview && url.pathname === '/mcp' : env.PREVIEW === '0' && url.hostname === env.MCP_HOST) {
         return await handleMcp(request, env, url);
       }
@@ -113,8 +129,17 @@ export default {
       if (preview && editor && !integrationPreview) throw new HttpError(404, 'Not found.');
       if (url.pathname === '/admin') return Response.redirect(new URL(prefix + url.search, url), 308);
       if (url.pathname.startsWith(prefix + 'api/')) return await handleEditorApi(request, env, url, identity);
+      const publicMatch = /^\/api\/recipes(?:\/([a-z0-9-]+\.json))?$/.exec(url.pathname);
+      if (publicMatch) {
+        if (request.method !== 'GET') {
+          return new Response(null, { status: 405, headers: { ...noCache, Allow: 'GET' } });
+        }
+        const store = recipeStore(env);
+        const filename = publicMatch[1];
+        return json(filename ? publicRecipe(await store.get(filename)) : (await store.all()).map(publicRecipe));
+      }
       const pathname = editor ? '/' + url.pathname.slice(prefix.length) : url.pathname;
-      return await assets(request, env, pathname, editor || preview, preview && !integrationPreview);
+      return await assets(request, env, pathname, identity, preview && !integrationPreview);
     } catch (error) {
       return error instanceof HttpError ? json({ error: error.message }, error.status)
         : json({ error: 'Kuchtik could not complete the request.' }, 502);

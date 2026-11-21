@@ -15,8 +15,6 @@
     "optional": "Volitelné"
   },
   "navigation": {
-    "editRecipes": "Upravit recepty",
-    "publicView": "Veřejný přehled",
     "signIn": "Přihlásit se",
     "signOut": "Odhlásit se",
     "user": "Uživatel"

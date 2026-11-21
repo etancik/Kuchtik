@@ -6,12 +6,14 @@ import RecipeRepository from './repositories/RecipeRepository.js';
 import { renderRecipeCard } from './components/RecipeCard.js';
 import { getSelectedRecipeNames, collectIngredientsGroupedByRecipe, searchRecipesWithHighlighting, generateFilenameFromRecipeName } from './utils/recipeUtils.js';
 import { recipeUI } from './components/RecipeUI.js';
-import { workerHosted, readOnlyWorker, editorMode, switchView, workerRecipeAdapter } from './services/workerEditor.js';
+import { workerHosted, editorMode, initializeWorkerSession, signInToWorker, workerRecipeAdapter, publicWorkerRecipeAdapter } from './services/workerEditor.js';
 import { githubAuth } from './services/githubAuth.js';
 import { ingredientsExportService } from './services/ingredientsExport.js';
 import { i18n, t } from './i18n/i18n.js';
 import { handleFullscreenNavigation, initializeFullscreenFromUrl } from './services/fullscreenRecipe.js';
 import { skeletonCardService } from './services/skeletonCardService.js';
+
+let workerSession = null;
 
 // Application state
 const state = {
@@ -69,9 +71,8 @@ async function initializeApp() {
   }
   
   // Initialize RecipeRepository
-  
-  // Initialize RecipeRepository
   try {
+    workerSession = await initializeWorkerSession();
     state.repository = new RecipeRepository({
       syncStrategy: 'immediate',
       cacheExpiry: 5 * 60 * 1000, // 5 minutes
@@ -86,8 +87,6 @@ async function initializeApp() {
     
     // Set up repository event handlers
     setupRepositoryEventHandlers();
-    
-    // Update UI button states
     updateAuthStatus();
     
     console.log('✅ RecipeRepository initialized');
@@ -98,12 +97,6 @@ async function initializeApp() {
   // Get DOM elements
   state.recipeListElement = document.getElementById('recipeList');
   
-  // Ensure create button starts hidden
-  const createButton = document.getElementById('createRecipeBtn');
-  if (createButton) {
-    createButton.style.setProperty('display', 'none', 'important');
-    console.log('🔧 DEBUG: Initially hiding create button with !important');
-  }
   const exportBtn = document.getElementById('exportBtn');
   const searchInput = document.getElementById('searchInput');
   
@@ -216,9 +209,6 @@ async function initializeApp() {
     });
   }
   
-  // Update auth status
-  updateAuthStatus();
-  
   // Initialize deeplink functionality
   console.log('🔗 Setting up deeplink navigation...');
   handleFullscreenNavigation(async (normalizedId) => {
@@ -250,8 +240,8 @@ async function initializeApp() {
  * Set up the appropriate repository adapter based on authentication status
  */
 async function setupRepositoryAdapter() {
-  if (editorMode) {
-    state.repository.setGitHubAPI(workerRecipeAdapter);
+  if (workerHosted) {
+    state.repository.setGitHubAPI(editorMode ? workerRecipeAdapter : publicWorkerRecipeAdapter);
     return;
   }
   try {
@@ -385,10 +375,10 @@ function setupLanguageSwitcher() {
   
   // Update current language flag display
   const currentLang = i18n.getCurrentLanguage();
-  const langFlags = { en: '🇺🇸', cs: '🇨🇿' };
-  if (currentLangFlag) {
-    currentLangFlag.textContent = langFlags[currentLang] || '🇺🇸';
-  }
+  const language = currentLang === 'cs' ? 'cs' : 'en';
+  const currentLangLabel = document.getElementById('currentLanguageLabel');
+  if (currentLangFlag) currentLangFlag.src = 'src/assets/flag-' + language + '.svg';
+  if (currentLangLabel) currentLangLabel.textContent = language === 'cs' ? 'Čeština' : 'English';
   
   // Add click handlers for language links
   langLinks.forEach(link => {
@@ -477,7 +467,7 @@ function renderRecipes(recipes) {
           <p>${message}</p>
           ${!isSearching && githubAuth.isAuthenticated() ? 
             `<button class="btn btn-primary" id="createEmptyRecipeBtn"><i class="fas fa-plus me-2"></i>${t('recipes.createRecipe')}</button>` :
-            !isSearching ? `<p><i class="fas fa-info-circle me-2"></i>${t('recipes.signInToManage')}</p>` : ''
+            !isSearching && (!workerHosted || workerSession === false) ? `<p><i class="fas fa-info-circle me-2"></i>${t('recipes.signInToManage')}</p>` : ''
           }
         </div>
       </div>
@@ -577,16 +567,18 @@ function updateAuthStatus() {
   if (!authBtn) return;
 
   if (workerHosted) {
-    if (readOnlyWorker) {
-      authBtn.classList.replace('d-flex', 'd-none');
-      return;
-    }
-    authBtn.textContent = t(editorMode ? 'navigation.publicView' : 'navigation.editRecipes');
-    authBtn.onclick = switchView;
+    const showSignIn = workerSession === false;
+    authBtn.hidden = !showSignIn;
+    authBtn.classList.toggle('d-flex', showSignIn);
+    authBtn.setAttribute('aria-label', t('navigation.signIn'));
+    authBtn.onclick = signInToWorker;
+    createBtn?.setAttribute('aria-label', t('recipes.createRecipe'));
     createBtn?.style.setProperty('display', editorMode ? 'inline-flex' : 'none', 'important');
     return;
   }
-  
+
+  authBtn.hidden = false;
+  authBtn.classList.add('d-flex');
   if (githubAuth.isAuthenticated()) {
     const userInfo = githubAuth.getUserInfo();
     const userName = userInfo?.name || userInfo?.login || t('navigation.user');

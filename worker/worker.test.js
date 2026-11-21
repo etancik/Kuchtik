@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createPrivateKey, createSign, generateKeyPairSync, createVerify } from 'node:crypto';
+import { createSign, generateKeyPairSync } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { DatabaseSync } from 'node:sqlite';
 import worker from './index.js';
 import { mcpReply } from './mcp.js';
 
@@ -10,10 +12,8 @@ const branchWeb = 'https://feature-tancer-kuchtik.etancik.workers.dev';
 const issuer = 'https://test.cloudflareaccess.com';
 const writer = 'editor@example.test';
 const revision = 'a'.repeat(40);
-const commit = 'b'.repeat(40);
 const recipe = { name: 'Řízky', ingredients: [{ text: 'sůl', exportDefault: false }], instructions: ['Osolit'], tags: ['oběd'] };
 const accessKeys = generateKeyPairSync('rsa', { modulusLength: 2048 });
-const gitHubKeys = generateKeyPairSync('rsa', { modulusLength: 2048 });
 
 function assertion(audience, overrides = {}) {
   const parts = [{ alg: 'RS256', kid: 'test-key' },
@@ -35,7 +35,7 @@ function request(url, { audience, method = 'GET', origin, body, claims } = {}) {
   });
 }
 
-const env = {
+const previewEnv = {
   WEB_HOST: new URL(web).hostname,
   PREVIEW_INTEGRATION_HOST: new URL(web).hostname,
   PREVIEW: '1',
@@ -43,53 +43,39 @@ const env = {
   ACCESS_WEB_AUD: 'web',
   ACCESS_MCP_AUD: 'mcp',
   MCP_WRITER_EMAIL: writer,
-  GITHUB_APP_ID: '123',
-  GITHUB_INSTALLATION_ID: '456',
-  GITHUB_APP_PRIVATE_KEY: createPrivateKey(gitHubKeys.privateKey.export({ type: 'pkcs1', format: 'pem' }))
-    .export({ type: 'pkcs1', format: 'pem' }),
   ASSETS: { fetch: request => new Response(new URL(request.url).pathname) },
 };
 
-test('Worker isolates Access audiences and writes preview edits with the read revision', async t => {
-  const calls = [];
-  t.mock.method(globalThis, 'fetch', async (input, options) => {
-    const url = new URL(input);
-    if (url.origin === issuer) {
-      assert.equal(url.pathname, '/cdn-cgi/access/certs');
-      return Response.json({ keys: [{ ...accessKeys.publicKey.export({ format: 'jwk' }), kid: 'test-key' }] });
-    }
+function createDatabase(t) {
+  const database = new DatabaseSync(':memory:');
+  t.after(() => database.close());
+  database.exec(readFileSync(new URL('../migrations/0001_recipes.sql', import.meta.url), 'utf8'));
+  database.prepare('INSERT INTO recipes VALUES (?, ?, ?)').run('rizky.json', revision, JSON.stringify(recipe));
+  return {
+    prepare(sql) {
+      const statement = database.prepare(sql);
+      const bind = (...values) => ({
+        first: () => statement.get(...values) ?? null,
+        all: () => ({ results: statement.all(...values) }),
+        run: () => ({ meta: { changes: statement.run(...values).changes } }),
+      });
+      return { ...bind(), bind };
+    },
+  };
+}
 
-    assert.equal(url.origin, 'https://api.github.com');
-    calls.push({ url, ...options });
-    if (url.pathname === '/app/installations/456/access_tokens') {
-      const [, jwt] = options.headers.Authorization.split(' ');
-      const [header, claims, signature] = jwt.split('.');
-      assert.equal(JSON.parse(Buffer.from(claims, 'base64url')).iss, '123');
-      assert.ok(createVerify('RSA-SHA256').update(header + '.' + claims)
-        .verify(gitHubKeys.publicKey, signature, 'base64url'));
-      assert.deepEqual(JSON.parse(options.body), { repositories: ['Kuchtik'], permissions: { contents: 'write' } });
-      return Response.json({ token: 'installation-token', expires_at: new Date(Date.now() + 3600_000).toISOString() });
-    }
-    assert.equal(url.pathname, '/repos/etancik/Kuchtik/contents/recipes/rizky.json');
-    assert.equal(options.headers.Authorization, 'Bearer installation-token');
-    if (options.method === 'GET') {
-      assert.equal(url.searchParams.get('ref'), 'kuchtik-preview-recipes');
-      return Response.json({ content: Buffer.from(JSON.stringify(recipe)).toString('base64'), sha: revision });
-    }
-    const data = JSON.parse(options.body);
-    assert.equal(data.branch, 'kuchtik-preview-recipes');
-    assert.equal(data.sha, revision);
-    const saved = JSON.parse(Buffer.from(data.content, 'base64').toString());
-    assert.equal(saved.name, 'Kuřecí řízky');
-    assert.equal(saved.metadata.filename, 'rizky.json');
-    assert.equal(saved.metadata.sha, undefined);
-    assert.deepEqual(saved.ingredients, recipe.ingredients);
-    return Response.json({ content: { sha: 'c'.repeat(40) }, commit: { sha: commit } });
+test('Worker shares D1 recipes across public, editor and MCP routes and rejects stale edits', async t => {
+  const db = createDatabase(t);
+  const env = { ...previewEnv, RECIPES_DB: db };
+  t.mock.method(globalThis, 'fetch', async input => {
+    const url = new URL(input);
+    assert.equal(url.href, issuer + '/cdn-cgi/access/certs');
+    return Response.json({ keys: [{ ...accessKeys.publicKey.export({ format: 'jwk' }), kid: 'test-key' }] });
   });
 
   assert.equal((await worker.fetch(request(web), env)).status, 401);
   assert.equal((await worker.fetch(request(web + '/admin/', { audience: 'mcp' }), env)).status, 401);
-  const branchEnv = { ...env, GITHUB_APP_PRIVATE_KEY: undefined, PREVIEW_INTEGRATION_HOST: undefined };
+  const branchEnv = { ...env, PREVIEW_INTEGRATION_HOST: undefined };
   assert.equal((await worker.fetch(request(branchWeb + '/style.css', { audience: 'web' }), branchEnv)).status, 200);
   assert.equal((await worker.fetch(request(branchWeb + '/admin/', { audience: 'web' }), branchEnv)).status, 404);
   assert.equal((await worker.fetch(request(branchWeb + '/mcp', { audience: 'mcp' }), branchEnv)).status, 401);
@@ -111,29 +97,55 @@ test('Worker isolates Access audiences and writes preview edits with the read re
   assert.equal((await run(call, { origin: 'https://other.example' })).status, 403);
   const forbidden = await (await run(call, { claims: { email: 'reader@example.test' } })).json();
   assert.equal(forbidden.result.isError, true);
-  assert.equal(calls.length, 0);
-
   const invalid = structuredClone(call);
   invalid.params.arguments.revision = 'd'.repeat(40);
   assert.equal((await (await run(invalid)).json()).result.isError, true);
-  assert.equal(calls.filter(call => call.method === 'PUT').length, 0);
 
   const result = await (await run(call)).json();
   assert.equal(result.result.isError, false);
-  assert.equal(JSON.parse(result.result.content[0].text).commit, commit);
-  assert.equal(calls.filter(call => call.method === 'PUT').length, 1);
+  const saved = JSON.parse(result.result.content[0].text);
+  assert.match(saved.revision, /^[a-f0-9]{40}$/);
+  assert.notEqual(saved.revision, revision);
 
-  const editorWrite = await worker.fetch(request(web + '/admin/api/recipes/rizky.json', {
-    audience: 'web', method: 'PUT', origin: web, body: { recipe: { ...recipe, name: 'Kuřecí řízky' }, revision },
-  }), env);
-  assert.equal(editorWrite.status, 200);
-  assert.equal(calls.filter(call => call.method === 'PUT').length, 2);
+  const production = { ...env, PREVIEW: '0', WEB_HOST: 'kuchtik.tancer.cz' };
+  const live = 'https://' + production.WEB_HOST;
+  const reader = await worker.fetch(request(live + '/api/recipes'), production);
+  assert.equal(reader.headers.get('Cache-Control'), 'no-store');
+  const [published] = await reader.json();
+  assert.equal(published.name, 'Kuřecí řízky');
+  assert.equal(published.metadata.sha, undefined);
+  assert.equal((await worker.fetch(request(live + '/api/recipes', { method: 'POST' }), production)).status, 405);
+  assert.equal((await worker.fetch(request(live + '/admin/api/catalog'), production)).status, 401);
 
-  const foreignOrigin = await worker.fetch(request(web + '/admin/api/recipes/rizky.json', {
-    audience: 'web', method: 'PUT', origin: branchWeb, body: { recipe, revision },
+  const sessionUrl = web + '/admin/api/session';
+  assert.equal((await worker.fetch(request(sessionUrl, { audience: 'mcp' }), env)).status, 401);
+  const session = await worker.fetch(request(sessionUrl, { audience: 'web', claims: { name: 'Test Editor' } }), env);
+  assert.deepEqual(await session.json(), { authenticated: true, displayName: 'Test Editor' });
+  const fallbackSession = await worker.fetch(request(sessionUrl, { audience: 'web' }), env);
+  assert.deepEqual(await fallbackSession.json(), { authenticated: true, displayName: 'editor' });
+
+  const editorCatalog = await worker.fetch(request(web + '/admin/api/catalog', { audience: 'web' }), env);
+  assert.equal((await editorCatalog.json())[0].metadata.sha, saved.revision);
+  const editorEdit = (revision, origin = web) => worker.fetch(request(web + '/admin/api/recipes/rizky.json', {
+    audience: 'web', method: 'PUT', origin, body: { recipe, revision },
   }), env);
-  assert.equal(foreignOrigin.status, 403);
-  assert.equal(calls.filter(call => call.method === 'PUT').length, 2);
+  assert.equal((await editorEdit(revision)).status, 409);
+  assert.equal((await editorEdit(saved.revision, branchWeb)).status, 403);
+  assert.equal((await editorEdit(saved.revision)).status, 200);
+  assert.equal((await editorEdit(saved.revision)).status, 409);
+
+  const create = () => worker.fetch(request(web + '/admin/api/recipes', {
+    audience: 'web', method: 'POST', origin: web, body: { recipe: { ...recipe, name: 'Brambory' } },
+  }), env);
+  const created = await create();
+  assert.equal(created.status, 201);
+  assert.equal((await create()).status, 409);
+  const latest = await created.json();
+  const deleted = await worker.fetch(request(web + '/admin/api/recipes/' + latest.filename, {
+    audience: 'web', method: 'DELETE', origin: web, body: { revision: latest.revision },
+  }), env);
+  assert.equal(deleted.status, 200);
+  assert.equal((await worker.fetch(request(live + '/api/recipes/' + latest.filename), production)).status, 404);
 });
 
 test('MCP negotiates protocol, hides writes for readers and returns empty notification replies', async () => {

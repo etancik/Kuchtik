@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 26 13">
+  <defs>
+    <path id="star" fill="#fff" d="m0-.3.07.21h.22l-.18.13.07.21L0 .12l-.18.13.07-.21-.18-.13h.22z"/>
+    <g id="six"><use href="#star" x=".9"/><use href="#star" x="2.6"/><use href="#star" x="4.3"/><use href="#star" x="6.1"/><use href="#star" x="7.8"/><use href="#star" x="9.5"/></g>
+    <g id="five"><use href="#star" x="1.75"/><use href="#star" x="3.45"/><use href="#star" x="5.2"/><use href="#star" x="6.95"/><use href="#star" x="8.65"/></g>
+  </defs>
+  <path fill="#fff" d="M0 0h26v13H0z"/>
+  <path stroke="#b31942" d="M0 .5h26M0 2.5h26M0 4.5h26M0 6.5h26M0 8.5h26M0 10.5h26M0 12.5h26"/>
+  <path fill="#0a3161" d="M0 0h10.4v7H0z"/>
+  <use href="#six" y=".7"/><use href="#five" y="1.4"/><use href="#six" y="2.1"/><use href="#five" y="2.8"/><use href="#six" y="3.5"/><use href="#five" y="4.2"/><use href="#six" y="4.9"/><use href="#five" y="5.6"/><use href="#six" y="6.3"/>
+</svg>

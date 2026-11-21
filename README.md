@@ -140,22 +140,32 @@ repo.on('recipesUpdated', (recipes) => {
 **Dependencies:** Jest, ESLint, Prettier (dev only)
 **Deployment:** Static files, no build process required
 
-## Cloudflare nasazení
+## Cloudflare deployment
 
-Kuchtík má veřejný přehled a editor na `/admin/`. Editor ukládá přes Worker a GitHub App.
-MCP používá vlastní hostname a zpřístupňuje nástroje pro hledání, načtení a úpravu receptu.
-Úprava posílá revizi z načteného receptu a vrací SHA commitu. Při konfliktu načti recept znovu.
+The Worker serves the public catalog and the Access-protected editor at `/admin/` from the same D1 database. MCP uses the same store on its own hostname. Read a recipe before updating it and send its revision with the change. On a conflict, reload the recipe before saving.
 
-| Prostředí | Větev buildu | Web | MCP | Větev receptů |
-| --- | --- | --- | --- | --- |
-| Pracovní preview | Pracovní větev | URL z Workers Builds | — | Veřejné recepty pouze pro čtení |
-| Integrační preview | `kuchtik-preview` | URL z Workers Builds | `/mcp` na adrese integračního preview | `kuchtik-preview-recipes` |
-| Produkce | `main` | `kuchtik.tancer.cz` | `mcp-kuchtik.tancer.cz/mcp` | `main` |
+| Environment | Worker branch | Database | Access |
+| --- | --- | --- | --- |
+| Production | `main` | `tancer-kuchtik-production` | Public catalog, protected `/admin/` and MCP |
+| Working preview | Working branch | `tancer-kuchtik-preview` | Access-protected catalog, read-only |
+| Integration preview | `kuchtik-preview` | `tancer-kuchtik-preview` | Access-protected editor and MCP when the integration hostname is configured |
 
-1. V Cloudflare ověř živý stav hostname a Access. Na Workeru nastav Access v režimu Previews only, v produkci chraň `/admin` a všechny jeho podcesty. Pro MCP nastav Managed OAuth a ověř očekávané audience. Povol jen potřebné OAuth redirect URI pro ChatGPT a Claude Code. Custom Domains připoj až po ověření politik. Pracovní preview používají společný Access issuer a audience. Přihlašovací údaje GitHub App, `MCP_WRITER_EMAIL`, MCP audience a `PREVIEW_INTEGRATION_HOST` nastav pouze v pojmenovaném integračním preview. Hostname opiš z jeho stabilní URL.
-2. GitHub App nainstaluj jen do `etancik/Kuchtik` s Contents Read and write. Worker potřebuje `GITHUB_APP_ID`, `GITHUB_INSTALLATION_ID` a secret `GITHUB_APP_PRIVATE_KEY`. Dále nastav `ACCESS_ISSUER`, `ACCESS_WEB_AUD`, `ACCESS_MCP_AUD` a `MCP_WRITER_EMAIL`. Nastavení a klíč patří do Cloudflare. Preview používá pevně danou testovací větev, kterou založ z `main`.
-3. Pro Workers Builds nastav root repozitáře a `npm run build`, pro preview `npm run preview`, pro produkci `npm run deploy`. Po úspěšném nasazení pošli uživateli stabilní Preview URL z Workers Builds nebo z komentáře v PR a uveď větev. U odkazu ověř Access; při chybě buildu uveď výsledek a odkaz na build. Lokální kontrola probíhá přes `npm run lint`, `npm run test:worker` a `npm run build`. Dále ověř GitHub Pages CI a chráněné preview.
-4. Na preview ověř přihlášení a obnovu relace v obou MCP klientech, zápis oprávněného účtu, odmítnutí jiného účtu a konflikt verzí. Ověř také webový editor, odkaz `?recipe=…` a iOS Zkratky. Po ověření produkční adresy přidej kartu rozcestníku. Proměnná `KUCHTIK_PAGES_REDIRECT=1` v GitHub Actions zapne po ručním spuštění workflow přesměrování staré Pages adresy včetně query a fragmentu.
+### Import existing recipes
+
+Run these commands from the reviewed checkout containing the desired `recipes/*.json` snapshot. Seed the preview first. Before production cutover, seed production from the final Git snapshot and compare the source count with D1.
+
+```sh
+node scripts/seed-recipes.mjs recipes-seed.sql
+npx wrangler@4.151.2 d1 execute tancer-kuchtik-preview --remote --file migrations/0001_recipes.sql
+npx wrangler@4.151.2 d1 execute tancer-kuchtik-preview --remote --file recipes-seed.sql
+npx wrangler@4.151.2 d1 execute tancer-kuchtik-preview --remote --command "SELECT count(*) FROM recipes"
+```
+
+For production use the same three Wrangler commands with `tancer-kuchtik-production`. Import is additive, so retrying it preserves existing rows. Run the import only during setup to avoid recreating a recipe deleted after cutover. Keep the generated SQL outside Git. Git JSONs remain the pre-cutover snapshot. D1 becomes the source after cutover.
+
+For Workers Builds use `npm run build`, `npm run preview` and `npm run deploy`. Keep the Worker Access mode set to Previews only and protect the production `/admin` path and its descendants. Only the configured `PREVIEW_INTEGRATION_HOST` permits preview writes. For MCP configure Managed OAuth, `ACCESS_MCP_AUD` and `MCP_WRITER_EMAIL` on the intended environment. Set `ACCESS_ISSUER` and `ACCESS_WEB_AUD` for the editor.
+
+Before cutover, check the public catalog, editor login, saving and a stale revision on preview. Verify MCP if its hostname is configured. After production serves D1, set `KUCHTIK_PAGES_REDIRECT=1` and run the GitHub Pages workflow to redirect the legacy URL, preserving query and fragment.
 
 ## License
 

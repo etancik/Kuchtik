@@ -14,30 +14,31 @@
 <body>
   <div class="container my-4">
     <!-- Header with actions -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
       <div>
         <h1 class="mb-0" data-i18n="recipes.title">Recipe Manager</h1>
         <small class="text-muted" data-i18n="recipes.subtitle">Manage your favorite recipes</small>
       </div>
-      <div class="d-flex gap-2 align-items-center">
+      <div class="d-flex flex-wrap gap-2 align-items-center">
         <!-- Language Switcher -->
         <div class="dropdown">
           <button class="btn btn-outline-secondary btn-sm dropdown-toggle d-flex align-items-center" type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-            <span id="currentLanguageFlag">🇺🇸</span>
+            <img id="currentLanguageFlag" class="me-1" src="src/assets/flag-en.svg" width="21" height="14" alt="">
+            <span id="currentLanguageLabel">English</span>
           </button>
           <ul class="dropdown-menu dropdown-menu-end">
-            <li><a class="dropdown-item d-flex align-items-center" href="#" data-lang="en"><span class="me-2">🇺🇸</span>English</a></li>
-            <li><a class="dropdown-item d-flex align-items-center" href="#" data-lang="cs"><span class="me-2">🇨🇿</span>Čeština</a></li>
+            <li><a class="dropdown-item d-flex align-items-center" href="#" data-lang="en"><img class="me-2" src="src/assets/flag-en.svg" width="21" height="14" alt="">English</a></li>
+            <li><a class="dropdown-item d-flex align-items-center" href="#" data-lang="cs"><img class="me-2" src="src/assets/flag-cs.svg" width="21" height="14" alt="">Čeština</a></li>
           </ul>
         </div>
-        
+
         <!-- Auth and Create buttons -->
         <div class="btn-group" role="group">
-          <button id="authBtn" class="btn btn-outline-primary btn-sm d-flex align-items-center">
+          <button id="authBtn" type="button" class="btn btn-outline-primary btn-sm align-items-center" hidden>
             <i class="fas fa-sign-in-alt me-1"></i>
             <span class="d-none d-sm-inline" data-i18n="navigation.signIn">Sign In</span>
           </button>
-          <button id="createRecipeBtn" class="btn btn-primary btn-sm d-flex align-items-center" style="display: none;">
+          <button id="createRecipeBtn" class="btn btn-primary btn-sm align-items-center" style="display: none;">
             <i class="fas fa-plus me-1"></i>
             <span class="d-none d-sm-inline" data-i18n="recipes.createRecipe">Create Recipe</span>
           </button>

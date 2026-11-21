@@ -1,15 +1,45 @@
 const hostMode = typeof document !== 'undefined' ? document.querySelector('meta[name="kuchtik-host"]')?.content : null;
 export const readOnlyWorker = hostMode === 'readonly-worker';
-export const workerHosted = hostMode === 'worker' || readOnlyWorker;
-export const editorMode = workerHosted && location.pathname === '/admin/';
+const authenticatedWorker = hostMode === 'authenticated-worker';
+export const workerHosted = hostMode === 'worker' || authenticatedWorker || readOnlyWorker;
+export let editorMode = false;
 
-export function switchView() {
+export async function initializeWorkerSession() {
+  if (!workerHosted || readOnlyWorker) return null;
+
+  if (authenticatedWorker) {
+    editorMode = true;
+    return true;
+  }
+
+  try {
+    const response = await fetch('/admin/api/session', {
+      redirect: 'manual',
+      signal: window.AbortSignal?.timeout?.(5000),
+    });
+    if (response.type === 'opaqueredirect' || response.status === 401 || response.status === 403) {
+      return false;
+    }
+    if (!response.ok) return null;
+
+    const { authenticated } = await response.json();
+    if (authenticated !== true) return null;
+
+    editorMode = true;
+    return true;
+  } catch {
+    // The public catalog remains usable when the session check is unavailable.
+    return null;
+  }
+}
+
+export function signInToWorker() {
   const url = new window.URL(location.href);
-  url.pathname = editorMode ? '/' : '/admin/';
+  url.pathname = '/admin/';
   location.assign(url);
 }
 
-export async function editorRequest(path, options) {
+async function editorRequest(path, options) {
   const response = await fetch('/admin/api/' + path, {
     redirect: 'error',
     ...options,
@@ -34,10 +64,7 @@ export const workerRecipeAdapter = {
   getCurrentUser: () => null,
   getFileList: () => editorRequest('recipes'),
   getFile: filename => editorRequest('recipes/' + encodeURIComponent(filename)),
-  async getAllFiles() {
-    const files = await this.getFileList();
-    return Promise.all(files.map(filename => this.getFile(filename)));
-  },
+  getAllFiles: () => editorRequest('catalog'),
   async checkFileExists(filename) {
     return (await this.getFileList()).includes(filename);
   },
@@ -45,4 +72,18 @@ export const workerRecipeAdapter = {
   updateFile: (filename, recipe) => save('PUT', 'recipes/' + encodeURIComponent(filename),
     { recipe, revision: recipe.metadata?.sha }),
   deleteFile: (filename, revision) => save('DELETE', 'recipes/' + encodeURIComponent(filename), { revision }),
+};
+
+async function fetchPublicRecipes(path = '') {
+  const response = await fetch('/api/recipes' + path);
+  if (!response.ok) throw new Error('Unable to load recipes.');
+  return response.json();
+}
+
+export const publicWorkerRecipeAdapter = {
+  getAllFiles: () => fetchPublicRecipes(),
+  async getFileList() {
+    return (await this.getAllFiles()).map(recipe => recipe.metadata.filename);
+  },
+  getFile: filename => fetchPublicRecipes('/' + encodeURIComponent(filename)),
 };

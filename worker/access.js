@@ -44,7 +44,11 @@ export async function accessIdentity(request, env, audience) {
     }, false, ['verify']);
     const ok = await crypto.subtle.verify('RSASSA-PKCS1-v1_5', publicKey,
       decodePart(signature), encoder.encode(header + '.' + payload));
-    return ok ? { email: claims.email.toLowerCase(), subject: claims.sub } : null;
+    return ok ? {
+      email: claims.email.toLowerCase(),
+      subject: claims.sub,
+      name: typeof claims.name === 'string' ? claims.name.trim() : '',
+    } : null;
   } catch {
     return null;
   }
