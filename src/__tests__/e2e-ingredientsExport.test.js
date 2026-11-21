@@ -70,7 +70,7 @@ global.bootstrap = {
 global.alert = jest.fn();
 
 // Import the module under test
-const { default: ingredientsExportService } = await import('../services/ingredientsExport.js');
+const { ingredientsExportService } = await import('../services/ingredientsExport.js');
 
 describe('End-to-End Ingredients Export Integration', () => {
   let service;

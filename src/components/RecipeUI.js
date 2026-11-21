@@ -8,7 +8,7 @@ import RecipeRepository from '../repositories/RecipeRepository.js';
 import { escapeHtml } from '../utils/recipeUtils.js';
 import { t } from '../i18n/i18n.js';
 import { editorMode } from '../services/workerEditor.js';
-import gitHubAPIAdapter from '../adapters/GitHubAPIAdapter.js';
+import { gitHubAPIAdapter } from '../adapters/GitHubAPIAdapter.js';
 
 class RecipeUI {
   constructor(repository = null) {
@@ -1333,7 +1333,3 @@ class RecipeUI {
 
 // Create and export singleton instance (will be initialized with repository from main.js)
 export const recipeUI = new RecipeUI();
-export default recipeUI;
-
-// Export the class for testing
-export { RecipeUI };

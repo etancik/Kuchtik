@@ -4,7 +4,7 @@ import { templateLoader } from '../utils/templateLoader.js';
  * Skeleton Card Service
  * Manages skeleton loading cards for better loading experience
  */
-export class SkeletonCardService {
+class SkeletonCardService {
   constructor() {
     this.skeletonTemplate = null;
   }

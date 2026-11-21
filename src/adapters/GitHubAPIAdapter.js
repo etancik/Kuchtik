@@ -741,4 +741,3 @@ export class GitHubAPIAdapter {
 
 // Create and export singleton instance
 export const gitHubAPIAdapter = new GitHubAPIAdapter();
-export default gitHubAPIAdapter;
