@@ -258,7 +258,7 @@ async function setupRepositoryAdapter() {
     // Check if user is authenticated
     if (githubAuth.isAuthenticated()) {
       console.log('🔑 User authenticated - using full GitHub API adapter');
-      const { gitHubAPIAdapter } = await import('./adapters/GitHubAPIAdapter.js');
+      const { default: gitHubAPIAdapter } = await import('./adapters/GitHubAPIAdapter.js');
       state.repository.setGitHubAPI(gitHubAPIAdapter);
     } else {
       console.log('🌍 No authentication - using public read-only adapter');
