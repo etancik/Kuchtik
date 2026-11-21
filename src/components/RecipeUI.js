@@ -5,7 +5,9 @@
 
 import { templateLoader } from '../utils/templateLoader.js';
 import RecipeRepository from '../repositories/RecipeRepository.js';
+import { escapeHtml } from '../utils/recipeUtils.js';
 import { t } from '../i18n/i18n.js';
+import { editorMode } from '../services/workerEditor.js';
 import gitHubAPIAdapter from '../adapters/GitHubAPIAdapter.js';
 
 class RecipeUI {
@@ -312,6 +314,19 @@ class RecipeUI {
    * Setup edit and delete button event handlers
    */
   setupEditHandlers() {
+    document.getElementById('recipe-modal')?.addEventListener('click', (event) => {
+      const button = event.target.closest('button[data-recipe-action]');
+      switch (button?.dataset.recipeAction) {
+        case 'addIngredient': this.addIngredient(); break;
+        case 'addInstruction': this.addInstruction(); break;
+        case 'addNote': this.addNote(); break;
+        case 'addTag': this.addTag(); break;
+        case 'removeIngredient': this.removeIngredient(button); break;
+        case 'removeInstruction': this.removeInstruction(button); break;
+        case 'removeNote': this.removeNote(button); break;
+        case 'removeTag': this.removeTag(button); break;
+      }
+    });
     // Handle edit button clicks
     document.addEventListener('click', (event) => {
       if (event.target.matches('.edit-recipe-btn') || event.target.closest('.edit-recipe-btn')) {
@@ -390,13 +405,14 @@ class RecipeUI {
    * @param {string} recipeId - ID of the recipe to delete
    * @param {string} recipeName - Name of the recipe to delete
    */
-  async showDeleteConfirmation(recipeId, recipeName) {
+  async showDeleteConfirmation(recipeId, recipeName, revision) {
     console.log('🗑️ Showing delete confirmation for:', recipeName);
     
     const confirmed = confirm(t('confirmations.deleteRecipeMessage', { recipeName }));
     
     if (confirmed) {
-      await this.handleDeleteRecipe(recipeId);
+      if (revision) await this.handleDeleteRecipe(recipeId, revision);
+      else await this.handleDeleteRecipe(recipeId);
     }
   }
 
@@ -404,16 +420,24 @@ class RecipeUI {
    * Handle recipe deletion
    * @param {string} recipeId - ID of the recipe to delete
    */
-  async handleDeleteRecipe(recipeId) {
+  async handleDeleteRecipe(recipeId, revision) {
     try {
       console.log('🗑️ Deleting recipe:', recipeId);
       
       // Delete the recipe using repository (optimistic updates handled automatically)
-      await this.repository.delete(recipeId);
+      if (revision) await this.repository.delete(recipeId, { revision });
+      else await this.repository.delete(recipeId);
+      await this.refreshWorkerRecipes();
       
     } catch (error) {
       console.error('❌ Failed to delete recipe:', error);
       this.showErrorMessage(t('operations.deleteFailed', { error: error.message }));
+    }
+  }
+
+  async refreshWorkerRecipes() {
+    if (editorMode) {
+      await this.repository.getAll({ forceRefresh: true }).catch(error => console.error(error));
     }
   }
 
@@ -441,6 +465,7 @@ class RecipeUI {
         // Update the recipe using the original recipe ID, not the current name
         const recipeId = this.editingRecipe.metadata?.id || this.editingRecipe.id;
         await this.repository.update(recipeId, formData);
+        await this.refreshWorkerRecipes();
         
         // Close modal
         this.modal.hide();
@@ -451,6 +476,7 @@ class RecipeUI {
         
         // Create the recipe using repository (optimistic updates handled automatically)
         await this.repository.create(formData);
+        await this.refreshWorkerRecipes();
         
         // Close modal
         this.modal.hide();
@@ -732,7 +758,7 @@ class RecipeUI {
                     placeholder="${t('recipeForm.instructionPlaceholder')}" 
                     data-i18n-placeholder="recipeForm.instructionPlaceholder"
                     rows="2" required></textarea>
-          <button class="btn remove-btn-small" type="button" onclick="recipeUI.removeInstruction(this)" title="Remove step">
+          <button class="btn remove-btn-small" type="button" data-recipe-action="removeInstruction" title="Remove step">
             <i class="fas fa-times"></i>
           </button>
         </div>
@@ -749,7 +775,7 @@ class RecipeUI {
             <input type="checkbox" class="form-check-input ingredient-added-checkbox" title="Uncheck when used" checked>
           </div>
           <input class="form-control ${inputClass}" placeholder="${placeholder}" required>
-          <button class="btn btn-sm remove-btn" type="button" onclick="recipeUI.removeIngredient(this)" title="Remove ingredient">
+          <button class="btn btn-sm remove-btn" type="button" data-recipe-action="removeIngredient" title="Remove ingredient">
             <i class="fas fa-times"></i>
           </button>
         </div>
@@ -760,7 +786,7 @@ class RecipeUI {
       div.className = 'input-group mb-2';
       div.innerHTML = `
         <${inputType} class="form-control ${inputClass}" placeholder="${placeholder}" ${containerId === 'ingredients-container' ? 'required' : ''}></${inputType}>
-        <button class="btn btn-sm remove-btn" type="button" onclick="recipeUI.remove${this.getMethodSuffix(containerId)}(this)" title="Remove ${containerId === 'ingredients-container' ? 'ingredient' : 'note'}">
+        <button class="btn btn-sm remove-btn" type="button" data-recipe-action="remove${this.getMethodSuffix(containerId)}" title="Remove ${containerId === 'ingredients-container' ? 'ingredient' : 'note'}">
           <i class="fas fa-times"></i>
         </button>
       `;
@@ -792,8 +818,8 @@ class RecipeUI {
             <textarea class="form-control instruction-input" 
                       placeholder="${t('recipeForm.instructionPlaceholder')}" 
                       data-i18n-placeholder="recipeForm.instructionPlaceholder"
-                      rows="2" required>${item}</textarea>
-            <button class="btn remove-btn-small" type="button" onclick="recipeUI.removeInstruction(this)" title="Remove step">
+                      rows="2" required>${escapeHtml(item)}</textarea>
+            <button class="btn remove-btn-small" type="button" data-recipe-action="removeInstruction" title="Remove step">
               <i class="fas fa-times"></i>
             </button>
           </div>
@@ -814,8 +840,8 @@ class RecipeUI {
             <div class="input-group-text">
               <input type="checkbox" class="form-check-input ingredient-added-checkbox" title="Uncheck when used" ${exportDefault ? 'checked' : ''}>
             </div>
-            <input class="form-control ${inputClass}" value="${displayValue}" required>
-            <button class="btn btn-sm remove-btn" type="button" onclick="recipeUI.removeIngredient(this)" title="Remove ingredient">
+            <input class="form-control ${inputClass}" value="${escapeHtml(displayValue)}" required>
+            <button class="btn btn-sm remove-btn" type="button" data-recipe-action="removeIngredient" title="Remove ingredient">
               <i class="fas fa-times"></i>
             </button>
           </div>
@@ -833,8 +859,8 @@ class RecipeUI {
           : item;
         
         div.innerHTML = `
-          <${inputType} class="form-control ${inputClass}" value="${displayValue}" ${containerId === 'ingredients-container' ? 'required' : ''}></${inputType}>
-          <button class="btn btn-sm remove-btn" type="button" onclick="recipeUI.remove${this.getMethodSuffix(containerId)}(this)" title="Remove ${this.getMethodSuffix(containerId).toLowerCase()}">
+          <${inputType} class="form-control ${inputClass}" value="${escapeHtml(displayValue)}" ${containerId === 'ingredients-container' ? 'required' : ''}></${inputType}>
+          <button class="btn btn-sm remove-btn" type="button" data-recipe-action="remove${this.getMethodSuffix(containerId)}" title="Remove ${this.getMethodSuffix(containerId).toLowerCase()}">
             <i class="fas fa-times"></i>
           </button>
         `;
@@ -877,7 +903,7 @@ class RecipeUI {
           <input type="checkbox" class="form-check-input ingredient-added-checkbox" title="Uncheck when used" ${inheritedExportDefault ? 'checked' : ''}>
         </div>
         <input type="text" class="form-control ingredient-input" placeholder="${t('recipeForm.ingredientPlaceholder')}" required>
-        <button class="btn btn-sm remove-btn" type="button" onclick="recipeUI.removeIngredient(this)" title="Remove ingredient">
+        <button class="btn btn-sm remove-btn" type="button" data-recipe-action="removeIngredient" title="Remove ingredient">
           <i class="fas fa-times"></i>
         </button>
       </div>
@@ -909,7 +935,7 @@ class RecipeUI {
                   placeholder="${t('recipeForm.instructionPlaceholder')}" 
                   data-i18n-placeholder="recipeForm.instructionPlaceholder"
                   rows="2" required></textarea>
-        <button class="btn remove-btn-small" type="button" onclick="recipeUI.removeInstruction(this)" title="Remove step">
+        <button class="btn remove-btn-small" type="button" data-recipe-action="removeInstruction" title="Remove step">
           <i class="fas fa-times"></i>
         </button>
       </div>
@@ -936,7 +962,7 @@ class RecipeUI {
     noteDiv.className = 'input-group mb-2';
     noteDiv.innerHTML = `
       <input type="text" class="form-control note-input" placeholder="${t('recipeForm.notePlaceholder')}">
-      <button class="btn btn-sm remove-btn" type="button" onclick="recipeUI.removeNote(this)" title="Remove note">
+      <button class="btn btn-sm remove-btn" type="button" data-recipe-action="removeNote" title="Remove note">
         <i class="fas fa-times"></i>
       </button>
     `;
@@ -1067,8 +1093,8 @@ class RecipeUI {
     const tagElement = document.createElement('span');
     tagElement.className = 'tag-item';
     tagElement.innerHTML = `
-      <span>${tagText}</span>
-      <button type="button" class="tag-remove" onclick="recipeUI.removeTag(this)" title="Remove tag">
+      <span>${escapeHtml(tagText)}</span>
+      <button type="button" class="tag-remove" data-recipe-action="removeTag" title="Remove tag">
         <i class="fas fa-times"></i>
       </button>
     `;
@@ -1198,8 +1224,8 @@ class RecipeUI {
       const tagElement = document.createElement('span');
       tagElement.className = 'tag-item';
       tagElement.innerHTML = `
-        <span>${tag}</span>
-        <button type="button" class="tag-remove" onclick="recipeUI.removeTag(this)" title="Remove tag">
+        <span>${escapeHtml(tag)}</span>
+        <button type="button" class="tag-remove" data-recipe-action="removeTag" title="Remove tag">
           <i class="fas fa-times"></i>
         </button>
       `;

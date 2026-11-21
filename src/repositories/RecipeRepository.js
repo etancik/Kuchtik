@@ -384,6 +384,7 @@ class RecipeRepository {
         type: OperationType.DELETE,
         recipeName,
         originalData,
+        revision: options.revision,
         timestamp: Date.now(),
         attempts: 0
       });
@@ -737,7 +738,7 @@ class RecipeRepository {
           await this.githubAPI.updateFile(filename, operation.data);
           break;
         case OperationType.DELETE:
-          await this.githubAPI.deleteFile(filename);
+          await this.githubAPI.deleteFile(filename, operation.revision ?? operation.originalData?.metadata?.sha);
           break;
         default:
           throw new Error(`Unknown operation type: ${operation.type}`);

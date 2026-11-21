@@ -6,6 +6,7 @@ import RecipeRepository from './repositories/RecipeRepository.js';
 import { renderRecipeCard } from './components/RecipeCard.js';
 import { getSelectedRecipeNames, collectIngredientsGroupedByRecipe, searchRecipesWithHighlighting, generateFilenameFromRecipeName } from './utils/recipeUtils.js';
 import { recipeUI } from './components/RecipeUI.js';
+import { workerHosted, editorMode, switchView, workerRecipeAdapter } from './services/workerEditor.js';
 import { githubAuth } from './services/githubAuth.js';
 import { ingredientsExportService } from './services/ingredientsExport.js';
 import { i18n, t } from './i18n/i18n.js';
@@ -75,7 +76,8 @@ async function initializeApp() {
       syncStrategy: 'immediate',
       cacheExpiry: 5 * 60 * 1000, // 5 minutes
       enableOptimisticUpdates: true,
-      maxRetries: 3,
+      maxRetries: editorMode ? 1 : 3,
+      optimisticUpdates: !editorMode,
       retryDelay: 1000
     });
     
@@ -223,7 +225,7 @@ async function initializeApp() {
     // Find recipe by normalized ID - need to match against all recipes
     const recipes = await state.repository.getAll();
     return recipes.find(recipe => {
-      const recipeId = recipe.id || generateFilenameFromRecipeName(recipe.name).replace('.json', '');
+      const recipeId = recipe.metadata?.id || recipe.id || generateFilenameFromRecipeName(recipe.name).replace('.json', '');
       return recipeId === normalizedId;
     });
   });
@@ -233,7 +235,7 @@ async function initializeApp() {
     const recipes = await state.repository.getAll();
     
     const foundRecipe = recipes.find(recipe => {
-      const recipeId = recipe.id || generateFilenameFromRecipeName(recipe.name).replace('.json', '');
+      const recipeId = recipe.metadata?.id || recipe.id || generateFilenameFromRecipeName(recipe.name).replace('.json', '');
       return recipeId === normalizedId;
     });
     
@@ -248,6 +250,10 @@ async function initializeApp() {
  * Set up the appropriate repository adapter based on authentication status
  */
 async function setupRepositoryAdapter() {
+  if (editorMode) {
+    state.repository.setGitHubAPI(workerRecipeAdapter);
+    return;
+  }
   try {
     // Check if user is authenticated
     if (githubAuth.isAuthenticated()) {
@@ -441,10 +447,11 @@ function showLoadingError(error) {
         <p>${t('recipes.loadingErrorMessage', { error: error.message })}</p>
         <hr>
         <p class="mb-0">${t('recipes.connectionMessage')}</p>
-        <button class="btn btn-primary mt-2" onclick="location.reload()">${t('common.retry')}</button>
+        <button class="btn btn-primary mt-2" id="retryRecipesBtn">${t('common.retry')}</button>
       </div>
     </div>
   `;
+  document.getElementById('retryRecipesBtn')?.addEventListener('click', () => location.reload());
 }
 
 /**
@@ -469,12 +476,13 @@ function renderRecipes(recipes) {
           <h4><i class="fas fa-${isSearching ? 'search' : 'utensils'} me-2"></i>${title}</h4>
           <p>${message}</p>
           ${!isSearching && githubAuth.isAuthenticated() ? 
-            `<button class="btn btn-primary" onclick="recipeUI.showCreateForm()"><i class="fas fa-plus me-2"></i>${t('recipes.createRecipe')}</button>` : 
+            `<button class="btn btn-primary" id="createEmptyRecipeBtn"><i class="fas fa-plus me-2"></i>${t('recipes.createRecipe')}</button>` :
             !isSearching ? `<p><i class="fas fa-info-circle me-2"></i>${t('recipes.signInToManage')}</p>` : ''
           }
         </div>
       </div>
     `;
+    document.getElementById('createEmptyRecipeBtn')?.addEventListener('click', () => recipeUI.showCreateForm());
     return;
   }
   
@@ -567,6 +575,13 @@ function updateAuthStatus() {
   console.log('🔧 DEBUG: createBtn exists:', !!createBtn);
   
   if (!authBtn) return;
+
+  if (workerHosted) {
+    authBtn.textContent = t(editorMode ? 'navigation.publicView' : 'navigation.editRecipes');
+    authBtn.onclick = switchView;
+    createBtn?.style.setProperty('display', editorMode ? 'inline-flex' : 'none', 'important');
+    return;
+  }
   
   if (githubAuth.isAuthenticated()) {
     const userInfo = githubAuth.getUserInfo();
