@@ -75,10 +75,17 @@ async function handleMcp(request, env, url) {
   return result ? json(result) : new Response(null, { status: 202, headers: noCache });
 }
 
+function publicRecipe({ metadata, ...recipe }) {
+  const publicMetadata = { ...metadata };
+  delete publicMetadata.sha;
+  return { ...recipe, metadata: publicMetadata };
+}
+
 async function handleEditorApi(request, env, url, identity) {
   if (url.pathname === prefix + 'api/session' && request.method === 'GET') return json({ authenticated: true });
 
   const store = recipeStore(env);
+  if (url.pathname === prefix + 'api/catalog' && request.method === 'GET') return json(await store.all());
   const match = /^\/admin\/api\/recipes(?:\/([a-z0-9-]+\.json))?$/.exec(url.pathname);
   if (!match) throw new HttpError(404, 'Not found.');
   const filename = match[1];
@@ -98,7 +105,7 @@ export default {
     try {
       const url = new URL(request.url);
       const preview = env.PREVIEW === '1';
-      const integrationPreview = preview && url.hostname === env.PREVIEW_INTEGRATION_HOST && !!env.GITHUB_APP_PRIVATE_KEY;
+      const integrationPreview = preview && url.hostname === env.PREVIEW_INTEGRATION_HOST && !!env.RECIPES_DB;
       if (preview ? integrationPreview && url.pathname === '/mcp' : env.PREVIEW === '0' && url.hostname === env.MCP_HOST) {
         return await handleMcp(request, env, url);
       }
@@ -113,6 +120,15 @@ export default {
       if (preview && editor && !integrationPreview) throw new HttpError(404, 'Not found.');
       if (url.pathname === '/admin') return Response.redirect(new URL(prefix + url.search, url), 308);
       if (url.pathname.startsWith(prefix + 'api/')) return await handleEditorApi(request, env, url, identity);
+      const publicMatch = /^\/api\/recipes(?:\/([a-z0-9-]+\.json))?$/.exec(url.pathname);
+      if (publicMatch) {
+        if (request.method !== 'GET') {
+          return new Response(null, { status: 405, headers: { ...noCache, Allow: 'GET' } });
+        }
+        const store = recipeStore(env);
+        const filename = publicMatch[1];
+        return json(filename ? publicRecipe(await store.get(filename)) : (await store.all()).map(publicRecipe));
+      }
       const pathname = editor ? '/' + url.pathname.slice(prefix.length) : url.pathname;
       return await assets(request, env, pathname, editor || preview, preview && !integrationPreview);
     } catch (error) {

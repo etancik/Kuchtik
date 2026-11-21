@@ -6,7 +6,7 @@ import RecipeRepository from './repositories/RecipeRepository.js';
 import { renderRecipeCard } from './components/RecipeCard.js';
 import { getSelectedRecipeNames, collectIngredientsGroupedByRecipe, searchRecipesWithHighlighting, generateFilenameFromRecipeName } from './utils/recipeUtils.js';
 import { recipeUI } from './components/RecipeUI.js';
-import { workerHosted, readOnlyWorker, editorMode, switchView, workerRecipeAdapter } from './services/workerEditor.js';
+import { workerHosted, readOnlyWorker, editorMode, switchView, workerRecipeAdapter, publicWorkerRecipeAdapter } from './services/workerEditor.js';
 import { githubAuth } from './services/githubAuth.js';
 import { ingredientsExportService } from './services/ingredientsExport.js';
 import { i18n, t } from './i18n/i18n.js';
@@ -250,8 +250,8 @@ async function initializeApp() {
  * Set up the appropriate repository adapter based on authentication status
  */
 async function setupRepositoryAdapter() {
-  if (editorMode) {
-    state.repository.setGitHubAPI(workerRecipeAdapter);
+  if (workerHosted) {
+    state.repository.setGitHubAPI(editorMode ? workerRecipeAdapter : publicWorkerRecipeAdapter);
     return;
   }
   try {

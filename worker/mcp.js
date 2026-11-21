@@ -45,16 +45,12 @@ const tools = [
 async function search(store, query = '') {
   if (typeof query !== 'string') throw new HttpError(400, 'Query must be text.');
   const term = normalizeText(query.trim());
-  const filenames = await store.list();
-  if (!term) return filenames.map(filename => ({ filename }));
+  if (!term) return (await store.list()).map(filename => ({ filename }));
   const results = [];
-  for (let index = 0; index < filenames.length; index += 5) {
-    const recipes = await Promise.all(filenames.slice(index, index + 5).map(filename => store.get(filename)));
-    for (const recipe of recipes) {
-      const searchable = [recipe.name, ...recipe.tags, ...recipe.ingredients.map(item => item?.text ?? item)];
-      if (searchable.some(value => typeof value === 'string' && normalizeText(value).includes(term))) {
-        results.push({ filename: recipe.metadata.filename, name: recipe.name, tags: recipe.tags });
-      }
+  for (const recipe of await store.all()) {
+    const searchable = [recipe.name, ...(recipe.tags ?? []), ...(recipe.ingredients ?? []).map(item => item?.text ?? item)];
+    if (searchable.some(value => typeof value === 'string' && normalizeText(value).includes(term))) {
+      results.push({ filename: recipe.metadata.filename, name: recipe.name, tags: recipe.tags ?? [] });
     }
   }
   return results;

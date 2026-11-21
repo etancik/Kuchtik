@@ -34,10 +34,7 @@ export const workerRecipeAdapter = {
   getCurrentUser: () => null,
   getFileList: () => editorRequest('recipes'),
   getFile: filename => editorRequest('recipes/' + encodeURIComponent(filename)),
-  async getAllFiles() {
-    const files = await this.getFileList();
-    return Promise.all(files.map(filename => this.getFile(filename)));
-  },
+  getAllFiles: () => editorRequest('catalog'),
   async checkFileExists(filename) {
     return (await this.getFileList()).includes(filename);
   },
@@ -45,4 +42,18 @@ export const workerRecipeAdapter = {
   updateFile: (filename, recipe) => save('PUT', 'recipes/' + encodeURIComponent(filename),
     { recipe, revision: recipe.metadata?.sha }),
   deleteFile: (filename, revision) => save('DELETE', 'recipes/' + encodeURIComponent(filename), { revision }),
+};
+
+async function fetchPublicRecipes(path = '') {
+  const response = await fetch('/api/recipes' + path);
+  if (!response.ok) throw new Error('Unable to load recipes.');
+  return response.json();
+}
+
+export const publicWorkerRecipeAdapter = {
+  getAllFiles: () => fetchPublicRecipes(),
+  async getFileList() {
+    return (await this.getAllFiles()).map(recipe => recipe.metadata.filename);
+  },
+  getFile: filename => fetchPublicRecipes('/' + encodeURIComponent(filename)),
 };
