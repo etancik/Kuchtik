@@ -8,8 +8,21 @@ const recipeFields = {
   name: { type: 'string' },
   ingredients: {
     type: 'array',
-    items: { type: 'object', properties: { text: { type: 'string' }, exportDefault: { type: 'boolean' } },
-      required: ['text'], additionalProperties: false },
+    items: {
+      type: 'object',
+      properties: {
+        text: {
+          type: 'string',
+          description: 'One ingredient per item. In Czech, use amount, supported unit, then ingredient, separated by spaces. Use a decimal point instead of a comma or fraction. Examples: "1.5 ks salátové okurky", "1.5 lžíce octa", "0.5 lžička soli", "250 ml vody". Keep unit labels simple, such as g, kg, ml, l, ks, lžíce or lžička. Put preparation details and amount qualifiers in recipe notes when possible. If no amount is given, keep it unquantified.',
+        },
+        exportDefault: {
+          type: 'boolean',
+          description: 'Whether this ingredient is selected by default for shopping list export. Defaults to true. Set false for ingredients such as tap water when they do not need to be bought.',
+        },
+      },
+      required: ['text'],
+      additionalProperties: false,
+    },
   },
   instructions: textArray,
   tags: textArray,
