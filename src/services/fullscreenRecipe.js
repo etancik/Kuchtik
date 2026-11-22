@@ -144,21 +144,18 @@ async function createFullscreenModalHTML(recipe) {
   // Template data
   const archiveAction = recipe.metadata?.archived === true ? 'recipes.restoreFromArchive' : 'recipes.moveToArchive';
   const actionButtons = editorMode ? `
-    <div class="d-flex flex-wrap gap-2 align-items-center">
-      <button class="btn btn-outline-primary d-flex align-items-center fullscreen-edit-btn" 
-              id="fullscreenEditBtn"
-              title="${t('recipes.editRecipe')}">
-        <i class="fas fa-edit me-2"></i>
+    <div class="fullscreen-recipe-actions">
+      <button type="button" class="btn btn-outline-primary" id="fullscreenEditBtn">
+        <i class="fas fa-edit" aria-hidden="true"></i>
         <span>${t('common.edit')}</span>
       </button>
-      <button type="button" class="btn btn-outline-secondary d-flex align-items-center" id="fullscreenArchiveBtn">
-        <i class="fas fa-archive me-2" aria-hidden="true"></i>
+      <button type="button" class="btn btn-outline-secondary" id="fullscreenArchiveBtn">
+        <i class="fas fa-archive" aria-hidden="true"></i>
         <span>${t(archiveAction)}</span>
       </button>
-      <button class="btn btn-outline-danger d-flex align-items-center fullscreen-delete-btn" 
-              id="fullscreenDeleteBtn"
-              title="${t('recipes.deleteRecipe')}">
-        <i class="fas fa-trash me-1"></i>
+      <button type="button" class="btn btn-outline-danger" id="fullscreenDeleteBtn">
+        <i class="fas fa-trash" aria-hidden="true"></i>
+        <span>${t('common.delete')}</span>
       </button>
     </div>` : '';
 
