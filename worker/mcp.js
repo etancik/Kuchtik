@@ -33,7 +33,7 @@ function tool(name, description, properties, required, annotations) {
 }
 
 const tools = [
-  tool('search_recipes', 'Find recipes by name, ingredient, or tag. Leave query empty to list all recipes.',
+  tool('search_recipes', 'Find recipes by name, ingredient, or tag. Leave query empty to list all recipe names and filenames.',
     { query: { type: 'string' } }, [], { readOnlyHint: true, openWorldHint: false }),
   tool('get_recipe', 'Read a recipe and its current revision.',
     { filename }, ['filename'], { readOnlyHint: true, openWorldHint: false }),
@@ -45,9 +45,10 @@ const tools = [
 async function search(store, query = '') {
   if (typeof query !== 'string') throw new HttpError(400, 'Query must be text.');
   const term = normalizeText(query.trim());
-  if (!term) return (await store.list()).map(filename => ({ filename }));
+  const recipes = await store.all();
+  if (!term) return recipes.map(({ metadata, name }) => ({ filename: metadata.filename, name }));
   const results = [];
-  for (const recipe of await store.all()) {
+  for (const recipe of recipes) {
     const searchable = [recipe.name, ...(recipe.tags ?? []), ...(recipe.ingredients ?? []).map(item => item?.text ?? item)];
     if (searchable.some(value => typeof value === 'string' && normalizeText(value).includes(term))) {
       results.push({ filename: recipe.metadata.filename, name: recipe.name, tags: recipe.tags ?? [] });
