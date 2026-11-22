@@ -11,8 +11,8 @@ import RecipeRepository, {
   RepositoryEvents 
 } from '../repositories/RecipeRepository.js';
 
-// Mock GitHub API integration
-class MockGitHubAPI {
+// Mock the recipe adapter
+class MockRecipeAdapter {
   constructor() {
     this.files = new Map();
     this.networkDelay = 100;
@@ -94,7 +94,7 @@ class MockGitHubAPI {
 
 describe('RecipeRepository', () => {
   let repository;
-  let mockGitHubAPI;
+  let mockRecipeAdapter;
   let eventCallbacks;
 
   // Sample recipe data
@@ -120,7 +120,7 @@ describe('RecipeRepository', () => {
   };
 
   beforeEach(() => {
-    mockGitHubAPI = new MockGitHubAPI();
+    mockRecipeAdapter = new MockRecipeAdapter();
     repository = new RecipeRepository({
       cacheTimeout: 1000, // 1 second for faster testing
       maxRetries: 2,
@@ -128,7 +128,7 @@ describe('RecipeRepository', () => {
       syncStrategy: SyncStrategy.IMMEDIATE,
       enableLogging: false // Disable logging during tests
     });
-    repository.setGitHubAPI(mockGitHubAPI);
+    repository.setAdapter(mockRecipeAdapter);
     
     eventCallbacks = {};
     
@@ -140,7 +140,7 @@ describe('RecipeRepository', () => {
   });
 
   afterEach(() => {
-    mockGitHubAPI.reset();
+    mockRecipeAdapter.reset();
     // Use the repository's cleanup method to properly clean up timeouts and state
     repository.cleanup();
   });
@@ -173,11 +173,11 @@ describe('RecipeRepository', () => {
       expect(repo.config.optimisticUpdates).toBe(false);
     });
 
-    test('should set GitHub API integration', () => {
-      const mockAPI = new MockGitHubAPI();
+    test('should set the recipe adapter', () => {
+      const mockAPI = new MockRecipeAdapter();
       const repo = new RecipeRepository();
-      repo.setGitHubAPI(mockAPI);
-      expect(repo.githubAPI).toBe(mockAPI);
+      repo.setAdapter(mockAPI);
+      expect(repo.adapter).toBe(mockAPI);
     });
   });
 
@@ -229,9 +229,9 @@ describe('RecipeRepository', () => {
   // ============================================================================
 
   describe('getAll()', () => {
-    test('should get all recipes from GitHub API', async () => {
-      mockGitHubAPI.addMockFile('test-recipe.json', sampleRecipe);
-      mockGitHubAPI.addMockFile('recipe2.json', sampleRecipe2);
+    test('should get all recipes from recipe adapter', async () => {
+      mockRecipeAdapter.addMockFile('test-recipe.json', sampleRecipe);
+      mockRecipeAdapter.addMockFile('recipe2.json', sampleRecipe2);
 
       const recipes = await repository.getAll();
 
@@ -242,28 +242,28 @@ describe('RecipeRepository', () => {
     });
 
     test('should return cached recipes when available', async () => {
-      mockGitHubAPI.addMockFile('test-recipe.json', sampleRecipe);
+      mockRecipeAdapter.addMockFile('test-recipe.json', sampleRecipe);
       
       // First call - loads from API
       const recipes1 = await repository.getAll();
       expect(recipes1).toHaveLength(1);
 
       // Second call - should use cache
-      mockGitHubAPI.setNetworkFailure(true); // API would fail, but cache should work
+      mockRecipeAdapter.setNetworkFailure(true); // API would fail, but cache should work
       const recipes2 = await repository.getAll();
       expect(recipes2).toHaveLength(1);
       expect(recipes2[0]).toEqual(sampleRecipe);
     });
 
     test('should force refresh when forceRefresh is true', async () => {
-      mockGitHubAPI.addMockFile('test-recipe.json', sampleRecipe);
+      mockRecipeAdapter.addMockFile('test-recipe.json', sampleRecipe);
       
       // First call
       await repository.getAll();
       
       // Update mock data
       const updatedRecipe = { ...sampleRecipe, description: 'Updated description' };
-      mockGitHubAPI.files.set('test-recipe.json', updatedRecipe);
+      mockRecipeAdapter.files.set('test-recipe.json', updatedRecipe);
       
       // Force refresh should get updated data
       const recipes = await repository.getAll({ forceRefresh: true });
@@ -271,7 +271,7 @@ describe('RecipeRepository', () => {
     });
 
     test('should include metadata when requested', async () => {
-      mockGitHubAPI.addMockFile('test-recipe.json', sampleRecipe);
+      mockRecipeAdapter.addMockFile('test-recipe.json', sampleRecipe);
       
       const result = await repository.getAll({ includeMetadata: true });
       
@@ -283,7 +283,7 @@ describe('RecipeRepository', () => {
     });
 
     test('should handle API errors gracefully', async () => {
-      mockGitHubAPI.setNetworkFailure(true, 'API Error');
+      mockRecipeAdapter.setNetworkFailure(true, 'API Error');
 
       await expect(repository.getAll()).rejects.toThrow('API Error');
       expect(repository.getState()).toBe(RepositoryState.ERROR);
@@ -293,7 +293,7 @@ describe('RecipeRepository', () => {
 
   describe('getByName()', () => {
     test('should get single recipe by name', async () => {
-      mockGitHubAPI.addMockFile('test-recipe.json', sampleRecipe);
+      mockRecipeAdapter.addMockFile('test-recipe.json', sampleRecipe);
 
       const recipe = await repository.getByName('test-recipe.json');
       
@@ -301,13 +301,13 @@ describe('RecipeRepository', () => {
     });
 
     test('should return cached recipe when available', async () => {
-      mockGitHubAPI.addMockFile('test-recipe.json', sampleRecipe);
+      mockRecipeAdapter.addMockFile('test-recipe.json', sampleRecipe);
       
       // First call
       const recipe1 = await repository.getByName('test-recipe.json');
       
       // Second call with API failure should use cache
-      mockGitHubAPI.setNetworkFailure(true);
+      mockRecipeAdapter.setNetworkFailure(true);
       const recipe2 = await repository.getByName('test-recipe.json');
       
       expect(recipe2).toEqual(recipe1);
@@ -319,14 +319,14 @@ describe('RecipeRepository', () => {
     });
 
     test('should force refresh when requested', async () => {
-      mockGitHubAPI.addMockFile('test-recipe.json', sampleRecipe);
+      mockRecipeAdapter.addMockFile('test-recipe.json', sampleRecipe);
       
       // First call
       await repository.getByName('test-recipe.json');
       
       // Update mock data
       const updatedRecipe = { ...sampleRecipe, servings: 6 };
-      mockGitHubAPI.files.set('test-recipe.json', updatedRecipe);
+      mockRecipeAdapter.files.set('test-recipe.json', updatedRecipe);
       
       // Force refresh
       const recipe = await repository.getByName('test-recipe.json', { forceRefresh: true });
@@ -341,7 +341,7 @@ describe('RecipeRepository', () => {
       });
 
       expect(createdRecipe).toEqual(sampleRecipe);
-      expect(mockGitHubAPI.files.has('test-recipe.json')).toBe(true);
+      expect(mockRecipeAdapter.files.has('test-recipe.json')).toBe(true);
       expect(eventCallbacks[RepositoryEvents.RECIPE_CREATED]).toHaveBeenCalledWith(sampleRecipe);
     });
 
@@ -360,7 +360,7 @@ describe('RecipeRepository', () => {
     });
 
     test('should handle creation errors with optimistic update rollback', async () => {
-      mockGitHubAPI.setNetworkFailure(true, 'Creation failed');
+      mockRecipeAdapter.setNetworkFailure(true, 'Creation failed');
 
       await expect(repository.create(sampleRecipe, {
         syncStrategy: SyncStrategy.IMMEDIATE,
@@ -388,7 +388,7 @@ describe('RecipeRepository', () => {
     test('should update recipe with immediate sync', async () => {
       // Setup existing recipe
       const filename = repository.getFilenameFromRecipeName(sampleRecipe.name);
-      mockGitHubAPI.addMockFile(filename, sampleRecipe);
+      mockRecipeAdapter.addMockFile(filename, sampleRecipe);
       
       const updatedData = { ...sampleRecipe, servings: 6 };
       const updatedRecipe = await repository.update(sampleRecipe.name, updatedData, {
@@ -396,13 +396,13 @@ describe('RecipeRepository', () => {
       });
 
       expect(updatedRecipe.servings).toBe(6);
-      expect(mockGitHubAPI.files.get(filename).servings).toBe(6);
+      expect(mockRecipeAdapter.files.get(filename).servings).toBe(6);
       expect(eventCallbacks[RepositoryEvents.RECIPE_UPDATED]).toHaveBeenCalledWith(updatedData);
     });
 
     test('should update recipe with optimistic update', async () => {
       const filename = repository.getFilenameFromRecipeName(sampleRecipe.name);
-      mockGitHubAPI.addMockFile(filename, sampleRecipe);
+      mockRecipeAdapter.addMockFile(filename, sampleRecipe);
       
       const updatedData = { ...sampleRecipe, servings: 8 };
       await repository.update(sampleRecipe.name, updatedData, {
@@ -417,13 +417,13 @@ describe('RecipeRepository', () => {
 
     test('should handle update errors with rollback', async () => {
       const filename = repository.getFilenameFromRecipeName(sampleRecipe.name);
-      mockGitHubAPI.addMockFile(filename, sampleRecipe);
+      mockRecipeAdapter.addMockFile(filename, sampleRecipe);
       
       // First get the recipe in cache
       await repository.getByName(sampleRecipe.name);
       
       // Now make API fail and try update
-      mockGitHubAPI.setNetworkFailure(true, 'Update failed');
+      mockRecipeAdapter.setNetworkFailure(true, 'Update failed');
       
       const updatedData = { ...sampleRecipe, servings: 10 };
       await expect(repository.update(sampleRecipe.name, updatedData, {
@@ -440,14 +440,14 @@ describe('RecipeRepository', () => {
   describe('delete()', () => {
     test('should delete recipe with immediate sync', async () => {
       const filename = repository.getFilenameFromRecipeName(sampleRecipe.name);
-      mockGitHubAPI.addMockFile(filename, sampleRecipe);
+      mockRecipeAdapter.addMockFile(filename, sampleRecipe);
       
       const result = await repository.delete(sampleRecipe.name, {
         syncStrategy: SyncStrategy.IMMEDIATE
       });
 
       expect(result).toBe(true);
-      expect(mockGitHubAPI.files.has(filename)).toBe(false);
+      expect(mockRecipeAdapter.files.has(filename)).toBe(false);
       expect(eventCallbacks[RepositoryEvents.RECIPE_DELETED]).toHaveBeenCalledWith({
         recipeName: sampleRecipe.name,
         data: expect.any(Object)
@@ -456,7 +456,7 @@ describe('RecipeRepository', () => {
 
     test('should delete recipe with optimistic update', async () => {
       const filename = repository.getFilenameFromRecipeName(sampleRecipe.name);
-      mockGitHubAPI.addMockFile(filename, sampleRecipe);
+      mockRecipeAdapter.addMockFile(filename, sampleRecipe);
       
       // First cache the recipe
       await repository.getByName(sampleRecipe.name);
@@ -473,14 +473,14 @@ describe('RecipeRepository', () => {
 
     test('should handle deletion errors with rollback', async () => {
       const filename = repository.getFilenameFromRecipeName(sampleRecipe.name);
-      mockGitHubAPI.addMockFile(filename, sampleRecipe);
+      mockRecipeAdapter.addMockFile(filename, sampleRecipe);
       
       // First cache the recipe
       const cachedBefore = await repository.getByName(sampleRecipe.name);
       expect(cachedBefore).toEqual(sampleRecipe);
       
       // Make API fail
-      mockGitHubAPI.setNetworkFailure(true, 'Delete failed');
+      mockRecipeAdapter.setNetworkFailure(true, 'Delete failed');
       
       await expect(repository.delete(sampleRecipe.name, {
         syncStrategy: SyncStrategy.IMMEDIATE,
@@ -513,14 +513,14 @@ describe('RecipeRepository', () => {
 
       const statusAfter = repository.getSyncStatus();
       expect(statusAfter.pendingCount).toBe(0);
-      expect(mockGitHubAPI.files.size).toBe(2);
+      expect(mockRecipeAdapter.files.size).toBe(2);
       expect(eventCallbacks[RepositoryEvents.SYNC_COMPLETED]).toHaveBeenCalled();
     });
 
     test('should handle sync failures gracefully', async () => {
       await repository.create(sampleRecipe, { syncStrategy: SyncStrategy.MANUAL });
       
-      mockGitHubAPI.setNetworkFailure(true, 'Sync failed');
+      mockRecipeAdapter.setNetworkFailure(true, 'Sync failed');
       
       await expect(repository.syncAll()).rejects.toThrow();
       expect(eventCallbacks[RepositoryEvents.SYNC_FAILED]).toHaveBeenCalled();
@@ -545,8 +545,8 @@ describe('RecipeRepository', () => {
 
   describe('Cache Management', () => {
     test('should clear all cache', async () => {
-      mockGitHubAPI.addMockFile('recipe1.json', sampleRecipe);
-      mockGitHubAPI.addMockFile('recipe2.json', sampleRecipe2);
+      mockRecipeAdapter.addMockFile('recipe1.json', sampleRecipe);
+      mockRecipeAdapter.addMockFile('recipe2.json', sampleRecipe2);
       
       // Load recipes to cache them
       await repository.getAll();
@@ -562,8 +562,8 @@ describe('RecipeRepository', () => {
     });
 
     test('should clear specific cache entry', async () => {
-      mockGitHubAPI.addMockFile('test-recipe.json', sampleRecipe);
-      mockGitHubAPI.addMockFile('recipe2.json', sampleRecipe2);
+      mockRecipeAdapter.addMockFile('test-recipe.json', sampleRecipe);
+      mockRecipeAdapter.addMockFile('recipe2.json', sampleRecipe2);
       
       await repository.getAll();
       
@@ -577,7 +577,7 @@ describe('RecipeRepository', () => {
     });
 
     test('should provide cache metadata', async () => {
-      mockGitHubAPI.addMockFile('test-recipe.json', sampleRecipe);
+      mockRecipeAdapter.addMockFile('test-recipe.json', sampleRecipe);
       
       await repository.getByName('test-recipe.json');
       
@@ -592,7 +592,7 @@ describe('RecipeRepository', () => {
     });
 
     test('should identify expired cache entries', async () => {
-      mockGitHubAPI.addMockFile('recipe1.json', sampleRecipe);
+      mockRecipeAdapter.addMockFile('recipe1.json', sampleRecipe);
       
       await repository.getByName('recipe1.json');
       
@@ -617,7 +617,7 @@ describe('RecipeRepository', () => {
     });
 
     test('should emit state change events', async () => {
-      mockGitHubAPI.addMockFile('recipe1.json', sampleRecipe);
+      mockRecipeAdapter.addMockFile('recipe1.json', sampleRecipe);
       
       const statePromise = repository.getAll();
       
@@ -631,8 +631,8 @@ describe('RecipeRepository', () => {
     });
 
     test('should detect busy state during operations', async () => {
-      mockGitHubAPI.addMockFile('recipe1.json', sampleRecipe);
-      mockGitHubAPI.networkDelay = 200; // Add delay to check busy state
+      mockRecipeAdapter.addMockFile('recipe1.json', sampleRecipe);
+      mockRecipeAdapter.networkDelay = 200; // Add delay to check busy state
       
       const promise = repository.getAll();
       
@@ -712,7 +712,7 @@ describe('RecipeRepository', () => {
       await repository.create(sampleRecipe);
       
       // Simulate network failure
-      mockGitHubAPI.setNetworkFailure(true);
+      mockRecipeAdapter.setNetworkFailure(true);
       
       // Try to update with optimistic updates
       const updatedData = { ...sampleRecipe, servings: 10 };
@@ -722,7 +722,7 @@ describe('RecipeRepository', () => {
       })).rejects.toThrow();
       
       // Restore network
-      mockGitHubAPI.setNetworkFailure(false);
+      mockRecipeAdapter.setNetworkFailure(false);
       
       // Data should be consistent (not updated due to failure)
       // For optimistic updates with rollback, the recipe should be back to original state
@@ -758,9 +758,9 @@ describe('RecipeRepository', () => {
         instructions: ['step 3']
       };
 
-      await mockGitHubAPI.createFile('recipe-1.json', recipe1);
-      await mockGitHubAPI.createFile('recipe-2.json', recipe2);
-      await mockGitHubAPI.createFile('recipe-3.json', recipe3);
+      await mockRecipeAdapter.createFile('recipe-1.json', recipe1);
+      await mockRecipeAdapter.createFile('recipe-2.json', recipe2);
+      await mockRecipeAdapter.createFile('recipe-3.json', recipe3);
       
       // Load all recipes into cache initially
       await repository.getAll();
@@ -889,7 +889,7 @@ describe('RecipeRepository', () => {
         instructions: ['original step']
       };
       
-      await mockGitHubAPI.createFile('test-recipe.json', originalRecipe);
+      await mockRecipeAdapter.createFile('test-recipe.json', originalRecipe);
       
       // Load the recipe to populate cache
       await repository.getAll();
@@ -948,8 +948,8 @@ describe('RecipeRepository', () => {
       const recipe1 = { name: 'Recipe 1', ingredients: [{ text: 'ingredient 1', exportDefault: true }], instructions: ['step 1'] };
       const recipe2 = { name: 'Recipe 2', ingredients: [{ text: 'ingredient 2', exportDefault: true }], instructions: ['step 2'] };
       
-      await mockGitHubAPI.createFile('recipe-1.json', recipe1);
-      await mockGitHubAPI.createFile('recipe-2.json', recipe2);
+      await mockRecipeAdapter.createFile('recipe-1.json', recipe1);
+      await mockRecipeAdapter.createFile('recipe-2.json', recipe2);
       
       // Load initial recipes
       await repository.getAll();

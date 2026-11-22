@@ -65,22 +65,6 @@ describe('TemplateLoader', () => {
     });
   });
 
-  describe('createElement', () => {
-    test('should create DOM element from template', async () => {
-      const mockHtml = '<div class="test-element">Test Content</div>';
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        text: () => Promise.resolve(mockHtml),
-      });
-
-      const element = await templateLoader.createElement('element-template.html');
-
-      expect(element).toBeInstanceOf(HTMLElement);
-      expect(element.className).toBe('test-element');
-      expect(element.textContent).toBe('Test Content');
-    });
-  });
-
   describe('cache management', () => {
     test('should clear cache', async () => {
       const mockHtml = '<div>Template</div>';

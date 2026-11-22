@@ -6,8 +6,7 @@ import RecipeRepository from './repositories/RecipeRepository.js';
 import { renderRecipeCard } from './components/RecipeCard.js';
 import { getSelectedRecipeNames, collectIngredientsGroupedByRecipe, searchRecipesWithHighlighting, generateFilenameFromRecipeName } from './utils/recipeUtils.js';
 import { recipeUI } from './components/RecipeUI.js';
-import { workerHosted, editorMode, initializeWorkerSession, signInToWorker, workerRecipeAdapter, publicWorkerRecipeAdapter } from './services/workerEditor.js';
-import { githubAuth } from './services/githubAuth.js';
+import { editorMode, initializeWorkerSession, signInToWorker, workerRecipeAdapter, publicWorkerRecipeAdapter } from './services/workerEditor.js';
 import { ingredientsExportService } from './services/ingredientsExport.js';
 import { i18n, t } from './i18n/i18n.js';
 import { handleFullscreenNavigation, initializeFullscreenFromUrl } from './services/fullscreenRecipe.js';
@@ -82,8 +81,7 @@ async function initializeApp() {
       retryDelay: 1000
     });
     
-    // Auto-select the appropriate adapter based on authentication
-    await setupRepositoryAdapter();
+    state.repository.setAdapter(editorMode ? workerRecipeAdapter : publicWorkerRecipeAdapter);
     
     // Set up repository event handlers
     setupRepositoryEventHandlers();
@@ -182,33 +180,6 @@ async function initializeApp() {
     });
   }
   
-  // Setup mode toggle button
-  const modeToggleBtn = document.getElementById('modeToggleBtn');
-  if (modeToggleBtn) {
-    modeToggleBtn.addEventListener('click', async () => {
-            // If not authenticated, try to authenticate
-      if (!githubAuth.isAuthenticated()) {
-        console.log('🔐 User not authenticated, attempting to authenticate...');
-        const token = await githubAuth.authenticate();
-        if (token) {
-          // Re-setup repository with authenticated adapter
-          await setupRepositoryAdapter();
-          updateAuthStatus();
-          console.log('✅ Authentication successful, switched to authenticated mode');
-        } else {
-          console.log('❌ Authentication failed');
-          return;
-        }
-      } else {
-        githubAuth.signOut();
-        // Re-setup repository with public adapter
-        await setupRepositoryAdapter();
-        updateAuthStatus();
-        console.log('👋 Signed out, switched to public mode');
-      }
-    });
-  }
-  
   // Initialize deeplink functionality
   console.log('🔗 Setting up deeplink navigation...');
   handleFullscreenNavigation(async (normalizedId) => {
@@ -234,33 +205,6 @@ async function initializeApp() {
   });
   
   console.log('✅ Main application initialized successfully');
-}
-
-/**
- * Set up the appropriate repository adapter based on authentication status
- */
-async function setupRepositoryAdapter() {
-  if (workerHosted) {
-    state.repository.setGitHubAPI(editorMode ? workerRecipeAdapter : publicWorkerRecipeAdapter);
-    return;
-  }
-  try {
-    // Check if user is authenticated
-    if (githubAuth.isAuthenticated()) {
-      console.log('🔑 User authenticated - using full GitHub API adapter');
-      const { gitHubAPIAdapter } = await import('./adapters/GitHubAPIAdapter.js');
-      state.repository.setGitHubAPI(gitHubAPIAdapter);
-    } else {
-      console.log('🌍 No authentication - using public read-only adapter');
-      const { publicGitHubAdapter } = await import('./adapters/PublicGitHubAdapter.js');
-      state.repository.setGitHubAPI(publicGitHubAdapter);
-    }
-  } catch (error) {
-    console.error('❌ Failed to setup repository adapter:', error);
-    // Fallback to public adapter
-    const { publicGitHubAdapter } = await import('./adapters/PublicGitHubAdapter.js');
-    state.repository.setGitHubAPI(publicGitHubAdapter);
-  }
 }
 
 /**
@@ -465,9 +409,9 @@ function renderRecipes(recipes) {
         <div class="alert alert-info text-center" role="alert">
           <h4><i class="fas fa-${isSearching ? 'search' : 'utensils'} me-2"></i>${title}</h4>
           <p>${message}</p>
-          ${!isSearching && githubAuth.isAuthenticated() ? 
+          ${!isSearching && editorMode ?
             `<button class="btn btn-primary" id="createEmptyRecipeBtn"><i class="fas fa-plus me-2"></i>${t('recipes.createRecipe')}</button>` :
-            !isSearching && (!workerHosted || workerSession === false) ? `<p><i class="fas fa-info-circle me-2"></i>${t('recipes.signInToManage')}</p>` : ''
+            !isSearching && workerSession === false ? `<p><i class="fas fa-info-circle me-2"></i>${t('recipes.signInToManage')}</p>` : ''
           }
         </div>
       </div>
@@ -493,9 +437,6 @@ function renderRecipes(recipes) {
     updateExportButtonVisibility(exportBtn);
   }
 }
-
-// Make renderRecipes available globally for RecipeUI
-window.renderRecipes = renderRecipes;
 
 // Make recipeUI available globally for template click handlers
 window.recipeUI = recipeUI;
@@ -560,71 +501,15 @@ function updateAuthStatus() {
   const authBtn = document.getElementById('authBtn');
   const createBtn = document.getElementById('createRecipeBtn');
   
-  console.log('🔧 DEBUG: updateAuthStatus called');
-  console.log('🔧 DEBUG: isAuthenticated:', githubAuth.isAuthenticated());
-  console.log('🔧 DEBUG: createBtn exists:', !!createBtn);
-  
   if (!authBtn) return;
 
-  if (workerHosted) {
-    const showSignIn = workerSession === false;
-    authBtn.hidden = !showSignIn;
-    authBtn.classList.toggle('d-flex', showSignIn);
-    authBtn.setAttribute('aria-label', t('navigation.signIn'));
-    authBtn.onclick = signInToWorker;
-    createBtn?.setAttribute('aria-label', t('recipes.createRecipe'));
-    createBtn?.style.setProperty('display', editorMode ? 'inline-flex' : 'none', 'important');
-    return;
-  }
-
-  authBtn.hidden = false;
-  authBtn.classList.add('d-flex');
-  if (githubAuth.isAuthenticated()) {
-    const userInfo = githubAuth.getUserInfo();
-    const userName = userInfo?.name || userInfo?.login || t('navigation.user');
-    authBtn.innerHTML = `<i class="fas fa-user me-2"></i>${userName}`;
-    authBtn.classList.remove('btn-outline-primary');
-    authBtn.classList.add('btn-outline-success');
-    
-    if (createBtn) {
-      createBtn.style.setProperty('display', 'inline-flex', 'important'); // Match updateButtonStates display style
-      console.log('🔧 DEBUG: Showing create button for authenticated user');
-    }
-    
-    // Add sign out functionality
-    authBtn.onclick = () => {
-      if (confirm(t('confirmations.signOutConfirm'))) {
-        githubAuth.signOut();
-        updateAuthStatus();
-        location.reload();
-      }
-    };
-  } else {
-    authBtn.innerHTML = `<i class="fas fa-sign-in-alt me-2"></i><span data-i18n="navigation.signIn">${t('navigation.signIn')}</span>`;
-    authBtn.classList.remove('btn-outline-success');
-    authBtn.classList.add('btn-outline-primary');
-    
-    if (createBtn) {
-      createBtn.style.setProperty('display', 'none', 'important'); // Hide for unauthenticated users
-      console.log('🔧 DEBUG: Hiding create button for unauthenticated user');
-      console.log('🔧 DEBUG: createBtn.style.display after setting:', createBtn.style.display);
-      console.log('🔧 DEBUG: createBtn computed style:', window.getComputedStyle(createBtn).display);
-    }
-    
-    // Add sign in functionality
-    authBtn.onclick = async () => {
-      try {
-        await githubAuth.authenticate();
-        updateAuthStatus();
-        // Refresh recipes after authentication
-        if (state.repository) {
-          await refreshRecipesFromCache();
-        }
-      } catch (error) {
-        alert(t('confirmations.authenticationFailed', { error: error.message }));
-      }
-    };
-  }
+  const showSignIn = workerSession === false;
+  authBtn.hidden = !showSignIn;
+  authBtn.classList.toggle('d-flex', showSignIn);
+  authBtn.setAttribute('aria-label', t('navigation.signIn'));
+  authBtn.onclick = signInToWorker;
+  createBtn?.setAttribute('aria-label', t('recipes.createRecipe'));
+  createBtn?.style.setProperty('display', editorMode ? 'inline-flex' : 'none', 'important');
 }
 
 /**

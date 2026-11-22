@@ -7,7 +7,7 @@ import { generateFilenameFromRecipeName } from '../utils/recipeUtils.js';
  * - Offline-first caching with intelligent synchronization
  * - Optimistic updates for immediate UI feedback
  * - Automatic retry logic with exponential backoff
- * - GitHub API integration with fallback strategies
+ * - Recipe adapter with fallback strategies
  * - Event-driven notifications for UI updates
  * - Conflict resolution and data consistency
  */
@@ -77,8 +77,8 @@ class RecipeRepository {
     this.retryQueues = new Map();
     this.activeTimeouts = new Set(); // Track active timeouts for cleanup
     
-    // Initialize GitHub API integration
-    this.githubAPI = null; // Will be injected
+    // Initialize recipe storage adapter
+    this.adapter = null; // Will be injected
     
     this.log('🏗️ RecipeRepository initialized', this.config);
   }
@@ -528,12 +528,12 @@ class RecipeRepository {
   // ============================================================================
 
   /**
-   * Set GitHub API integration
-   * @param {Object} githubAPI - GitHub API service instance
+   * Set the recipe storage adapter
+   * @param {Object} adapter - Recipe storage adapter
    */
-  setGitHubAPI(githubAPI) {
-    this.githubAPI = githubAPI;
-    this.log('🔗 GitHub API integration configured');
+  setAdapter(adapter) {
+    this.adapter = adapter;
+    this.log('🔗 Recipe storage adapter configured');
   }
 
   /**
@@ -629,30 +629,30 @@ class RecipeRepository {
   // ============================================================================
 
   /**
-   * Load all recipes from source (GitHub API) using efficient batch loading
+   * Load all recipes from the adapter using efficient batch loading
    * @private
    * @returns {Promise<Array>} Array of recipe objects
    */
   async loadFromSource() {
-    if (!this.githubAPI) {
-      throw new Error('GitHub API not configured');
+    if (!this.adapter) {
+      throw new Error('Recipe storage adapter not configured');
     }
 
     try {
       // Use the new batch loading method if available
-      if (typeof this.githubAPI.getAllFiles === 'function') {
+      if (typeof this.adapter.getAllFiles === 'function') {
         this.log('🚀 Using batch loading for better performance...');
-        return await this.githubAPI.getAllFiles();
+        return await this.adapter.getAllFiles();
       }
       
       // Fallback to sequential loading for backward compatibility
       this.log('⚠️ Using fallback sequential loading (slower)');
-      const filenames = await this.githubAPI.getFileList();
+      const filenames = await this.adapter.getFileList();
       const recipes = [];
 
       for (const filename of filenames) {
         try {
-          const recipe = await this.githubAPI.getFile(filename);
+          const recipe = await this.adapter.getFile(filename);
           if (recipe) {
             recipes.push(recipe);
           }
@@ -668,12 +668,12 @@ class RecipeRepository {
       this.log('❌ Batch loading failed, falling back to sequential loading:', error.message);
       
       // Final fallback to sequential loading
-      const filenames = await this.githubAPI.getFileList();
+      const filenames = await this.adapter.getFileList();
       const recipes = [];
 
       for (const filename of filenames) {
         try {
-          const recipe = await this.githubAPI.getFile(filename);
+          const recipe = await this.adapter.getFile(filename);
           if (recipe) {
             recipes.push(recipe);
           }
@@ -688,22 +688,22 @@ class RecipeRepository {
   }
 
   /**
-   * Load single recipe from source (GitHub API)
+   * Load single recipe from the adapter
    * @private
    * @param {string} recipeName - Recipe filename
    * @returns {Promise<Object|null>} Recipe object or null
    */
   async loadRecipeFromSource(recipeName) {
-    if (!this.githubAPI) {
-      throw new Error('GitHub API not configured');
+    if (!this.adapter) {
+      throw new Error('Recipe storage adapter not configured');
     }
 
     try {
-      const exists = await this.githubAPI.checkFileExists(recipeName);
+      const exists = await this.adapter.checkFileExists(recipeName);
       if (!exists) {
         return null;
       }
-      return await this.githubAPI.getFile(recipeName);
+      return await this.adapter.getFile(recipeName);
     } catch (error) {
       this.log(`⚠️ Failed to load recipe ${recipeName}:`, error.message);
       return null;
@@ -711,7 +711,7 @@ class RecipeRepository {
   }
 
   /**
-   * Sync a specific operation with GitHub
+   * Sync a specific operation with the adapter
    * @private
    * @param {string} operationId - Operation ID
    * @returns {Promise<void>}
@@ -722,8 +722,8 @@ class RecipeRepository {
       throw new Error(`Operation not found: ${operationId}`);
     }
 
-    if (!this.githubAPI) {
-      throw new Error('GitHub API not configured');
+    if (!this.adapter) {
+      throw new Error('Recipe storage adapter not configured');
     }
 
     try {
@@ -732,13 +732,13 @@ class RecipeRepository {
 
       switch (operation.type) {
         case OperationType.CREATE:
-          await this.githubAPI.createFile(filename, operation.data);
+          await this.adapter.createFile(filename, operation.data);
           break;
         case OperationType.UPDATE:
-          await this.githubAPI.updateFile(filename, operation.data);
+          await this.adapter.updateFile(filename, operation.data);
           break;
         case OperationType.DELETE:
-          await this.githubAPI.deleteFile(filename, operation.revision ?? operation.originalData?.metadata?.sha);
+          await this.adapter.deleteFile(filename, operation.revision ?? operation.originalData?.metadata?.sha);
           break;
         default:
           throw new Error(`Unknown operation type: ${operation.type}`);

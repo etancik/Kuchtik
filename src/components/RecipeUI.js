@@ -4,18 +4,16 @@
  */
 
 import { templateLoader } from '../utils/templateLoader.js';
-import RecipeRepository from '../repositories/RecipeRepository.js';
 import { escapeHtml } from '../utils/recipeUtils.js';
 import { t } from '../i18n/i18n.js';
 import { editorMode } from '../services/workerEditor.js';
-import { gitHubAPIAdapter } from '../adapters/GitHubAPIAdapter.js';
 
 class RecipeUI {
-  constructor(repository = null) {
+  constructor() {
     this.isEditing = false;
     this.editingRecipe = null;
     this.modal = null;
-    this.repository = repository; // Use provided repository if available
+    this.repository = null;
     this.draggedElement = null; // Track currently dragged element
   }
 
@@ -25,24 +23,6 @@ class RecipeUI {
   async initialize() {
     console.log('🚀 Initializing RecipeUI with RecipeRepository...');
     try {
-      // Only initialize repository if it doesn't already exist
-      if (!this.repository) {
-        // Initialize repository with GitHub adapter
-        this.repository = new RecipeRepository({
-          syncStrategy: 'immediate',
-          cacheExpiry: 5 * 60 * 1000, // 5 minutes
-          enableOptimisticUpdates: true,
-          maxRetries: 3,
-          retryDelay: 1000
-        });
-
-        // Set the GitHub API adapter
-        this.repository.setGitHubAPI(gitHubAPIAdapter);
-
-        // Set up event listeners for repository events
-        this.setupRepositoryEventHandlers();
-      }
-
       // Load and inject the modal template
       console.log('📄 Loading modal template...');
       const modalHtml = await templateLoader.loadTemplate('src/templates/recipe-modal.html');
@@ -141,173 +121,6 @@ class RecipeUI {
       console.error('❌ Failed to initialize RecipeUI:', error);
       throw error;
     }
-  }
-
-  /**
-   * Set up event listeners for repository events
-   */
-  setupRepositoryEventHandlers() {
-    // Listen for optimistic updates
-    this.repository.on('optimisticUpdate', (event) => {
-      console.log('⚡ Optimistic update:', event);
-      this.handleOptimisticUpdate(event);
-    });
-
-    // Listen for successful operations
-    this.repository.on('operationSuccess', (event) => {
-      console.log('✅ Operation success:', event);
-      this.handleOperationSuccess(event);
-    });
-
-    // Listen for operation failures
-    this.repository.on('operationFailure', (event) => {
-      console.log('❌ Operation failure:', event);
-      this.handleOperationFailure(event);
-    });
-
-    // Listen for rollbacks
-    this.repository.on('rollback', (event) => {
-      console.log('↩️ Rollback occurred:', event);
-      this.handleRollback(event);
-    });
-
-    // Add debounce timeout to prevent concurrent refresh calls
-    this.refreshTimeout = null;
-
-    // Listen for cache updates
-    this.repository.on('cacheUpdated', (event) => {
-      console.log('🔄 Cache updated:', event);
-      this.debouncedRefresh();
-    });
-
-    // Listen for recipes updates (when the full recipe list changes)
-    this.repository.on('recipesUpdated', (recipes) => {
-      console.log('📝 Recipes updated, refreshing display with', recipes.length, 'recipes');
-      this.debouncedRefresh();
-    });
-
-    // Listen for sync status changes
-    this.repository.on('syncStatusChange', (event) => {
-      console.log('🔄 Sync status change:', event);
-      this.handleSyncStatusChange(event);
-    });
-  }
-
-  /**
-   * Handle optimistic updates
-   * @param {Object} event - Event data
-   */
-  handleOptimisticUpdate(event) {
-    const { operation, recipeId, recipe } = event;
-    
-    switch (operation) {
-      case 'create':
-        this.showSuccessMessage(t('operations.creating', { recipeName: recipe.name }));
-        break;
-      case 'update':
-        this.showSuccessMessage(t('operations.updating', { recipeName: recipe.name }));
-        break;
-      case 'delete':
-        this.showSuccessMessage(t('operations.deleting', { recipeId }));
-        break;
-    }
-
-    // Trigger UI refresh
-    this.refreshRecipesDisplay();
-  }
-
-  /**
-   * Handle operation success
-   * @param {Object} event - Event data
-   */
-  handleOperationSuccess(event) {
-    const { operation } = event;
-    
-    let message;
-    switch (operation) {
-      case 'create':
-        message = t('operations.createSuccess');
-        break;
-      case 'update':
-        message = t('operations.updateSuccess');
-        break;
-      case 'delete':
-        message = t('operations.deleteSuccess');
-        break;
-      default:
-        message = t('operations.operationSuccess');
-    }
-    
-    this.showSuccessMessage(message);
-  }
-
-  /**
-   * Handle operation failures
-   * @param {Object} event - Event data
-   */
-  handleOperationFailure(event) {
-    const { operation, error } = event;
-    
-    let message;
-    switch (operation) {
-      case 'create':
-        message = t('operations.createFailed', { error: error.message });
-        break;
-      case 'update':
-        message = t('operations.updateFailed', { error: error.message });
-        break;
-      case 'delete':
-        message = t('operations.deleteFailed', { error: error.message });
-        break;
-      default:
-        message = t('operations.operationFailed', { error: error.message });
-    }
-    
-    this.showErrorMessage(message);
-  }
-
-  /**
-   * Handle rollbacks
-   * @param {Object} event - Event data
-   */
-  handleRollback(event) {
-    const { operation, recipeId, error } = event;
-    this.showWarningMessage(t('operations.rollbackMessage', { operation, recipeId, error: error.message }));
-    this.refreshRecipesDisplay();
-  }
-
-  /**
-   * Handle cache updates
-   */
-  handleCacheUpdate() {
-    // Refresh the display when cache is updated
-    this.refreshRecipesDisplay();
-  }
-
-  /**
-   * Debounced refresh to prevent concurrent refresh calls
-   */
-  debouncedRefresh() {
-    // Clear existing timeout
-    if (this.refreshTimeout) {
-      globalThis.clearTimeout(this.refreshTimeout);
-    }
-    
-    // Set new timeout
-    this.refreshTimeout = globalThis.setTimeout(() => {
-      this.refreshRecipesDisplay();
-      this.refreshTimeout = null;
-    }, 10); // Small delay to batch multiple rapid events
-  }
-
-  /**
-   * Handle sync status changes
-   * @param {Object} event - Event data
-   */
-  handleSyncStatusChange(event) {
-    const { status } = event;
-    // Could show sync status in UI (e.g., spinning indicator)
-    console.log('Sync status:', status);
   }
 
   /**
@@ -572,22 +385,7 @@ class RecipeUI {
           lastModified: new Date().toISOString()
         };
       }
-    } else if (!this.isEditing && this.repository.githubAPI.isAuthenticated()) {
-      // Add metadata for new recipes only
-      const userInfo = this.repository.githubAPI.getCurrentUser();
-      const now = new Date().toISOString();
-      
-      recipeData.metadata = {
-        id: null, // Will be set after GitHub API response
-        sha: null, // Will be set after GitHub API response
-        createdDate: now,
-        createdAt: now, // Add both for compatibility
-        author: userInfo?.login || 'Anonymous',
-        lastModified: now,
-        filename: null // Will be set by the repository when saving
-      };
     } else if (!this.isEditing) {
-      // Even for non-authenticated users, add basic timestamp for sorting
       const now = new Date().toISOString();
       recipeData.metadata = {
         createdDate: now,
@@ -597,38 +395,6 @@ class RecipeUI {
     }
 
     return recipeData;
-  }
-
-  /**
-   * Load and display all recipes using repository
-   * @returns {Promise<Array>} Array of recipes
-   */
-  async loadAllRecipes() {
-    try {
-      console.log('🔄 Loading all recipes from repository...');
-      const recipes = await this.repository.getAll();
-      console.log(`✅ Loaded ${recipes.length} recipes from repository`);
-      return recipes;
-    } catch (error) {
-      console.error('❌ Failed to load recipes:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Refresh the recipes display
-   */
-  async refreshRecipesDisplay() {
-    try {
-      const recipes = await this.loadAllRecipes();
-      
-      // Assuming there's a global function to render recipes
-      if (window.renderRecipes) {
-        window.renderRecipes(recipes);
-      }
-    } catch (error) {
-      console.error('❌ Failed to refresh recipes display:', error);
-    }
   }
 
   /**
@@ -674,20 +440,6 @@ class RecipeUI {
     
     if (window.showToast) {
       window.showToast(message, 'error');
-    } else {
-      alert(message);
-    }
-  }
-
-  /**
-   * Show warning message
-   * @param {string} message - Warning message
-   */
-  showWarningMessage(message) {
-    console.warn('⚠️', message);
-    
-    if (window.showToast) {
-      window.showToast(message, 'warning');
     } else {
       alert(message);
     }

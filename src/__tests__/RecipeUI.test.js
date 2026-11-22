@@ -10,24 +10,13 @@ const mockRepository = {
   update: jest.fn(),
   create: jest.fn(),
   getAll: jest.fn(),
-  get: jest.fn(),
-  on: jest.fn(),
-  setGitHubAPI: jest.fn()
+  get: jest.fn()
 };
 
 // Mock template loader
 const mockTemplateLoader = {
   loadTemplate: jest.fn().mockResolvedValue('<div id="recipe-modal">Mock Modal</div>')
 };
-
-// Mock the imports
-jest.unstable_mockModule('../repositories/RecipeRepository.js', () => ({
-  default: jest.fn(() => mockRepository)
-}));
-
-jest.unstable_mockModule('../adapters/GitHubAPIAdapter.js', () => ({
-  gitHubAPIAdapter: {}
-}));
 
 // Mock i18n system
 jest.unstable_mockModule('../i18n/i18n.js', () => ({
@@ -164,83 +153,7 @@ describe('RecipeUI Repository Integration Tests', () => {
     });
   });
 
-  describe('Event Handling', () => {
-    beforeEach(() => {
-      // Clear previous mock calls to start fresh
-      mockRepository.on.mockClear();
-      
-      // Re-initialize the event handlers by calling setupRepositoryEventHandlers
-      if (recipeUI.setupRepositoryEventHandlers) {
-        recipeUI.setupRepositoryEventHandlers();
-      }
-    });
-
-    test('should listen for recipesUpdated events and refresh display', () => {
-      // Mock debouncedRefresh method (which is now called instead of refreshRecipesDisplay)
-      recipeUI.debouncedRefresh = jest.fn();
-      
-      // Find the recipesUpdated event listener call
-      const recipesUpdatedCall = mockRepository.on.mock.calls.find(call => call[0] === 'recipesUpdated');
-      expect(recipesUpdatedCall).toBeDefined();
-      expect(typeof recipesUpdatedCall[1]).toBe('function');
-      
-      // Simulate the event being triggered with a recipe array
-      const mockRecipes = [
-        { id: 'recipe1', name: 'Test Recipe 1' },
-        { id: 'recipe2', name: 'Test Recipe 2' }
-      ];
-      
-      // Call the event handler
-      recipesUpdatedCall[1](mockRecipes);
-      
-      // Verify debouncedRefresh was called (instead of refreshRecipesDisplay)
-      expect(recipeUI.debouncedRefresh).toHaveBeenCalled();
-    });
-
-    test('should listen for cacheUpdated events and refresh display', () => {
-      // Mock debouncedRefresh method (which is now called instead of handleCacheUpdate)
-      recipeUI.debouncedRefresh = jest.fn();
-      
-      // Find the cacheUpdated event listener call
-      const cacheUpdatedCall = mockRepository.on.mock.calls.find(call => call[0] === 'cacheUpdated');
-      expect(cacheUpdatedCall).toBeDefined();
-      expect(typeof cacheUpdatedCall[1]).toBe('function');
-      
-      // Simulate the event being triggered
-      const mockEvent = { recipe: { id: 'test', name: 'Test Recipe' } };
-      
-      // Call the event handler
-      cacheUpdatedCall[1](mockEvent);
-      
-      // Verify debouncedRefresh was called
-      expect(recipeUI.debouncedRefresh).toHaveBeenCalled();
-    });
-
-    test('should setup all required repository event listeners', () => {
-      // Verify all expected event listeners are registered
-      const expectedEvents = [
-        'optimisticUpdate',
-        'operationSuccess', 
-        'operationFailure',
-        'rollback',
-        'cacheUpdated',
-        'recipesUpdated',
-        'syncStatusChange'
-      ];
-
-      expectedEvents.forEach(eventName => {
-        const eventCall = mockRepository.on.mock.calls.find(call => call[0] === eventName);
-        expect(eventCall).toBeDefined();
-        expect(typeof eventCall[1]).toBe('function'); // Verify the handler is a function
-      });
-
-      // Verify we have at least the expected number of event listeners
-      const uniqueEventNames = [...new Set(mockRepository.on.mock.calls.map(call => call[0]))];
-      expectedEvents.forEach(eventName => {
-        expect(uniqueEventNames).toContain(eventName);
-      });
-    });
-
+  describe('Recipe form', () => {
     test('should preserve exportDefault values when editing recipe', () => {
       // Setup a recipe with mixed exportDefault values
       const originalRecipe = {
