@@ -279,6 +279,7 @@ class IngredientsExportService {
 
     const recipeSectionsHTML = this.groupedRecipes.map((recipe, recipeIndex) => {
       const recipeScale = this.recipeScales.get(recipe.recipeId) || 1;
+      const escapedRecipeId = this.escapeHtml(recipe.recipeId);
       const normalizedIngredients = normalizeIngredientsList(recipe.ingredients);
       
       const ingredientsHTML = normalizedIngredients.map((ingredient, ingredientIndex) => {
@@ -340,16 +341,16 @@ class IngredientsExportService {
               <small class="text-muted me-2">Scale:</small>
               <div class="input-group input-group-sm" style="width: 120px;">
                 <button class="btn btn-outline-secondary recipe-scale-decrease" 
-                        type="button" data-recipe-id="${recipe.recipeId}">
+                        type="button" data-recipe-id="${escapedRecipeId}">
                   <i class="fas fa-minus"></i>
                 </button>
                 <input type="number" 
                        class="form-control text-center recipe-scale-input" 
-                       data-recipe-id="${recipe.recipeId}"
+                       data-recipe-id="${escapedRecipeId}"
                        value="${recipeScale}" 
                        min="0.25" max="4" step="0.25">
                 <button class="btn btn-outline-secondary recipe-scale-increase" 
-                        type="button" data-recipe-id="${recipe.recipeId}">
+                        type="button" data-recipe-id="${escapedRecipeId}">
                   <i class="fas fa-plus"></i>
                 </button>
               </div>

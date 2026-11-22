@@ -383,24 +383,14 @@ export function highlightText(text, matches) {
   return result;
 }
 
-/**
- * Get array of selected recipe names from checked checkboxes
- * @returns {string[]} Array of selected recipe names
- */
-export function getSelectedRecipeNames() {
-  const checkedBoxes = document.querySelectorAll('.selectRecipe:checked');
-  const recipeNames = [];
-  
-  checkedBoxes.forEach(checkbox => {
-    // Find the recipe title within the same card
-    const cardTitle = checkbox.closest('.card').querySelector('.recipe-title');
-    if (cardTitle) {
-      const recipeName = extractRecipeName(cardTitle.textContent);
-      recipeNames.push(recipeName);
-    }
-  });
-  
-  return recipeNames;
+export function getRecipeId(recipe) {
+  return String(recipe.metadata?.id || recipe.id ||
+    generateFilenameFromRecipeName(recipe.name).slice(0, -5));
+}
+
+export function getSelectedRecipeIds() {
+  return Array.from(document.querySelectorAll('.selectRecipe:checked'),
+    checkbox => checkbox.dataset.recipeId);
 }
 
 /**
@@ -444,24 +434,25 @@ export function collectIngredientsFromRecipes(recipes, selectedRecipeNames) {
 /**
  * Collect ingredients from selected recipes grouped by recipe
  * @param {Object[]} recipes - Array of recipe objects
- * @param {string[]} selectedRecipeNames - Array of selected recipe names
+ * @param {string[]} selectedRecipeIds - IDs of the checked recipe cards
  * @returns {Array} Array of recipe objects with ingredients and metadata
  */
-export function collectIngredientsGroupedByRecipe(recipes, selectedRecipeNames) {
+export function collectIngredientsGroupedByRecipe(recipes, selectedRecipeIds) {
+  const recipesById = new Map(recipes.map(recipe => [getRecipeId(recipe), recipe]));
   const groupedIngredients = [];
-  
-  selectedRecipeNames.forEach(recipeName => {
-    const recipe = findRecipeByName(recipes, recipeName);
-    if (recipe && recipe.ingredients) {
+
+  for (const recipeId of selectedRecipeIds) {
+    const recipe = recipesById.get(recipeId);
+    if (recipe?.ingredients?.length) {
       groupedIngredients.push({
         recipeName: recipe.name,
-        recipeId: recipeName, // Use filename as ID
+        recipeId,
         ingredients: recipe.ingredients,
         defaultScale: 1
       });
     }
-  });
-  
+  }
+
   return groupedIngredients;
 }
 

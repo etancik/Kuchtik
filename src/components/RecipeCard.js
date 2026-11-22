@@ -4,7 +4,7 @@
  */
 
 import { t } from '../i18n/i18n.js';
-import { escapeHtml, highlightText } from '../utils/recipeUtils.js';
+import { escapeHtml, getRecipeId, highlightText } from '../utils/recipeUtils.js';
 
 /**
  * Simple recipe validation for English format
@@ -44,8 +44,7 @@ function createRecipeCard(recipe, options = {}) {
   const recipeName = recipe.name || 'Untitled Recipe';
   const recipeTags = recipe.tags || [];
   
-  // Generate recipe ID early for use in ingredient IDs
-  const recipeId = recipe.metadata?.id || recipeName.replace(/\s+/g, '-').toLowerCase();
+  const recipeId = escapeHtml(getRecipeId(recipe));
   
   // Extract highlighting options - remove shouldExpand since we don't use collapsing anymore
   const { matches = {} } = options;
@@ -82,11 +81,11 @@ function createRecipeCard(recipe, options = {}) {
         <div class="recipe-header">
           <div class="d-flex align-items-center">
             <label class="checkbox-container">
-              <input type="checkbox" class="selectRecipe" id="checkbox-${escapeHtml(recipeId)}"
-                     aria-labelledby="recipe-title-${escapeHtml(recipeId)}">
+              <input type="checkbox" class="selectRecipe" id="checkbox-${recipeId}"
+                     data-recipe-id="${recipeId}" aria-labelledby="recipe-title-${recipeId}">
             </label>
             <div class="flex-grow-1 recipe-title-area">
-              <h6 class="mb-1 recipe-title" id="recipe-title-${escapeHtml(recipeId)}">
+              <h6 class="mb-1 recipe-title" id="recipe-title-${recipeId}">
                 <button type="button" class="recipe-title-button">${highlightedName}</button>
               </h6>
               <div class="text-muted small recipe-subtitle">
