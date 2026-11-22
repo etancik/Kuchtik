@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kuchtík · Návrhy katalogu</title>
+<link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="./preview.css">
+<script src="./preview.js" defer></script>
+</head>
+<body>
+<header class="toolbar"><div class="wrap switcher"><span class="preview-label">Návrhy katalogu</span><nav id="variants" aria-label="Varianty katalogu"></nav></div></header>
+<main class="wrap">
+  <div class="brand"><span class="mark" aria-hidden="true">K</span><div><h1>Kuchtík</h1><p>Rodinná kuchařka</p></div></div>
+  <div class="controls">
+    <label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Hledat recept nebo kategorii" aria-label="Hledat recept nebo kategorii"></label>
+    <button id="archive" type="button" class="button" aria-pressed="false">Archiv</button>
+  </div>
+  <div id="view"></div>
+</main>
+<button id="shopping" class="shopping" type="button" hidden></button>
+<dialog id="selection"><div class="dialog-head"><h2>Výběr na nákup</h2><form method="dialog"><button class="button">Zavřít</button></form></div><ul id="selected-list"></ul><p>Ukázka výběru pro nákupní seznam.</p></dialog>
+</body></html>
