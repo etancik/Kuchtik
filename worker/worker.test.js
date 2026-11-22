@@ -119,6 +119,7 @@ test('Worker shares D1 recipes across public, editor and MCP routes and rejects 
   assert.equal(liveTools.status, 200);
   const liveToolsBody = await liveTools.json();
   assert.ok(liveToolsBody.result.tools.some(tool => tool.name === 'update_recipe'));
+  assert.ok(liveToolsBody.result.tools.some(tool => tool.name === 'create_recipe'));
   const legacyTools = await liveMcp('https://' + production.MCP_HOST, 'mcp');
   assert.equal(legacyTools.status, 200);
   assert.deepEqual(await legacyTools.json(), liveToolsBody);
@@ -170,4 +171,38 @@ test('MCP negotiates protocol, hides writes for readers and returns empty notifi
   assert.equal(await mcpReply({ jsonrpc: '2.0', method: 'notifications/initialized' }), null);
   const { result } = await mcpReply({ ...message, method: 'tools/list' }, null, null, false);
   assert.deepEqual(result.tools.map(tool => tool.name), ['search_recipes', 'get_recipe']);
+});
+
+test('MCP creates a new recipe with a catalog link and refuses duplicate or unauthorized writes', async t => {
+  const env = { ...previewEnv, PREVIEW: '0', WEB_HOST: 'kuchtik.tancer.cz',
+    MCP_HOST: 'mcp-kuchtik.tancer.cz', RECIPES_DB: createDatabase(t) };
+  t.mock.method(globalThis, 'fetch', async () =>
+    Response.json({ keys: [{ ...accessKeys.publicKey.export({ format: 'jwk' }), kid: 'test-key' }] }));
+
+  const create = async (newRecipe, claims) => {
+    const response = await worker.fetch(request('https://' + env.MCP_HOST + '/mcp', {
+      audience: 'mcp', method: 'POST', claims,
+      body: { jsonrpc: '2.0', id: 1, method: 'tools/call',
+        params: { name: 'create_recipe', arguments: { recipe: newRecipe } } },
+    }), env);
+    return (await response.json()).result;
+  };
+  const newRecipe = { ...recipe, name: 'Čočková polévka' };
+  assert.equal((await create(newRecipe, { email: 'reader@example.test' })).isError, true);
+  assert.equal((await create({ name: newRecipe.name })).isError, true);
+  assert.equal((await create({ ...newRecipe, metadata: { author: 'other' } })).isError, true);
+
+  const result = await create(newRecipe);
+  assert.equal(result.isError, false);
+  const saved = JSON.parse(result.content[0].text);
+  assert.equal(saved.filename, 'cockova-polevka.json');
+  assert.match(saved.revision, /^[a-f0-9]{40}$/);
+  assert.equal(saved.url, 'https://kuchtik.tancer.cz/?recipe=cockova-polevka');
+  assert.equal((await create({ ...newRecipe, tags: ['unwanted'] })).isError, true);
+
+  const response = await worker.fetch(new Request('https://kuchtik.tancer.cz/api/recipes/' + saved.filename), env);
+  assert.equal(response.status, 200);
+  const stored = await response.json();
+  assert.equal(stored.name, newRecipe.name);
+  assert.deepEqual(stored.tags, newRecipe.tags);
 });
