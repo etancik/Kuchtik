@@ -4,7 +4,7 @@
 
 import RecipeRepository from './repositories/RecipeRepository.js';
 import { renderRecipeCard } from './components/RecipeCard.js';
-import { getSelectedRecipeNames, collectIngredientsGroupedByRecipe, searchRecipesWithHighlighting, generateFilenameFromRecipeName } from './utils/recipeUtils.js';
+import { getSelectedRecipeIds, collectIngredientsGroupedByRecipe, searchRecipesWithHighlighting, generateFilenameFromRecipeName } from './utils/recipeUtils.js';
 import { recipeUI } from './components/RecipeUI.js';
 import { workerHosted, editorMode, initializeWorkerSession, signInToWorker, workerRecipeAdapter, publicWorkerRecipeAdapter } from './services/workerEditor.js';
 import { githubAuth } from './services/githubAuth.js';
@@ -531,14 +531,14 @@ function performSearch(query) {
  */
 async function handleExportClick() {
   try {
-    const selectedNames = getSelectedRecipeNames();
+    const selectedRecipeIds = getSelectedRecipeIds();
     
-    if (selectedNames.length === 0) {
+    if (selectedRecipeIds.length === 0) {
       alert(t('recipes.selectAtLeastOne'));
       return;
     }
     
-    const groupedRecipes = collectIngredientsGroupedByRecipe(state.recipes, selectedNames);
+    const groupedRecipes = collectIngredientsGroupedByRecipe(state.recipes, selectedRecipeIds);
     
     if (groupedRecipes.length === 0) {
       alert(t('recipes.noIngredientsToExport'));
