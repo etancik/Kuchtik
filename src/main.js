@@ -4,7 +4,7 @@
 
 import RecipeRepository from './repositories/RecipeRepository.js';
 import { renderRecipeCard } from './components/RecipeCard.js';
-import { getSelectedRecipeIds, collectIngredientsGroupedByRecipe, searchRecipesWithHighlighting, generateFilenameFromRecipeName } from './utils/recipeUtils.js';
+import { getRecipeId, collectIngredientsGroupedByRecipe, searchRecipesWithHighlighting, generateFilenameFromRecipeName } from './utils/recipeUtils.js';
 import { recipeUI } from './components/RecipeUI.js';
 import { editorMode, initializeWorkerSession, signInToWorker, workerRecipeAdapter, publicWorkerRecipeAdapter } from './services/workerEditor.js';
 import { ingredientsExportService } from './services/ingredientsExport.js';
@@ -20,6 +20,8 @@ const state = {
   recipes: [],
   filteredRecipes: [], // Store filtered results
   currentSearchQuery: '',
+  recipeView: null,
+  selectedRecipeIds: new Set(),
   recipeListElement: null
 };
 
@@ -169,6 +171,14 @@ async function initializeApp() {
     }, 300);
   });
   
+  document.getElementById('recipeViews').addEventListener('click', event => {
+    const button = event.target.closest('[data-recipe-view]');
+    if (!button) return;
+    window.clearTimeout(searchTimeout);
+    state.recipeView = button.dataset.recipeView;
+    performSearch(searchInput.value.trim());
+  });
+
   // Setup recipe selection change handler
   setupRecipeSelectionHandler(exportBtn);
   
@@ -245,6 +255,9 @@ function setupRecipeSelectionHandler(exportBtn) {
   // Add event listener for checkbox changes
   document.addEventListener('change', (e) => {
     if (e.target.classList.contains('selectRecipe')) {
+      const { recipeId } = e.target.dataset;
+      if (e.target.checked) state.selectedRecipeIds.add(recipeId);
+      else state.selectedRecipeIds.delete(recipeId);
       updateExportButtonVisibility(exportBtn);
     }
   });
@@ -255,14 +268,13 @@ function setupRecipeSelectionHandler(exportBtn) {
  * @param {HTMLElement} exportBtn - The export button element
  */
 function updateExportButtonVisibility(exportBtn) {
-  const selectedCheckboxes = document.querySelectorAll('.selectRecipe:checked');
-  const hasSelection = selectedCheckboxes.length > 0;
+  const count = state.selectedRecipeIds.size;
+  const hasSelection = count > 0;
   
   if (hasSelection) {
     exportBtn.style.display = 'block';
     exportBtn.classList.add('sticky-export-btn');
     
-    const count = selectedCheckboxes.length;
     let recipesText = '';
     
     if (i18n.getCurrentLanguage() === 'cs') {
@@ -303,6 +315,10 @@ function updateHTMLTranslations() {
     element.textContent = t(key);
   });
   
+  document.querySelectorAll('[data-i18n-aria-label]').forEach(element => {
+    element.setAttribute('aria-label', t(element.dataset.i18nAriaLabel));
+  });
+
   // Update placeholders
   document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
     const key = element.getAttribute('data-i18n-placeholder');
@@ -395,23 +411,43 @@ function showLoadingError(error) {
 function renderRecipes(recipes) {
   if (!state.recipeListElement) return;
   
-  // Clear existing recipes
-  state.recipeListElement.innerHTML = '';
+  const isSearching = Boolean(state.currentSearchQuery);
+  const isFavorite = recipe => recipe.metadata?.favorite === true && recipe.metadata?.archived !== true;
+  state.recipeView ??= state.recipes.some(isFavorite) ? 'favorites' : 'all';
+  document.querySelectorAll('[data-recipe-view]').forEach(button => {
+    button.setAttribute('aria-pressed', String(button.dataset.recipeView === state.recipeView));
+  });
+  recipes = recipes.filter(item => {
+    const recipe = item.recipe || item;
+    if (state.recipeView === 'archive') return recipe.metadata?.archived === true;
+    if (isSearching) return true;
+    return state.recipeView === 'favorites' ? isFavorite(recipe) : recipe.metadata?.archived !== true;
+  });
+  const ids = new Set(state.recipes.map(getRecipeId));
+  for (const id of state.selectedRecipeIds) {
+    if (!ids.has(id)) state.selectedRecipeIds.delete(id);
+  }
+  const exportBtn = document.getElementById('exportBtn');
+  if (exportBtn) updateExportButtonVisibility(exportBtn);
+
+  state.recipeListElement.replaceChildren();
   
   if (recipes.length === 0) {
     // Show appropriate empty state message
-    const isSearching = state.currentSearchQuery && state.currentSearchQuery.trim() !== '';
-    const title = isSearching ? t('recipes.noResultsTitle') : t('recipes.noRecipesTitle');
-    const message = isSearching ? t('recipes.noResultsMessage') : t('recipes.noRecipesMessage');
+    const emptyView = !isSearching && state.recipeView !== 'all';
+    const title = isSearching ? t('recipes.noResultsTitle') :
+      emptyView ? t('recipes.' + state.recipeView) : t('recipes.noRecipesTitle');
+    const message = isSearching ? t('recipes.noResultsMessage') :
+      emptyView ? t('recipes.empty' + (state.recipeView === 'favorites' ? 'Favorites' : 'Archive')) : t('recipes.noRecipesMessage');
     
     state.recipeListElement.innerHTML = `
       <div class="col-12">
         <div class="alert alert-info text-center" role="alert">
           <h4><i class="fas fa-${isSearching ? 'search' : 'utensils'} me-2"></i>${title}</h4>
           <p>${message}</p>
-          ${!isSearching && editorMode ?
+          ${!isSearching && !emptyView && editorMode ?
             `<button class="btn btn-primary" id="createEmptyRecipeBtn"><i class="fas fa-plus me-2"></i>${t('recipes.createRecipe')}</button>` :
-            !isSearching && workerSession === false ? `<p><i class="fas fa-info-circle me-2"></i>${t('recipes.signInToManage')}</p>` : ''
+            !isSearching && !emptyView && workerSession === false ? `<p><i class="fas fa-info-circle me-2"></i>${t('recipes.signInToManage')}</p>` : ''
           }
         </div>
       </div>
@@ -428,13 +464,24 @@ function renderRecipes(recipes) {
       shouldExpand: item.shouldExpand || false
     } : {};
     
-    renderRecipeCard(recipe, state.recipeListElement, options);
+    renderRecipeCard(recipe, state.recipeListElement, {
+      ...options,
+      selected: state.selectedRecipeIds.has(getRecipeId(recipe)),
+      onFavorite: editorMode && recipe.metadata?.archived !== true ? toggleFavorite : null
+    });
   });
-  
-  // Update export button visibility after rendering
-  const exportBtn = document.getElementById('exportBtn');
-  if (exportBtn) {
-    updateExportButtonVisibility(exportBtn);
+}
+
+async function toggleFavorite(recipe) {
+  try {
+    await state.repository.update(getRecipeId(recipe), {
+      ...recipe,
+      metadata: { ...recipe.metadata, favorite: recipe.metadata?.favorite !== true }
+    });
+    await recipeUI.refreshWorkerRecipes();
+  } catch (error) {
+    recipeUI.showErrorMessage(t('operations.updateFailed', { error: error.message }));
+    await recipeUI.refreshWorkerRecipes();
   }
 }
 
@@ -472,7 +519,7 @@ function performSearch(query) {
  */
 async function handleExportClick() {
   try {
-    const selectedRecipeIds = getSelectedRecipeIds();
+    const selectedRecipeIds = [...state.selectedRecipeIds];
     
     if (selectedRecipeIds.length === 0) {
       alert(t('recipes.selectAtLeastOne'));

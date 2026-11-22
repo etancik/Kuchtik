@@ -394,6 +394,7 @@ class RecipeUI {
       };
     }
 
+    recipeData.metadata.archived = document.getElementById('recipe-archived')?.checked === true;
     return recipeData;
   }
 
@@ -451,6 +452,7 @@ class RecipeUI {
     document.getElementById('recipe-name').value = '';
     document.getElementById('recipe-servings').value = '4';
     document.getElementById('recipe-time').value = '';
+    document.getElementById('recipe-archived').checked = false;
     
     // Clear tags
     this.setTags('');
@@ -470,6 +472,7 @@ class RecipeUI {
     document.getElementById('recipe-name').value = recipe.name || '';
     document.getElementById('recipe-servings').value = recipe.servings || '4';
     document.getElementById('recipe-time').value = recipe.cookingTime || '';
+    document.getElementById('recipe-archived').checked = recipe.metadata?.archived === true;
     
     // Populate tags using the new tag UI
     this.setTags((recipe.tags || []).join(', '));

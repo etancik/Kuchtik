@@ -20,6 +20,14 @@
     "user": "Uživatel"
   },
   "recipes": {
+    "views": "Zobrazení receptů",
+    "favorites": "Oblíbené",
+    "allRecipes": "Všechny",
+    "archive": "Archiv",
+    "emptyFavorites": "Oblíbené můžeš přidat hvězdičkou po přihlášení.",
+    "emptyArchive": "V archivu zatím nejsou žádné recepty.",
+    "addFavorite": "Přidat do oblíbených",
+    "removeFavorite": "Odebrat z oblíbených",
     "title": "Kuchtík",
     "subtitle": "Rodinná kuchařka",
     "searchPlaceholder": "Hledat podle názvu, tagů nebo ingrediencí...",
@@ -72,6 +80,7 @@
     "copyError": "Nepodařilo se zkopírovat ingredience do schránky!"
   },
   "recipeForm": {
+    "archiveRecipe": "Uložit do archivu",
     "createNewRecipe": "Vytvořit Nový Recept",
     "editRecipeTitle": "Upravit Recept",
     "recipeName": "Název Receptu",
