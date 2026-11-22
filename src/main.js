@@ -21,6 +21,7 @@ const state = {
   filteredRecipes: [], // Store filtered results
   currentSearchQuery: '',
   recipeView: null,
+  activeCatalogView: null,
   selectedRecipeIds: new Set(),
   recipeListElement: null
 };
@@ -175,7 +176,13 @@ async function initializeApp() {
     const button = event.target.closest('[data-recipe-view]');
     if (!button) return;
     window.clearTimeout(searchTimeout);
-    state.recipeView = button.dataset.recipeView;
+    const view = button.dataset.recipeView;
+    if (view === 'archive') {
+      state.recipeView = state.recipeView === 'archive' ? state.activeCatalogView : 'archive';
+    } else {
+      state.recipeView = view;
+      state.activeCatalogView = view;
+    }
     performSearch(searchInput.value.trim());
   });
 
@@ -413,7 +420,8 @@ function renderRecipes(recipes) {
   
   const isSearching = Boolean(state.currentSearchQuery);
   const isFavorite = recipe => recipe.metadata?.favorite === true && recipe.metadata?.archived !== true;
-  state.recipeView ??= state.recipes.some(isFavorite) ? 'favorites' : 'all';
+  state.activeCatalogView ??= state.recipes.some(isFavorite) ? 'favorites' : 'all';
+  state.recipeView ??= state.activeCatalogView;
   document.querySelectorAll('[data-recipe-view]').forEach(button => {
     button.setAttribute('aria-pressed', String(button.dataset.recipeView === state.recipeView));
   });
