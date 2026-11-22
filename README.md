@@ -131,11 +131,15 @@ The Worker serves the public catalog and the Access-protected editor at `/admin/
 | Working preview | Working branch | `tancer-kuchtik-preview` | Access-protected catalog, read-only |
 | Integration preview | `kuchtik-preview` | `tancer-kuchtik-preview` | Access-protected editor and MCP when the integration hostname is configured |
 
-### Move MCP clients to the public web hostname
+### Connect the private Kuchtík plugin
 
-Before production deployment, configure `kuchtik.tancer.cz/mcp` as a destination in the MCP Access application with Managed OAuth. Reuse the existing MCP application and audience if available. If a new Access application is required, configure its audience as `ACCESS_MCP_AUD`. Keep the editor in its separate Access application.
+Kuchtík follows the same setup as [Rodokmen](https://github.com/etancik/family-tree/blob/main/docs/direct-mcp.md). A private ChatGPT plugin connects directly to the Worker through Cloudflare Access Managed OAuth.
 
-After deployment, verify that an unauthenticated MCP request receives an OAuth challenge and that its resource metadata can be discovered. Connect from ChatGPT using the new URL and verify `initialize`, `tools/list` and `get_recipe`. Check that the public catalog remains public and the editor still requires its own Access session. Switch existing clients once the new URL works. Retire the old destination in a follow-up.
+1. In Cloudflare Zero Trust, inspect the existing MCP Access application. Add the exact destination `kuchtik.tancer.cz/mcp` to that application if it can be reused. If a dedicated application is needed, use the intended MCP user policy and set the production Worker’s `ACCESS_MCP_AUD` to its audience. Keep the editor’s Access application and audience separate.
+2. Enable Managed OAuth for that MCP application and allow the ChatGPT callback `https://chatgpt.com/connector/oauth/*`. Keep the public catalog outside the MCP Access application. Access serves OAuth discovery and handles sign-in and token refresh.
+3. Verify that an anonymous MCP `initialize` request returns `401` with a Bearer `WWW-Authenticate` challenge containing `resource_metadata`. Open that metadata URL in the browser and check that `resource` matches the exact MCP endpoint and that `authorization_servers` lists the OAuth issuer.
+4. In ChatGPT Plugins, create a private custom MCP plugin named **Kuchtík**. Set the server URL to `https://kuchtik.tancer.cz/mcp` and select **OAuth**. Install and connect it, then start a new chat and use `@Kuchtík` to search for Langoše and read the recipe. Verify the public catalog and protected editor separately.
+5. Switch any remaining clients to the new URL after the plugin can read a recipe. Only then retire the former destination.
 
 ### Import existing recipes
 
