@@ -1,11 +1,10 @@
 const hostMode = typeof document !== 'undefined' ? document.querySelector('meta[name="kuchtik-host"]')?.content : null;
 const readOnlyWorker = hostMode === 'readonly-worker';
 const authenticatedWorker = hostMode === 'authenticated-worker';
-export const workerHosted = hostMode === 'worker' || authenticatedWorker || readOnlyWorker;
 export let editorMode = false;
 
 export async function initializeWorkerSession() {
-  if (!workerHosted || readOnlyWorker) return null;
+  if (readOnlyWorker) return null;
 
   if (authenticatedWorker) {
     editorMode = true;
@@ -60,8 +59,6 @@ function save(method, path, payload) {
 }
 
 export const workerRecipeAdapter = {
-  isAuthenticated: () => editorMode,
-  getCurrentUser: () => null,
   getFileList: () => editorRequest('recipes'),
   getFile: filename => editorRequest('recipes/' + encodeURIComponent(filename)),
   getAllFiles: () => editorRequest('catalog'),

@@ -36,7 +36,6 @@ Three-layer architecture:
 ├── src/
 │   ├── main.js                   # Application entry point
 │   ├── repositories/             # Data access layer
-│   ├── adapters/                 # GitHub API integration
 │   ├── components/               # UI components (RecipeCard, RecipeUI)
 │   ├── services/                 # Business services
 │   ├── utils/                    # Utility functions
@@ -45,7 +44,8 @@ Three-layer architecture:
 │   ├── config/                   # Configuration
 │   └── __tests__/                # Test files
 ├── index.html                    # Main HTML
-└── style.css                     # Styles
+├── style.css                     # Styles
+└── worker/                       # Cloudflare Worker
 
 ## Setup
 
@@ -93,7 +93,7 @@ repo.on('recipesUpdated', (recipes) => {
 
 ## Testing
 
-214+ tests across 20 test files covering:
+The test suite covers:
 - Unit tests for utilities and services
 - Integration tests for component interactions
 - Repository caching and event system
@@ -113,7 +113,6 @@ repo.on('recipesUpdated', (recipes) => {
 
 **Error Handling:**
 - Network failure fallbacks
-- GitHub API rate limiting
 - Validation error display
 
 ## Technical Details

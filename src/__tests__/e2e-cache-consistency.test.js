@@ -5,14 +5,14 @@
  * 1. Load a bunch of recipes (13 recipes)
  * 2. Update one recipe 
  * 3. Check that all recipes are still in cache
- * 4. Simulate GitHub being slow and eventually consistent
+ * 4. Simulate the adapter being slow and eventually consistent
  */
 
 import RecipeRepository, { SyncStrategy } from '../repositories/RecipeRepository.js';
 import { generateFilenameFromRecipeName } from '../utils/recipeUtils.js';
 
-// Mock GitHub API that simulates realistic behavior
-class RealisticMockGitHubAPI {
+// Mock recipe adapter that simulates realistic behavior
+class RealisticMockRecipeAdapter {
   constructor() {
     this.files = new Map();
     this.networkDelay = 100; // Simulate network delay
@@ -136,18 +136,18 @@ class RealisticMockGitHubAPI {
 
 describe('E2E Cache Consistency Test', () => {
   let repository;
-  let mockGitHubAPI;
+  let mockRecipeAdapter;
   let eventLog;
   
   beforeEach(() => {
-    mockGitHubAPI = new RealisticMockGitHubAPI();
+    mockRecipeAdapter = new RealisticMockRecipeAdapter();
     repository = new RecipeRepository({
       cacheTimeout: 300000, // 5 minutes like in your real app
       syncStrategy: SyncStrategy.IMMEDIATE,
       optimisticUpdates: true
     });
     
-    repository.setGitHubAPI(mockGitHubAPI);
+    repository.setAdapter(mockRecipeAdapter);
     
     // Track all events
     eventLog = [];
@@ -238,23 +238,23 @@ describe('E2E Cache Consistency Test', () => {
     
     // Log API calls
     console.log('\n📡 API Call Log:');
-    mockGitHubAPI.getCallLog().forEach((call, i) => {
+    mockRecipeAdapter.getCallLog().forEach((call, i) => {
       console.log(`  ${i + 1}. ${call}`);
     });
   });
   
-  test('should handle slow GitHub responses gracefully', async () => {
-    console.log('\n🧪 Testing slow GitHub responses...');
+  test('should handle slow adapter responses gracefully', async () => {
+    console.log('\n🧪 Testing slow adapter responses...');
     
     // Load initial recipes
     await repository.getAll();
     
-    // Make GitHub API slow
-    mockGitHubAPI.setNetworkDelay(1000); // 1 second delay
+    // Make recipe adapter slow
+    mockRecipeAdapter.setNetworkDelay(1000); // 1 second delay
     
     const startTime = Date.now();
     
-    // Update recipe with slow GitHub
+    // Update recipe with slow adapter
     const updatedData = {
       name: 'Guláš',
       ingredients: ['beef', 'onion', 'paprika'],
@@ -270,9 +270,9 @@ describe('E2E Cache Consistency Test', () => {
     const endTime = Date.now();
     const duration = endTime - startTime;
     
-    console.log(`⏱️ Update took ${duration}ms with slow GitHub`);
+    console.log(`⏱️ Update took ${duration}ms with slow adapter`);
     
-    // Even with slow GitHub, cache should be consistent
+    // Even with slow adapter, cache should be consistent
     const metadata = repository.getCacheMetadata();
     expect(metadata.totalEntries).toBe(13);
     

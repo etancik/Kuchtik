@@ -5,7 +5,7 @@
 import RecipeRepository, { SyncStrategy } from '../repositories/RecipeRepository.js';
 
 // Simple mock that matches the behavior from your logs
-class SimpleMockGitHubAPI {
+class SimpleMockRecipeAdapter {
   constructor() {
     this.files = new Map();
     // Add the 13 recipes like in your scenario
@@ -78,19 +78,19 @@ class SimpleMockGitHubAPI {
 
 describe('Cache Clearing Bug Investigation', () => {
   let repository;
-  let mockGitHubAPI;
+  let mockRecipeAdapter;
   let cacheEvents = [];
   let recipeEvents = [];
   
   beforeEach(() => {
-    mockGitHubAPI = new SimpleMockGitHubAPI();
+    mockRecipeAdapter = new SimpleMockRecipeAdapter();
     repository = new RecipeRepository({
       cacheTimeout: 300000,
       syncStrategy: SyncStrategy.IMMEDIATE,
       optimisticUpdates: true
     });
     
-    repository.setGitHubAPI(mockGitHubAPI);
+    repository.setAdapter(mockRecipeAdapter);
     
     // Track events
     cacheEvents = [];

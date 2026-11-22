@@ -5,7 +5,7 @@
 import { t } from '../i18n/i18n.js';
 import { escapeHtml, generateFilenameFromRecipeName } from '../utils/recipeUtils.js';
 import { templateLoader } from '../utils/templateLoader.js';
-import { githubAuth } from './githubAuth.js';
+import { editorMode } from './workerEditor.js';
 
 // Global variables for modal management
 let currentModal = null;
@@ -142,9 +142,7 @@ async function createFullscreenModalHTML(recipe) {
     : '';
 
   // Template data
-  const isAuthenticated = githubAuth.isAuthenticated();
-  
-  const actionButtons = isAuthenticated ? `
+  const actionButtons = editorMode ? `
     <div class="d-flex gap-3 align-items-center">
       <button class="btn btn-outline-primary d-flex align-items-center fullscreen-edit-btn" 
               id="fullscreenEditBtn"
@@ -209,7 +207,7 @@ export async function showFullscreenRecipe(recipe, updateUrl = true) {
   });
 
   // Set up edit and delete buttons (only if authenticated)
-  if (githubAuth.isAuthenticated()) {
+  if (editorMode) {
     const editBtn = modalElement.querySelector('#fullscreenEditBtn');
     const deleteBtn = modalElement.querySelector('#fullscreenDeleteBtn');
 

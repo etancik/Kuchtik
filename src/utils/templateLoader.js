@@ -38,18 +38,6 @@ class TemplateLoader {
   }
 
   /**
-   * Create DOM element from template
-   * @param {string} templatePath - Path to template file
-   * @returns {Promise<HTMLElement>} DOM element
-   */
-  async createElement(templatePath) {
-    const html = await this.loadTemplate(templatePath);
-    const template = document.createElement('div');
-    template.innerHTML = html;
-    return template.firstElementChild;
-  }
-
-  /**
    * Load template and process with data substitution
    * @param {string} templatePath - Path to template file
    * @param {Object} data - Data object with keys matching template placeholders
