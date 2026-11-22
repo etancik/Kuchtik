@@ -246,6 +246,29 @@
   background-color: rgba(var(--bs-light-rgb), 0.3);
 }
 
+.fullscreen-recipe-actions {
+  display: flex;
+  gap: 0.375rem;
+}
+
+.fullscreen-recipe-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  width: auto;
+  min-height: 44px;
+  padding: 0.375rem 0.5rem;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 360px) {
+  .fullscreen-recipe-actions .fas {
+    display: none;
+  }
+}
+
 .modal-fullscreen .modal-header-secondary .form-check-input {
   transform: scale(1.1);
 }
