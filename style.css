@@ -37,6 +37,8 @@
 .recipe-search-row .input-group { flex: 1; min-width: 0; }
 
 .recipe-archive {
+  flex: 0 0 auto;
+  width: auto;
   padding: .375rem .625rem;
   min-height: 44px;
   border: 1px solid var(--border-primary);
