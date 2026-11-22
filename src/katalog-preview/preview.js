@@ -10,7 +10,7 @@ const categories = [
 ].map(([name, ids]) => ({ name, ids: ids.split(' ') }));
 
 const variants = [
-  ['A1', 'Oblíbené nahoře'], ['A2', 'Oblíbené vedle'],
+  ['A1', 'Oblíbené nahoře'], ['A2', 'Přepínač seznamů'],
   ['B1', 'Rozbalovací skupiny'], ['B2', 'Výběr kategorie'],
 ];
 const sampleArchive = new Set(['korpus-dortu','mrkvovy-dort','rybi-karbenatky']);
@@ -18,6 +18,7 @@ const favorites = new Set(['langose','houbove-kremove-rizoto','palacinky']);
 const selection = new Set();
 let variant = variants.some(([id]) => id === location.hash.slice(1)) ? location.hash.slice(1) : 'A1';
 let activeCategory = '';
+let activeShelf = 'favorites';
 let archive = false;
 const search = document.getElementById('search');
 const archiveButton = document.getElementById('archive');
@@ -96,11 +97,11 @@ function heading(title, count) {
   return head;
 }
 
-function favoritePanel(list, rail = false) {
-  const box = el('section', rail ? 'rail' : 'favorite-strip');
+function favoritePanel(list) {
+  const box = el('section', 'favorite-strip');
   const items = list.filter(recipe => favorites.has(recipe.id));
   box.append(heading('Oblíbené', items.length));
-  if (rail || !items.length) box.append(renderRows(items, false));
+  if (!items.length) box.append(renderRows(items, false));
   else {
     const strip = el('div', 'strip-grid');
     strip.append(...items.map(recipe => renderRow(recipe, false)));
@@ -113,6 +114,22 @@ function catalogSection(title, list, metadata = true) {
   const section = el('section', 'section');
   section.append(heading(title, list.length), renderRows(list, metadata));
   return section;
+}
+
+function byShelf(list) {
+  const liked = list.filter(recipe => favorites.has(recipe.id));
+  const switches = el('nav', 'shelf-switch');
+  switches.setAttribute('aria-label', 'Zobrazení receptů');
+  for (const [id, label, count] of [['favorites', 'Oblíbené', liked.length], ['all', 'Všechny', list.length]]) {
+    const button = action('shelf-button', label, () => {
+      activeShelf = id;
+      render('shelf', id);
+    }, id === activeShelf);
+    button.dataset.shelf = id;
+    button.append(el('span', 'shelf-count', String(count)));
+    switches.append(button);
+  }
+  view.append(switches, renderRows(activeShelf === 'favorites' ? liked : list));
 }
 
 function byGroups(list) {
@@ -144,7 +161,9 @@ function byTiles(list) {
       render('tile', name);
     }, activeCategory === name);
     tile.dataset.category = name;
-    tile.append(el('small', '', count + (count === 1 ? ' recept' : count < 5 ? ' recepty' : ' receptů')));
+    const total = el('small', '', String(count));
+    total.append(el('span', '', count === 1 ? ' recept' : count < 5 ? ' recepty' : ' receptů'));
+    tile.append(total);
     tiles.append(tile);
   }
   const items = activeCategory ? list.filter(r => r.category === activeCategory) : list;
@@ -174,9 +193,7 @@ function render(kind, key) {
     label.append(el('h2', '', 'Archiv'), el('p', 'hint', 'Ukázkové zařazení receptů z dětství.'));
     view.append(label, renderRows(recipes.filter(recipe => sampleArchive.has(recipe.id))));
   } else if (variant === 'A2') {
-    const grid = el('div', 'side-layout');
-    grid.append(catalogSection('Všechny recepty', list), favoritePanel(list, true));
-    view.append(grid);
+    byShelf(list);
   } else {
     view.append(favoritePanel(list));
     if (variant === 'A1') view.append(catalogSection('Všechny recepty', list));
@@ -185,6 +202,7 @@ function render(kind, key) {
   }
 
   if (kind === 'star') [...view.querySelectorAll('.star')].find(btn => btn.dataset.recipe === key)?.focus();
+  if (kind === 'shelf') [...view.querySelectorAll('.shelf-button')].find(btn => btn.dataset.shelf === key)?.focus();
   if (kind === 'tile') [...view.querySelectorAll('.tile')].find(btn => btn.dataset.category === key)?.focus();
 }
 
@@ -200,7 +218,7 @@ function renderShopping() {
   shopping.textContent = 'Výběr na nákup (' + selection.size + ')';
 }
 
-const expanded = new Set(['Hlavní jídla', 'Polévky']);
+const expanded = new Set();
 for (const [id, label] of variants) {
   const btn = action('tab', id + ' · ' + label, () => setVariant(id), id === variant);
   btn.dataset.variant = id;
