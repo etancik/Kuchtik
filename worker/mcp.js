@@ -3,25 +3,27 @@ import { HttpError } from './recipes.js';
 
 const versions = ['2025-11-25', '2025-06-18', '2025-03-26'];
 const filename = { type: 'string', description: 'Recipe filename returned by search, including .json' };
-const fields = ['name', 'ingredients', 'instructions', 'tags', 'notes', 'cookingTime', 'servings'];
 const textArray = { type: 'array', items: { type: 'string' } };
-const changes = {
-  type: 'object',
-  minProperties: 1,
-  additionalProperties: false,
-  properties: {
-    name: { type: 'string' },
-    ingredients: {
-      type: 'array',
-      items: { type: 'object', properties: { text: { type: 'string' }, exportDefault: { type: 'boolean' } },
-        required: ['text'], additionalProperties: false },
-    },
-    instructions: textArray,
-    tags: textArray,
-    notes: textArray,
-    cookingTime: { type: 'string' },
-    servings: { type: 'number' },
+const recipeFields = {
+  name: { type: 'string' },
+  ingredients: {
+    type: 'array',
+    items: { type: 'object', properties: { text: { type: 'string' }, exportDefault: { type: 'boolean' } },
+      required: ['text'], additionalProperties: false },
   },
+  instructions: textArray,
+  tags: textArray,
+  notes: textArray,
+  cookingTime: { type: 'string' },
+  servings: { type: 'number' },
+};
+const fields = Object.keys(recipeFields);
+const changes = { type: 'object', minProperties: 1, additionalProperties: false, properties: recipeFields };
+const newRecipe = {
+  type: 'object',
+  required: ['name', 'ingredients', 'instructions', 'tags'],
+  additionalProperties: false,
+  properties: recipeFields,
 };
 
 function tool(name, description, properties, required, annotations) {
@@ -37,6 +39,8 @@ const tools = [
     { query: { type: 'string' } }, [], { readOnlyHint: true, openWorldHint: false }),
   tool('get_recipe', 'Read a recipe and its current revision.',
     { filename }, ['filename'], { readOnlyHint: true, openWorldHint: false }),
+  tool('create_recipe', 'Create a new recipe after showing the user the proposed recipe and receiving approval to save it. Returns the saved recipe URL. Existing recipes are never overwritten.',
+    { recipe: newRecipe }, ['recipe'], { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false }),
   tool('update_recipe', 'Save requested changes to an existing recipe after showing the user the proposed changes and receiving their approval. Read the recipe first and pass its original revision. Array fields replace the corresponding whole array.',
     { filename, revision: { type: 'string', pattern: '^[a-fA-F0-9]{40}$' }, changes },
     ['filename', 'revision', 'changes'], { readOnlyHint: false, destructiveHint: true, openWorldHint: false }),
@@ -61,7 +65,7 @@ function toolResult(value, isError = false) {
   return { content: [{ type: 'text', text: typeof value === 'string' ? value : JSON.stringify(value) }], isError };
 }
 
-async function callTool(params, store, identity, canWrite) {
+async function callTool(params, store, identity, canWrite, catalogUrl) {
   const args = params?.arguments ?? {};
   try {
     switch (params?.name) {
@@ -69,6 +73,18 @@ async function callTool(params, store, identity, canWrite) {
         return toolResult(await search(store, args.query));
       case 'get_recipe':
         return toolResult(await store.get(args.filename));
+      case 'create_recipe': {
+        if (!canWrite) throw new HttpError(403, 'This account cannot write recipes via MCP.');
+        const { recipe } = args;
+        if (!recipe || typeof recipe !== 'object' || Array.isArray(recipe) ||
+            Object.keys(recipe).some(key => !fields.includes(key))) {
+          throw new HttpError(400, 'Specify the fields for the new recipe.');
+        }
+        const url = new URL('/', catalogUrl);
+        const saved = await store.write('create', undefined, recipe, undefined, identity);
+        url.searchParams.set('recipe', saved.filename.slice(0, -5));
+        return toolResult({ ...saved, url: url.href });
+      }
       case 'update_recipe': {
         if (!canWrite) throw new HttpError(403, 'This account cannot write recipes via MCP.');
         if (!args.changes || !Object.keys(args.changes).length ||
@@ -89,7 +105,7 @@ async function callTool(params, store, identity, canWrite) {
   }
 }
 
-export async function mcpReply(message, store, identity, canWrite) {
+export async function mcpReply(message, store, identity, canWrite, catalogUrl) {
   const id = message?.id ?? null;
   const reply = { jsonrpc: '2.0', id };
   if (message?.jsonrpc !== '2.0' || typeof message.method !== 'string' ||
@@ -108,7 +124,7 @@ export async function mcpReply(message, store, identity, canWrite) {
     case 'tools/list':
       return { ...reply, result: { tools: canWrite ? tools : tools.slice(0, 2) } };
     case 'tools/call':
-      return { ...reply, result: await callTool(message.params, store, identity, canWrite) };
+      return { ...reply, result: await callTool(message.params, store, identity, canWrite, catalogUrl) };
     default:
       return { ...reply, error: { code: -32601, message: 'Method not found' } };
   }
