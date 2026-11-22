@@ -64,7 +64,6 @@ async function assets(request, env, pathname, identity, readOnly) {
 }
 
 async function handleMcp(request, env, url) {
-  if (url.pathname !== '/mcp') throw new HttpError(404, 'Not found.');
   const origin = request.headers.get('Origin');
   if (origin && ![url.origin, 'https://chatgpt.com'].includes(origin)) {
     throw new HttpError(403, 'Origin is not allowed.');
@@ -115,7 +114,9 @@ export default {
       const url = new URL(request.url);
       const preview = env.PREVIEW === '1';
       const integrationPreview = preview && url.hostname === env.PREVIEW_INTEGRATION_HOST && !!env.RECIPES_DB;
-      if (preview ? integrationPreview && url.pathname === '/mcp' : env.PREVIEW === '0' && url.hostname === env.MCP_HOST) {
+      const productionMcpHost = env.PREVIEW === '0' &&
+        (url.hostname === env.WEB_HOST || url.hostname === env.MCP_HOST);
+      if (url.pathname === '/mcp' && (preview ? integrationPreview : productionMcpHost)) {
         return await handleMcp(request, env, url);
       }
       if (!preview && (env.PREVIEW !== '0' || url.hostname !== env.WEB_HOST)) throw new HttpError(404, 'Not found.');

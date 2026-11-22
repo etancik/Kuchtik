@@ -107,8 +107,23 @@ test('Worker shares D1 recipes across public, editor and MCP routes and rejects 
   assert.match(saved.revision, /^[a-f0-9]{40}$/);
   assert.notEqual(saved.revision, revision);
 
-  const production = { ...env, PREVIEW: '0', WEB_HOST: 'kuchtik.tancer.cz' };
+  const production = { ...env, PREVIEW: '0', WEB_HOST: 'kuchtik.tancer.cz', MCP_HOST: 'mcp-kuchtik.tancer.cz' };
   const live = 'https://' + production.WEB_HOST;
+  const toolsList = { jsonrpc: '2.0', id: 2, method: 'tools/list' };
+  const liveMcp = (host, audience) => worker.fetch(request(host + '/mcp', {
+    audience, method: 'POST', body: toolsList,
+  }), production);
+  assert.equal((await liveMcp(live)).status, 401);
+  assert.equal((await liveMcp(live, 'web')).status, 401);
+  const liveTools = await liveMcp(live, 'mcp');
+  assert.equal(liveTools.status, 200);
+  const liveToolsBody = await liveTools.json();
+  assert.ok(liveToolsBody.result.tools.some(tool => tool.name === 'update_recipe'));
+  const legacyTools = await liveMcp('https://' + production.MCP_HOST, 'mcp');
+  assert.equal(legacyTools.status, 200);
+  assert.deepEqual(await legacyTools.json(), liveToolsBody);
+  assert.equal((await liveMcp('https://other.example', 'mcp')).status, 404);
+
   const reader = await worker.fetch(request(live + '/api/recipes'), production);
   assert.equal(reader.headers.get('Cache-Control'), 'no-store');
   const [published] = await reader.json();

@@ -123,13 +123,19 @@ The test suite covers:
 
 ## Cloudflare deployment
 
-The Worker serves the public catalog and the Access-protected editor at `/admin/` from the same D1 database. MCP uses the same store on its own hostname. Read a recipe before updating it and send its revision with the change. On a conflict, reload the recipe before saving.
+The Worker serves the public catalog and the Access-protected editor at `/admin/` from the same D1 database. MCP uses the same store at `https://kuchtik.tancer.cz/mcp`. The Worker also recognizes the former MCP hostname during the transition. Read a recipe before updating it and send its revision with the change. On a conflict, reload the recipe before saving.
 
 | Environment | Worker branch | Database | Access |
 | --- | --- | --- | --- |
 | Production | `main` | `tancer-kuchtik-production` | Public catalog, protected `/admin/` and MCP |
 | Working preview | Working branch | `tancer-kuchtik-preview` | Access-protected catalog, read-only |
 | Integration preview | `kuchtik-preview` | `tancer-kuchtik-preview` | Access-protected editor and MCP when the integration hostname is configured |
+
+### Move MCP clients to the public web hostname
+
+Before production deployment, configure `kuchtik.tancer.cz/mcp` as a destination in the MCP Access application with Managed OAuth. Reuse the existing MCP application and audience if available. If a new Access application is required, configure its audience as `ACCESS_MCP_AUD`. Keep the editor in its separate Access application.
+
+After deployment, verify that an unauthenticated MCP request receives an OAuth challenge and that its resource metadata can be discovered. Connect from ChatGPT using the new URL and verify `initialize`, `tools/list` and `get_recipe`. Check that the public catalog remains public and the editor still requires its own Access session. Switch existing clients once the new URL works. Retire the old destination in a follow-up.
 
 ### Import existing recipes
 
