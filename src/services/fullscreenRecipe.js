@@ -142,13 +142,18 @@ async function createFullscreenModalHTML(recipe) {
     : '';
 
   // Template data
+  const archiveAction = recipe.metadata?.archived === true ? 'recipes.restoreFromArchive' : 'recipes.moveToArchive';
   const actionButtons = editorMode ? `
-    <div class="d-flex gap-3 align-items-center">
+    <div class="d-flex flex-wrap gap-2 align-items-center">
       <button class="btn btn-outline-primary d-flex align-items-center fullscreen-edit-btn" 
               id="fullscreenEditBtn"
               title="${t('recipes.editRecipe')}">
         <i class="fas fa-edit me-2"></i>
         <span>${t('common.edit')}</span>
+      </button>
+      <button type="button" class="btn btn-outline-secondary d-flex align-items-center" id="fullscreenArchiveBtn">
+        <i class="fas fa-archive me-2" aria-hidden="true"></i>
+        <span>${t(archiveAction)}</span>
       </button>
       <button class="btn btn-outline-danger d-flex align-items-center fullscreen-delete-btn" 
               id="fullscreenDeleteBtn"
@@ -206,9 +211,10 @@ export async function showFullscreenRecipe(recipe, updateUrl = true) {
     console.warn('Wake lock not available on this device:', err);
   });
 
-  // Set up edit and delete buttons (only if authenticated)
+  // Set up recipe actions (only if authenticated)
   if (editorMode) {
     const editBtn = modalElement.querySelector('#fullscreenEditBtn');
+    const archiveBtn = modalElement.querySelector('#fullscreenArchiveBtn');
     const deleteBtn = modalElement.querySelector('#fullscreenDeleteBtn');
 
     if (editBtn) {
@@ -224,6 +230,17 @@ export async function showFullscreenRecipe(recipe, updateUrl = true) {
         }
       });
     }
+
+    archiveBtn.addEventListener('click', async () => {
+      archiveBtn.disabled = true;
+      try {
+        const { recipeUI } = await import('../components/RecipeUI.js');
+        const updated = await recipeUI.toggleArchive(recipe);
+        if (updated) modal.hide();
+      } finally {
+        archiveBtn.disabled = false;
+      }
+    });
 
     if (deleteBtn) {
       deleteBtn.addEventListener('click', async () => {

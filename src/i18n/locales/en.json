@@ -24,6 +24,8 @@
     "favorites": "Favorites",
     "allRecipes": "All",
     "archive": "Archive",
+    "moveToArchive": "Move to archive",
+    "restoreFromArchive": "Restore from archive",
     "emptyFavorites": "Sign in and use the star to add favorites.",
     "emptyArchive": "There are no archived recipes yet.",
     "addFavorite": "Add to favorites",
