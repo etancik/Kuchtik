@@ -95,6 +95,12 @@
   font-size: 1.375rem;
 }
 
+button.recipe-favorite {
+  /* Keep the star above the recipe title's stretched click target. */
+  position: relative;
+  z-index: 2;
+}
+
 .recipe-favorite[aria-pressed="true"] { background: #fff3cd; }
 .recipe-favorite:focus-visible, .recipe-views button:focus-visible, .recipe-archive:focus-visible {
   outline: 2px solid var(--color-primary-dark);
