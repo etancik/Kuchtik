@@ -4,7 +4,7 @@
  */
 
 import { templateLoader } from '../utils/templateLoader.js';
-import { escapeHtml } from '../utils/recipeUtils.js';
+import { escapeHtml, getRecipeId } from '../utils/recipeUtils.js';
 import { t } from '../i18n/i18n.js';
 import { editorMode } from '../services/workerEditor.js';
 
@@ -245,6 +245,22 @@ class RecipeUI {
     } catch (error) {
       console.error('❌ Failed to delete recipe:', error);
       this.showErrorMessage(t('operations.deleteFailed', { error: error.message }));
+    }
+  }
+
+  async toggleArchive(recipe) {
+    const archived = recipe.metadata?.archived !== true;
+    try {
+      await this.repository.update(getRecipeId(recipe), {
+        ...recipe,
+        metadata: { ...recipe.metadata, archived }
+      });
+      await this.refreshWorkerRecipes();
+      return true;
+    } catch (error) {
+      this.showErrorMessage(t('operations.updateFailed', { error: error.message }));
+      await this.refreshWorkerRecipes();
+      return false;
     }
   }
 

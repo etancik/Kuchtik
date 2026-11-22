@@ -24,6 +24,8 @@
     "favorites": "Oblíbené",
     "allRecipes": "Všechny",
     "archive": "Archiv",
+    "moveToArchive": "Do archivu",
+    "restoreFromArchive": "Vrátit z archivu",
     "emptyFavorites": "Oblíbené můžeš přidat hvězdičkou po přihlášení.",
     "emptyArchive": "V archivu zatím nejsou žádné recepty.",
     "addFavorite": "Přidat do oblíbených",
