@@ -20,6 +20,14 @@
     "user": "User"
   },
   "recipes": {
+    "views": "Recipe views",
+    "favorites": "Favorites",
+    "allRecipes": "All",
+    "archive": "Archive",
+    "emptyFavorites": "Sign in and use the star to add favorites.",
+    "emptyArchive": "There are no archived recipes yet.",
+    "addFavorite": "Add to favorites",
+    "removeFavorite": "Remove from favorites",
     "title": "Kuchtik",
     "subtitle": "A Family Cookbook",
     "createRecipe": "Create Recipe",
@@ -72,6 +80,7 @@
     "copyError": "Failed to copy ingredients to clipboard!"
   },
   "recipeForm": {
+    "archiveRecipe": "Keep in archive",
     "createNewRecipe": "Create New Recipe",
     "editRecipeTitle": "Edit Recipe",
     "recipeName": "Recipe Name",

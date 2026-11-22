@@ -50,13 +50,19 @@
     <!-- Recipe cards container -->
     <div id="recipe-cards">
       <!-- Search bar -->
-      <div class="mb-3">
-        <div class="input-group">
-          <span class="input-group-text"><i class="fas fa-search"></i></span>
-          <input type="text" class="form-control" id="searchInput" placeholder="" data-i18n-placeholder="recipes.searchPlaceholder">
+      <div id="recipeViews">
+        <div class="recipe-search-row">
+          <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-search"></i></span>
+            <input type="text" class="form-control" id="searchInput" placeholder="" data-i18n-placeholder="recipes.searchPlaceholder">
+          </div>
+          <button type="button" class="recipe-archive" data-recipe-view="archive" data-i18n="recipes.archive" aria-pressed="false">Archive</button>
+        </div>
+        <div class="recipe-views" role="group" data-i18n-aria-label="recipes.views">
+          <button type="button" data-recipe-view="favorites" data-i18n="recipes.favorites" aria-pressed="true">Favorites</button>
+          <button type="button" data-recipe-view="all" data-i18n="recipes.allRecipes" aria-pressed="false">All</button>
         </div>
       </div>
-      
       <div id="recipeList" class="row row-cols-1 g-1"></div>
     </div>
 

@@ -47,7 +47,9 @@ function createRecipeCard(recipe, options = {}) {
   const recipeId = escapeHtml(getRecipeId(recipe));
   
   // Extract highlighting options - remove shouldExpand since we don't use collapsing anymore
-  const { matches = {} } = options;
+  const { matches = {}, selected = false, onFavorite } = options;
+  const favorite = recipe.metadata?.favorite === true;
+  const archived = recipe.metadata?.archived === true;
   const { name: nameMatches = [], tags: tagMatches = [] } = matches;
   
   // Apply highlighting to recipe name
@@ -82,7 +84,7 @@ function createRecipeCard(recipe, options = {}) {
           <div class="d-flex align-items-center">
             <label class="checkbox-container">
               <input type="checkbox" class="selectRecipe" id="checkbox-${recipeId}"
-                     data-recipe-id="${recipeId}" aria-labelledby="recipe-title-${recipeId}">
+                     data-recipe-id="${recipeId}" aria-labelledby="recipe-title-${recipeId}" ${selected ? 'checked' : ''}>
             </label>
             <div class="flex-grow-1 recipe-title-area">
               <h6 class="mb-1 recipe-title" id="recipe-title-${recipeId}">
@@ -91,6 +93,7 @@ function createRecipeCard(recipe, options = {}) {
               <div class="text-muted small recipe-subtitle">
                 ${tags ? `${t('recipes.tags')}: ${tags}` : ''}
                 ${tags && subtitleText ? ' • ' : ''}${escapeHtml(subtitleText)}
+                ${archived ? `<span class="badge text-bg-light">${t('recipes.archive')}</span>` : ''}
               </div>
             </div>
           </div>
@@ -98,6 +101,31 @@ function createRecipeCard(recipe, options = {}) {
       </div>
     </div>
   `;
+
+  const titleArea = div.querySelector('.recipe-title-area');
+  if (onFavorite) {
+    const star = document.createElement('button');
+    star.type = 'button';
+    star.className = 'recipe-favorite';
+    star.textContent = favorite ? '★' : '☆';
+    star.setAttribute('aria-pressed', String(favorite));
+    star.setAttribute('aria-label', t(favorite ? 'recipes.removeFavorite' : 'recipes.addFavorite') + ' ' + recipeName);
+    star.addEventListener('click', async () => {
+      star.disabled = true;
+      try {
+        await onFavorite(recipe);
+      } finally {
+        star.disabled = false;
+      }
+    });
+    titleArea.after(star);
+  } else if (favorite && !archived) {
+    const star = document.createElement('span');
+    star.className = 'recipe-favorite';
+    star.textContent = '★';
+    star.setAttribute('aria-label', t('recipes.favorites'));
+    titleArea.after(star);
+  }
 
   div.querySelector('.recipe-title-button').addEventListener('click', async () => {
     try {

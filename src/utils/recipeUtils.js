@@ -388,11 +388,6 @@ export function getRecipeId(recipe) {
     generateFilenameFromRecipeName(recipe.name).slice(0, -5));
 }
 
-export function getSelectedRecipeIds() {
-  return Array.from(document.querySelectorAll('.selectRecipe:checked'),
-    checkbox => checkbox.dataset.recipeId);
-}
-
 /**
  * Extract recipe name from card title text
  * @param {string} cardTitle - Full card title text
