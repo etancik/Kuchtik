@@ -166,7 +166,13 @@ test('Worker shares D1 recipes across public, editor and MCP routes and rejects 
 
 test('MCP negotiates protocol, hides writes for readers and returns empty notification replies', async () => {
   const message = { jsonrpc: '2.0', id: 1 };
-  const response = await mcpReply({ ...message, method: 'initialize', params: { protocolVersion: '2025-06-18' } });
+  const response = await mcpReply(
+    { ...message, method: 'initialize', params: { protocolVersion: '2025-06-18' } },
+    null, null, false, 'https://kuchtik.tancer.cz'
+  );
+  assert.deepEqual(response.result.serverInfo.icons, [
+    { src: 'https://kuchtik.tancer.cz/favicon.png', mimeType: 'image/png', sizes: ['96x96'] },
+  ]);
   assert.equal(response.result.protocolVersion, '2025-06-18');
   assert.equal(await mcpReply({ jsonrpc: '2.0', method: 'notifications/initialized' }), null);
   const { result } = await mcpReply({ ...message, method: 'tools/list' }, null, null, false);
