@@ -32,6 +32,13 @@ test('exports ingredients from the recipe selected in the Worker catalog', async
   await import('../main.js');
   await new Promise(resolve => setTimeout(resolve, 0));
 
+  const favorites = document.querySelector('[data-recipe-view="favorites"]');
+  const all = document.querySelector('[data-recipe-view="all"]');
+  expect(favorites.getAttribute('aria-pressed')).toBe('true');
+  expect(document.querySelectorAll('#recipeList .selectRecipe')).toHaveLength(0);
+
+  all.click();
+  expect(all.getAttribute('aria-pressed')).toBe('true');
   document.getElementById('checkbox-langose-b').click();
   document.getElementById('exportBtn').click();
   await new Promise(resolve => setTimeout(resolve, 0));
