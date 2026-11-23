@@ -20,8 +20,8 @@ const state = {
   recipes: [],
   filteredRecipes: [], // Store filtered results
   currentSearchQuery: '',
-  recipeView: null,
-  activeCatalogView: null,
+  recipeView: 'favorites',
+  activeCatalogView: 'favorites',
   selectedRecipeIds: new Set(),
   recipeListElement: null
 };
@@ -420,8 +420,6 @@ function renderRecipes(recipes) {
   
   const isSearching = Boolean(state.currentSearchQuery);
   const isFavorite = recipe => recipe.metadata?.favorite === true && recipe.metadata?.archived !== true;
-  state.activeCatalogView ??= state.recipes.some(isFavorite) ? 'favorites' : 'all';
-  state.recipeView ??= state.activeCatalogView;
   document.querySelectorAll('[data-recipe-view]').forEach(button => {
     button.setAttribute('aria-pressed', String(button.dataset.recipeView === state.recipeView));
   });
