@@ -76,10 +76,8 @@ async function handleMcp(request, env, url) {
   if (!supportsProtocol(request.headers.get('MCP-Protocol-Version'))) {
     throw new HttpError(400, 'Unsupported MCP protocol version.');
   }
-  const writer = env.MCP_WRITER_EMAIL?.trim().toLowerCase();
   const catalogUrl = env.PREVIEW === '1' ? url.origin : 'https://' + env.WEB_HOST;
-  const result = await mcpReply(await readJson(request), recipeStore(env), identity,
-    !!writer && identity.email === writer, catalogUrl);
+  const result = await mcpReply(await readJson(request), recipeStore(env), identity, catalogUrl);
   return result ? json(result) : new Response(null, { status: 202, headers: noCache });
 }
 

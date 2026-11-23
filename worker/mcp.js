@@ -78,7 +78,7 @@ function toolResult(value, isError = false) {
   return { content: [{ type: 'text', text: typeof value === 'string' ? value : JSON.stringify(value) }], isError };
 }
 
-async function callTool(params, store, identity, canWrite, catalogUrl) {
+async function callTool(params, store, identity, catalogUrl) {
   const args = params?.arguments ?? {};
   try {
     switch (params?.name) {
@@ -87,7 +87,6 @@ async function callTool(params, store, identity, canWrite, catalogUrl) {
       case 'get_recipe':
         return toolResult(await store.get(args.filename));
       case 'create_recipe': {
-        if (!canWrite) throw new HttpError(403, 'This account cannot write recipes via MCP.');
         const { recipe } = args;
         if (!recipe || typeof recipe !== 'object' || Array.isArray(recipe) ||
             Object.keys(recipe).some(key => !fields.includes(key))) {
@@ -99,7 +98,6 @@ async function callTool(params, store, identity, canWrite, catalogUrl) {
         return toolResult({ ...saved, url: url.href });
       }
       case 'update_recipe': {
-        if (!canWrite) throw new HttpError(403, 'This account cannot write recipes via MCP.');
         if (!args.changes || !Object.keys(args.changes).length ||
             Object.keys(args.changes).some(key => !fields.includes(key))) {
           throw new HttpError(400, 'Specify the recipe fields to update.');
@@ -118,7 +116,7 @@ async function callTool(params, store, identity, canWrite, catalogUrl) {
   }
 }
 
-export async function mcpReply(message, store, identity, canWrite, catalogUrl) {
+export async function mcpReply(message, store, identity, catalogUrl) {
   const id = message?.id ?? null;
   const reply = { jsonrpc: '2.0', id };
   if (message?.jsonrpc !== '2.0' || typeof message.method !== 'string' ||
@@ -140,9 +138,9 @@ export async function mcpReply(message, store, identity, canWrite, catalogUrl) {
     case 'ping':
       return { ...reply, result: {} };
     case 'tools/list':
-      return { ...reply, result: { tools: canWrite ? tools : tools.slice(0, 2) } };
+      return { ...reply, result: { tools } };
     case 'tools/call':
-      return { ...reply, result: await callTool(message.params, store, identity, canWrite, catalogUrl) };
+      return { ...reply, result: await callTool(message.params, store, identity, catalogUrl) };
     default:
       return { ...reply, error: { code: -32601, message: 'Method not found' } };
   }

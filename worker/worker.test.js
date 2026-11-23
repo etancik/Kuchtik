@@ -10,14 +10,15 @@ const web = 'https://kuchtik-preview-tancer-kuchtik.etancik.workers.dev';
 const mcp = web;
 const branchWeb = 'https://feature-tancer-kuchtik.etancik.workers.dev';
 const issuer = 'https://test.cloudflareaccess.com';
-const writer = 'editor@example.test';
+const account = 'editor@example.test';
+const otherAccount = 'second@example.test';
 const revision = 'a'.repeat(40);
 const recipe = { name: 'Řízky', ingredients: [{ text: 'sůl', exportDefault: false }], instructions: ['Osolit'], tags: ['oběd'] };
 const accessKeys = generateKeyPairSync('rsa', { modulusLength: 2048 });
 
 function assertion(audience, overrides = {}) {
   const parts = [{ alg: 'RS256', kid: 'test-key' },
-    { aud: [audience], iss: issuer, sub: 'subject', exp: Date.now() / 1000 + 60, email: writer, ...overrides }]
+    { aud: [audience], iss: issuer, sub: 'subject', exp: Date.now() / 1000 + 60, email: account, ...overrides }]
     .map(part => Buffer.from(JSON.stringify(part)).toString('base64url'));
   parts.push(createSign('RSA-SHA256').update(parts.join('.')).sign(accessKeys.privateKey, 'base64url'));
   return parts.join('.');
@@ -42,7 +43,6 @@ const previewEnv = {
   ACCESS_ISSUER: issuer,
   ACCESS_WEB_AUD: 'web',
   ACCESS_MCP_AUD: 'mcp',
-  MCP_WRITER_EMAIL: writer,
   ASSETS: { fetch: request => new Response(new URL(request.url).pathname) },
 };
 
@@ -93,15 +93,14 @@ test('Worker shares D1 recipes across public, editor and MCP routes and rejects 
   const run = (body, options = {}) => worker.fetch(request(mcp + '/mcp', {
     audience: 'mcp', method: 'POST', body, ...options,
   }), env);
+  assert.equal((await run(call, { audience: undefined })).status, 401);
   assert.equal((await run(call, { audience: 'web' })).status, 401);
   assert.equal((await run(call, { origin: 'https://other.example' })).status, 403);
-  const forbidden = await (await run(call, { claims: { email: 'reader@example.test' } })).json();
-  assert.equal(forbidden.result.isError, true);
   const invalid = structuredClone(call);
   invalid.params.arguments.revision = 'd'.repeat(40);
   assert.equal((await (await run(invalid)).json()).result.isError, true);
 
-  const result = await (await run(call)).json();
+  const result = await (await run(call, { claims: { email: otherAccount, sub: 'second-subject' } })).json();
   assert.equal(result.result.isError, false);
   const saved = JSON.parse(result.result.content[0].text);
   assert.match(saved.revision, /^[a-f0-9]{40}$/);
@@ -164,22 +163,22 @@ test('Worker shares D1 recipes across public, editor and MCP routes and rejects 
   assert.equal((await worker.fetch(request(live + '/api/recipes/' + latest.filename), production)).status, 404);
 });
 
-test('MCP negotiates protocol, hides writes for readers and returns empty notification replies', async () => {
+test('MCP negotiates protocol, lists recipe tools and returns empty notification replies', async () => {
   const message = { jsonrpc: '2.0', id: 1 };
   const response = await mcpReply(
     { ...message, method: 'initialize', params: { protocolVersion: '2025-06-18' } },
-    null, null, false, 'https://kuchtik.tancer.cz'
+    null, null, 'https://kuchtik.tancer.cz'
   );
   assert.deepEqual(response.result.serverInfo.icons, [
     { src: 'https://kuchtik.tancer.cz/favicon.png', mimeType: 'image/png', sizes: ['96x96'] },
   ]);
   assert.equal(response.result.protocolVersion, '2025-06-18');
   assert.equal(await mcpReply({ jsonrpc: '2.0', method: 'notifications/initialized' }), null);
-  const { result } = await mcpReply({ ...message, method: 'tools/list' }, null, null, false);
-  assert.deepEqual(result.tools.map(tool => tool.name), ['search_recipes', 'get_recipe']);
+  const { result } = await mcpReply({ ...message, method: 'tools/list' });
+  assert.deepEqual(result.tools.map(tool => tool.name), ['search_recipes', 'get_recipe', 'create_recipe', 'update_recipe']);
 });
 
-test('MCP creates a new recipe with a catalog link and refuses duplicate or unauthorized writes', async t => {
+test('An authenticated MCP account can create recipes and cannot overwrite a duplicate', async t => {
   const env = { ...previewEnv, PREVIEW: '0', WEB_HOST: 'kuchtik.tancer.cz',
     MCP_HOST: 'mcp-kuchtik.tancer.cz', RECIPES_DB: createDatabase(t) };
   t.mock.method(globalThis, 'fetch', async () =>
@@ -194,11 +193,10 @@ test('MCP creates a new recipe with a catalog link and refuses duplicate or unau
     return (await response.json()).result;
   };
   const newRecipe = { ...recipe, name: 'Čočková polévka' };
-  assert.equal((await create(newRecipe, { email: 'reader@example.test' })).isError, true);
   assert.equal((await create({ name: newRecipe.name })).isError, true);
   assert.equal((await create({ ...newRecipe, metadata: { author: 'other' } })).isError, true);
 
-  const result = await create(newRecipe);
+  const result = await create(newRecipe, { email: otherAccount, sub: 'second-subject' });
   assert.equal(result.isError, false);
   const saved = JSON.parse(result.content[0].text);
   assert.equal(saved.filename, 'cockova-polevka.json');

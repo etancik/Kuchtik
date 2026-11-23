@@ -133,7 +133,7 @@ The Worker serves the public catalog and the Access-protected editor at `/admin/
 
 ### Connect the private Kuchtík plugin
 
-Kuchtík follows the same setup as [Rodokmen](https://github.com/etancik/family-tree/blob/main/docs/direct-mcp.md). A private ChatGPT plugin connects directly to the Worker through Cloudflare Access Managed OAuth.
+Kuchtík follows the same setup as [Rodokmen](https://github.com/etancik/family-tree/blob/main/docs/direct-mcp.md). A private ChatGPT plugin connects directly to the Worker through Cloudflare Access Managed OAuth. Every account allowed by the MCP Access policy can search, read, create, and update recipes.
 
 1. In Cloudflare Zero Trust, inspect the existing MCP Access application. Add the exact destination `kuchtik.tancer.cz/mcp` to that application if it can be reused. If a dedicated application is needed, use the intended MCP user policy and set the production Worker’s `ACCESS_MCP_AUD` to its audience. Keep the editor’s Access application and audience separate.
 2. Enable Managed OAuth for that MCP application and allow the ChatGPT callback `https://chatgpt.com/connector/oauth/*`. Keep the public catalog outside the MCP Access application. Access serves OAuth discovery and handles sign-in and token refresh.
@@ -154,7 +154,7 @@ npx wrangler@4.151.2 d1 execute tancer-kuchtik-preview --remote --command "SELEC
 
 Import is additive, so retrying it preserves existing rows. Use the import only for initial setup to avoid recreating deleted recipes. Keep the generated SQL outside Git. D1 is the source for the live catalog.
 
-For Workers Builds use `npm run build`, `npm run preview` and `npm run deploy`. Keep the Worker Access mode set to Previews only and protect the production `/admin` path and its descendants. Only the configured `PREVIEW_INTEGRATION_HOST` permits preview writes. For MCP configure Managed OAuth, `ACCESS_MCP_AUD` and `MCP_WRITER_EMAIL` on the intended environment. Set `ACCESS_ISSUER` and `ACCESS_WEB_AUD` for the editor.
+For Workers Builds use `npm run build`, `npm run preview` and `npm run deploy`. Keep the Worker Access mode set to Previews only and protect the production `/admin` path and its descendants. Only the configured `PREVIEW_INTEGRATION_HOST` permits preview writes. For MCP configure Managed OAuth and `ACCESS_MCP_AUD` on the intended environment. Set `ACCESS_ISSUER` and `ACCESS_WEB_AUD` for the editor.
 
 The legacy GitHub Pages URL redirects to Kuchtík and preserves the query and fragment.
 
