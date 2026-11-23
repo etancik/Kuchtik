@@ -130,7 +130,12 @@ export async function mcpReply(message, store, identity, canWrite, catalogUrl) {
     case 'initialize':
       return { ...reply, result: {
         protocolVersion: versions.includes(message.params?.protocolVersion) ? message.params.protocolVersion : versions[0],
-        capabilities: { tools: {} }, serverInfo: { name: 'kuchtik', version: '1.0.0' },
+        capabilities: { tools: {} },
+        serverInfo: {
+          name: 'kuchtik',
+          version: '1.0.0',
+          icons: [{ src: new URL('/favicon.png', catalogUrl).href, mimeType: 'image/png', sizes: ['96x96'] }],
+        },
       } };
     case 'ping':
       return { ...reply, result: {} };
