@@ -123,23 +123,22 @@ The test suite covers:
 
 ## Cloudflare deployment
 
-The Worker serves the public catalog and the Access-protected editor at `/admin/` from the same D1 database. MCP uses the same store at `https://kuchtik.tancer.cz/mcp`. The Worker also recognizes the former MCP hostname during the transition. Read a recipe before updating it and send its revision with the change. On a conflict, reload the recipe before saving.
+The Worker serves the public catalog and the Access-protected editor at `/admin/` from the same D1 database. MCP uses the same store at `https://kuchtik.tancer.cz/mcp`. Read a recipe before updating it and send its revision with the change. On a conflict, reload the recipe before saving.
 
 | Environment | Worker branch | Database | Access |
 | --- | --- | --- | --- |
 | Production | `main` | `tancer-kuchtik-production` | Public catalog, protected `/admin/` and MCP |
 | Working preview | Working branch | `tancer-kuchtik-preview` | Access-protected catalog, read-only |
-| Integration preview | `kuchtik-preview` | `tancer-kuchtik-preview` | Access-protected editor and MCP when the integration hostname is configured |
+| Integration preview | [`kuchtik-integration`](https://kuchtik-integration-tancer-kuchtik.etancik.workers.dev/) | `tancer-kuchtik-preview` | Access-protected editor and MCP when the integration hostname is configured |
 
 ### Connect the private Kuchtík plugin
 
 Kuchtík follows the same setup as [Rodokmen](https://github.com/etancik/family-tree/blob/main/docs/direct-mcp.md). A private ChatGPT plugin connects directly to the Worker through Cloudflare Access Managed OAuth. Every account allowed by the MCP Access policy can search, read, create, and update recipes.
 
-1. In Cloudflare Zero Trust, inspect the existing MCP Access application. Add the exact destination `kuchtik.tancer.cz/mcp` to that application if it can be reused. If a dedicated application is needed, use the intended MCP user policy and set the production Worker’s `ACCESS_MCP_AUD` to its audience. Keep the editor’s Access application and audience separate.
+1. In Cloudflare Zero Trust, inspect the existing MCP Access application. Configure the exact destination `kuchtik.tancer.cz/mcp` with the intended MCP user policy and set the production Worker’s `ACCESS_MCP_AUD` to that application’s audience. Keep the editor’s Access application and audience separate.
 2. Enable Managed OAuth for that MCP application and allow the ChatGPT callback `https://chatgpt.com/connector/oauth/*`. Keep the public catalog outside the MCP Access application. Access serves OAuth discovery and handles sign-in and token refresh.
 3. Verify that an anonymous MCP `initialize` request returns `401` with a Bearer `WWW-Authenticate` challenge containing `resource_metadata`. Open that metadata URL in the browser and check that `resource` matches the exact MCP endpoint and that `authorization_servers` lists the OAuth issuer.
 4. In ChatGPT Plugins, create a private custom MCP plugin named **Kuchtík**. Set the server URL to `https://kuchtik.tancer.cz/mcp` and select **OAuth**. Install and connect it, then start a new chat and use `@Kuchtík` to search for Langoše and read the recipe. Verify the public catalog and protected editor separately.
-5. Switch any remaining clients to the new URL after the plugin can read a recipe. Only then retire the former destination.
 
 ### Import existing recipes
 

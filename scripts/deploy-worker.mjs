@@ -9,11 +9,6 @@ if (!['production', 'preview'].includes(mode) || WORKERS_CI !== '1' || !WORKERS_
   throw new Error('Deploy requires the corresponding Cloudflare Workers Builds branch and build context.');
 }
 
-if (WORKERS_CI_BRANCH === 'kuchtik-preview-recipes') {
-  console.log('Recipe test data branch has no Worker preview.');
-  process.exit(0);
-}
-
 const args = ['--yes', 'wrangler@4.151.2', mode === 'preview' ? 'preview' : 'deploy',
   '--message', 'Git ' + WORKERS_CI_COMMIT_SHA + ' / Build ' + WORKERS_CI_BUILD_UUID];
 

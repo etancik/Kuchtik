@@ -55,8 +55,8 @@ class SimpleMockRecipeAdapter {
       .replace(/^-|-$/g, '') + '.json';
   }
   
-  async getFileList() {
-    return Array.from(this.files.keys());
+  async getAllFiles() {
+    return Array.from(this.files.values(), recipe => ({ ...recipe }));
   }
   
   async getFile(filename) {

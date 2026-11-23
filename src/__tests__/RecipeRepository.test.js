@@ -20,10 +20,10 @@ class MockRecipeAdapter {
     this.failureReason = 'Network error';
   }
 
-  async getFileList() {
+  async getAllFiles() {
     await this.simulateNetworkDelay();
     if (this.shouldFail) throw new Error(this.failureReason);
-    return Array.from(this.files.keys());
+    return Array.from(this.files.values(), recipe => ({ ...recipe }));
   }
 
   async getFile(filename) {

@@ -6,7 +6,7 @@ import { DatabaseSync } from 'node:sqlite';
 import worker from './index.js';
 import { mcpReply } from './mcp.js';
 
-const web = 'https://kuchtik-preview-tancer-kuchtik.etancik.workers.dev';
+const web = 'https://kuchtik-integration-tancer-kuchtik.etancik.workers.dev';
 const mcp = web;
 const branchWeb = 'https://feature-tancer-kuchtik.etancik.workers.dev';
 const issuer = 'https://test.cloudflareaccess.com';
@@ -106,7 +106,7 @@ test('Worker shares D1 recipes across public, editor and MCP routes and rejects 
   assert.match(saved.revision, /^[a-f0-9]{40}$/);
   assert.notEqual(saved.revision, revision);
 
-  const production = { ...env, PREVIEW: '0', WEB_HOST: 'kuchtik.tancer.cz', MCP_HOST: 'mcp-kuchtik.tancer.cz' };
+  const production = { ...env, PREVIEW: '0', WEB_HOST: 'kuchtik.tancer.cz' };
   const live = 'https://' + production.WEB_HOST;
   const toolsList = { jsonrpc: '2.0', id: 2, method: 'tools/list' };
   const liveMcp = (host, audience) => worker.fetch(request(host + '/mcp', {
@@ -119,9 +119,7 @@ test('Worker shares D1 recipes across public, editor and MCP routes and rejects 
   const liveToolsBody = await liveTools.json();
   assert.ok(liveToolsBody.result.tools.some(tool => tool.name === 'update_recipe'));
   assert.ok(liveToolsBody.result.tools.some(tool => tool.name === 'create_recipe'));
-  const legacyTools = await liveMcp('https://' + production.MCP_HOST, 'mcp');
-  assert.equal(legacyTools.status, 200);
-  assert.deepEqual(await legacyTools.json(), liveToolsBody);
+  assert.equal((await liveMcp('https://mcp-kuchtik.tancer.cz', 'mcp')).status, 404);
   assert.equal((await liveMcp('https://other.example', 'mcp')).status, 404);
 
   const reader = await worker.fetch(request(live + '/api/recipes'), production);
@@ -180,12 +178,12 @@ test('MCP negotiates protocol, lists recipe tools and returns empty notification
 
 test('An authenticated MCP account can create recipes and cannot overwrite a duplicate', async t => {
   const env = { ...previewEnv, PREVIEW: '0', WEB_HOST: 'kuchtik.tancer.cz',
-    MCP_HOST: 'mcp-kuchtik.tancer.cz', RECIPES_DB: createDatabase(t) };
+    RECIPES_DB: createDatabase(t) };
   t.mock.method(globalThis, 'fetch', async () =>
     Response.json({ keys: [{ ...accessKeys.publicKey.export({ format: 'jwk' }), kid: 'test-key' }] }));
 
   const create = async (newRecipe, claims) => {
-    const response = await worker.fetch(request('https://' + env.MCP_HOST + '/mcp', {
+    const response = await worker.fetch(request('https://' + env.WEB_HOST + '/mcp', {
       audience: 'mcp', method: 'POST', claims,
       body: { jsonrpc: '2.0', id: 1, method: 'tools/call',
         params: { name: 'create_recipe', arguments: { recipe: newRecipe } } },

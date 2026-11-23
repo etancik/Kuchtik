@@ -13,7 +13,6 @@
   },
   "vars": {
     "WEB_HOST": "kuchtik.tancer.cz",
-    "MCP_HOST": "mcp-kuchtik.tancer.cz",
     "PREVIEW": "0"
   },
   "previews": {
@@ -21,7 +20,7 @@
       "PREVIEW": "1",
       "ACCESS_ISSUER": "https://tancer.cloudflareaccess.com",
       "ACCESS_WEB_AUD": "70eebb3910381c682459a9b7e04c4e62834e8840f7b578f8df8277e45f84ab29",
-      "PREVIEW_INTEGRATION_HOST": "feat-d1-recipe-storage-tancer-kuchtik.etancik.workers.dev"
+      "PREVIEW_INTEGRATION_HOST": "kuchtik-integration-tancer-kuchtik.etancik.workers.dev"
     },
     "d1_databases": [
       {

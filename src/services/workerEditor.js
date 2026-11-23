@@ -79,8 +79,5 @@ async function fetchPublicRecipes(path = '') {
 
 export const publicWorkerRecipeAdapter = {
   getAllFiles: () => fetchPublicRecipes(),
-  async getFileList() {
-    return (await this.getAllFiles()).map(recipe => recipe.metadata.filename);
-  },
   getFile: filename => fetchPublicRecipes('/' + encodeURIComponent(filename)),
 };
