@@ -114,12 +114,11 @@ export default {
       const url = new URL(request.url);
       const preview = env.PREVIEW === '1';
       const integrationPreview = preview && url.hostname === env.PREVIEW_INTEGRATION_HOST && !!env.RECIPES_DB;
-      const productionMcpHost = env.PREVIEW === '0' &&
-        (url.hostname === env.WEB_HOST || url.hostname === env.MCP_HOST);
-      if (url.pathname === '/mcp' && (preview ? integrationPreview : productionMcpHost)) {
+      const productionHost = env.PREVIEW === '0' && url.hostname === env.WEB_HOST;
+      if (url.pathname === '/mcp' && (integrationPreview || productionHost)) {
         return await handleMcp(request, env, url);
       }
-      if (!preview && (env.PREVIEW !== '0' || url.hostname !== env.WEB_HOST)) throw new HttpError(404, 'Not found.');
+      if (!preview && !productionHost) throw new HttpError(404, 'Not found.');
 
       const editor = url.pathname === '/admin' || url.pathname.startsWith(prefix);
       let identity;

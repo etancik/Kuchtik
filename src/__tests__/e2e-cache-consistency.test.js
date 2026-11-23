@@ -46,10 +46,10 @@ class RealisticMockRecipeAdapter {
     });
   }
   
-  async getFileList() {
-    this.callLog.push('getFileList');
+  async getAllFiles() {
+    this.callLog.push('getAllFiles');
     await this.simulateNetworkDelay();
-    return Array.from(this.files.keys());
+    return Array.from(this.files.values(), recipe => ({ ...recipe }));
   }
   
   async getFile(filename) {

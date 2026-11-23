@@ -119,7 +119,6 @@ async function initializeApp() {
       skeletonCardService.showSkeletons(state.recipeListElement, estimatedCount);
     }
     
-    // TEMPORARY: Use regular getAll method instead of progressive loading
     state.recipes = await state.repository.getAll();
     
     // Sort recipes with most recently modified first
@@ -494,8 +493,6 @@ async function toggleFavorite(recipe) {
 // Make recipeUI available globally for template click handlers
 window.recipeUI = recipeUI;
 
-// Make repository available globally if needed
-window.recipeRepository = state.repository;
 
 /**
  * Perform search and update the display
@@ -564,36 +561,6 @@ function updateAuthStatus() {
   createBtn?.setAttribute('aria-label', t('recipes.createRecipe'));
   createBtn?.style.setProperty('display', editorMode ? 'inline-flex' : 'none', 'important');
 }
-
-/**
- * Manual refresh function for debugging/testing
- */
-window.refreshRecipes = async () => {
-  console.log('🔄 Manual refresh triggered...');
-  if (state.repository) {
-    await refreshRecipesFromCache();
-  }
-};
-
-/**
- * Get repository cache status for debugging
- */
-window.getCacheStatus = () => {
-  if (state.repository) {
-    return state.repository.getCacheMetadata();
-  }
-  return null;
-};
-
-/**
- * Clear repository cache for debugging
- */
-window.clearCache = () => {
-  if (state.repository) {
-    state.repository.clearCache();
-    console.log('🗑️ Repository cache cleared');
-  }
-};
 
 // Initialize app when DOM is ready
 if (document.readyState === 'loading') {

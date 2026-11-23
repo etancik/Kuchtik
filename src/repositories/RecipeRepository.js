@@ -45,7 +45,6 @@ export const RepositoryEvents = {
   RECIPE_CREATED: 'recipeCreated',
   RECIPE_UPDATED: 'recipeUpdated',
   RECIPE_DELETED: 'recipeDeleted',
-  RECIPE_LOADED: 'recipeLoaded',
   SYNC_STARTED: 'syncStarted',
   SYNC_COMPLETED: 'syncCompleted',
   SYNC_FAILED: 'syncFailed',
@@ -167,7 +166,8 @@ class RecipeRepository {
       }
 
       // Load fresh data
-      const recipes = await this.loadFromSource();
+      if (!this.adapter) throw new Error('Recipe storage adapter not configured');
+      const recipes = await this.adapter.getAllFiles();
       this.updateCache(recipes);
       this.setState(RepositoryState.IDLE);
       
@@ -629,65 +629,6 @@ class RecipeRepository {
   // ============================================================================
 
   /**
-   * Load all recipes from the adapter using efficient batch loading
-   * @private
-   * @returns {Promise<Array>} Array of recipe objects
-   */
-  async loadFromSource() {
-    if (!this.adapter) {
-      throw new Error('Recipe storage adapter not configured');
-    }
-
-    try {
-      // Use the new batch loading method if available
-      if (typeof this.adapter.getAllFiles === 'function') {
-        this.log('🚀 Using batch loading for better performance...');
-        return await this.adapter.getAllFiles();
-      }
-      
-      // Fallback to sequential loading for backward compatibility
-      this.log('⚠️ Using fallback sequential loading (slower)');
-      const filenames = await this.adapter.getFileList();
-      const recipes = [];
-
-      for (const filename of filenames) {
-        try {
-          const recipe = await this.adapter.getFile(filename);
-          if (recipe) {
-            recipes.push(recipe);
-          }
-        } catch (error) {
-          this.log(`⚠️ Failed to load recipe ${filename}:`, error.message);
-          // Continue loading other recipes
-        }
-      }
-
-      return recipes;
-      
-    } catch (error) {
-      this.log('❌ Batch loading failed, falling back to sequential loading:', error.message);
-      
-      // Final fallback to sequential loading
-      const filenames = await this.adapter.getFileList();
-      const recipes = [];
-
-      for (const filename of filenames) {
-        try {
-          const recipe = await this.adapter.getFile(filename);
-          if (recipe) {
-            recipes.push(recipe);
-          }
-        } catch (error) {
-          this.log(`⚠️ Failed to load recipe ${filename}:`, error.message);
-          // Continue loading other recipes
-        }
-      }
-
-      return recipes;
-    }
-  }
-
-  /**
    * Load single recipe from the adapter
    * @private
    * @param {string} recipeName - Recipe filename
@@ -930,110 +871,6 @@ class RecipeRepository {
     
     // Use the proper filename generation that handles Czech diacritics correctly
     return generateFilenameFromRecipeName(recipeName);
-  }
-
-  /**
-   * Load recipes progressively, emitting events as each recipe is loaded
-   * Useful for UI loading states where you want to show recipes as they become available
-   * @param {Object} options - Options for progressive loading
-   * @param {boolean} options.forceRefresh - Skip cache and force fresh load
-   * @param {function} options.onRecipeLoaded - Callback for each loaded recipe
-   * @param {function} options.onProgress - Callback for loading progress
-   * @returns {Promise<Array>} Array of all loaded recipes
-   */
-  async getAllProgressive(options = {}) {
-    const { forceRefresh = false, onRecipeLoaded, onProgress } = options;
-    
-    this.setState(RepositoryState.LOADING);
-    
-    try {
-      // First, check if we can use cached data (unless forced refresh)
-      if (!forceRefresh) {
-        const cached = this.getCachedRecipes();
-        if (cached.length > 0) {
-          this.log('💾 Using cached recipes for progressive loading', { count: cached.length });
-          
-          // Still emit progressive events for UI consistency
-          for (let i = 0; i < cached.length; i++) {
-            const recipe = cached[i];
-            if (onRecipeLoaded) {
-              await onRecipeLoaded(recipe, i);
-            }
-            if (onProgress) {
-              await onProgress(i + 1, cached.length);
-            }
-            // Add small delay to show progressive loading effect even with cached data
-            if (i < cached.length - 1) {
-              await new Promise(resolve => setTimeout(resolve, 50));
-            }
-          }
-          
-          this.setState(RepositoryState.IDLE);
-          return cached;
-        }
-      }
-
-      // Load fresh data progressively
-      if (!this.adapter) {
-        throw new Error('No adapter configured for loading recipes');
-      }
-
-      // Get list of available recipe files
-      const recipeFiles = await this.adapter.listRecipeFiles();
-      const totalCount = recipeFiles.length;
-      const loadedRecipes = [];
-      
-      this.log(`🔄 Loading ${totalCount} recipes progressively`);
-      
-      // Load each recipe individually
-      for (let i = 0; i < recipeFiles.length; i++) {
-        const filename = recipeFiles[i];
-        
-        try {
-          const recipe = await this.loadRecipeFromSource(filename);
-          if (recipe) {
-            loadedRecipes.push(recipe);
-            
-            // Cache each recipe as it's loaded
-            const cacheKey = this.normalizeCacheKey(filename);
-            this.setCachedRecipe(cacheKey, recipe);
-            
-            // Notify callback about loaded recipe
-            if (onRecipeLoaded) {
-              await onRecipeLoaded(recipe, i);
-            }
-            
-            // Notify progress callback
-            if (onProgress) {
-              await onProgress(i + 1, totalCount);
-            }
-            
-            // Emit event for this recipe
-            this.emit(RepositoryEvents.RECIPE_LOADED, recipe);
-          }
-        } catch (recipeError) {
-          this.log(`❌ Failed to load recipe ${filename}:`, recipeError);
-          // Continue with other recipes instead of failing completely
-          
-          // Still update progress even on failure
-          if (onProgress) {
-            await onProgress(i + 1, totalCount);
-          }
-        }
-      }
-      
-      // Update full cache with all loaded recipes
-      this.updateCache(loadedRecipes);
-      this.setState(RepositoryState.IDLE);
-      
-      this.emit(RepositoryEvents.RECIPES_UPDATED, loadedRecipes);
-      
-      return loadedRecipes;
-      
-    } catch (error) {
-      this.handleError('getAllProgressive', error);
-      throw error;
-    }
   }
 }
 
