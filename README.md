@@ -155,8 +155,6 @@ Import is additive, so retrying it preserves existing rows. Use the import only 
 
 For Workers Builds use `npm run build`, `npm run preview` and `npm run deploy`. Keep the Worker Access mode set to Previews only and protect the production `/admin` path and its descendants. Only the configured `PREVIEW_INTEGRATION_HOST` permits preview writes. For MCP configure Managed OAuth and `ACCESS_MCP_AUD` on the intended environment. Set `ACCESS_ISSUER` and `ACCESS_WEB_AUD` for the editor.
 
-The legacy GitHub Pages URL redirects to Kuchtík and preserves the query and fragment.
-
 ## License
 
 This project is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License - see the [LICENSE](LICENSE) file for details.
